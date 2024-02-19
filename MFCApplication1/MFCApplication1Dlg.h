@@ -3,7 +3,8 @@
 //
 
 #pragma once
-
+#include "opencv2/opencv.hpp"
+using namespace cv;
 
 // CMFCApplication1Dlg 대화 상자
 class CMFCApplication1Dlg : public CDialogEx
@@ -32,7 +33,15 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 
-	CImage m_image;
 public:
+	CImage m_image;
 	afx_msg void OnBnClickedButton1();
+	afx_msg void OnBnClickedButton2();
+	Mat m_matImage; // 이미지 정보를 담고 있는 객체.
+	BITMAPINFO* m_pBitmapInfo; // Bitmap 정보를 담고 있는 구조체.
+	void CreateBitmapInfo(int w, int h, int bpp);
+	void DrawImage();
+//	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
+	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 };
