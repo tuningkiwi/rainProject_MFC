@@ -44,6 +44,7 @@ ON_WM_TIMER()
 ON_WM_DESTROY()
 ON_BN_CLICKED(IDC_EMBOSS_FT, &CFilterDlg::OnBnClickedEmbossFt)
 ON_BN_CLICKED(IDC_REVERT_FT, &CFilterDlg::OnBnClickedRevertFt)
+ON_BN_CLICKED(IDCANCEL, &CFilterDlg::OnBnClickedCancel)
 END_MESSAGE_MAP()
 
 
@@ -88,6 +89,7 @@ BOOL CFilterDlg::OnInitDialog()
 //}
 
 
+//적용 버튼을 누르면, 창을 종료하고, 부모창에도 변경된 이미지가 보여짐 
 void CFilterDlg::OnBnClickedOk()
 {
 	// TODO: Add your control notification handler code here
@@ -239,9 +241,17 @@ void CFilterDlg::CreateBitmapInfo(BITMAPINFO** btmInfo, int w, int h, int bpp){
 	(*btmInfo)->bmiHeader.biHeight = -h;//음수는 원본이 왼쪽 위 모서리에 있는 하향식 DIB입니다.
 }
 
-
+//되돌리기 기능 (원본 이미지로 돌아감) 
 void CFilterDlg::OnBnClickedRevertFt()
 {
 	// TODO: Add your control notification handler code here
 	DrawImage(myImg, myBitmapInfo);
+	MessageBox(L"원본으로 돌아갑니다", L"알림",MB_OK);
+}
+
+//필터 창을 종료하고, 부모창 사진에는 변경이 안되어 있어야함. 
+void CFilterDlg::OnBnClickedCancel()
+{
+	// TODO: Add your control notification handler code here
+	CDialogEx::OnCancel();
 }

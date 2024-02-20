@@ -46,4 +46,5 @@ public:
 	void CreateBitmapInfo(BITMAPINFO** newInfo, int w, int h, int bpp);
 	BITMAPINFO* myBmpInfoAfterChange;
 	afx_msg void OnBnClickedRevertFt();
+	afx_msg void OnBnClickedCancel();
 };
