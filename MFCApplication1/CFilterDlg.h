@@ -34,7 +34,7 @@ public:
 //	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 	afx_msg void OnBnClickedOk();
 	CStatic picCtrl_FT;
-	void DrawImage(Mat requestImg);
+	void DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo);
 //	afx_msg void OnBnClickedImgloadFt();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnDestroy();
@@ -43,5 +43,6 @@ public:
 	afx_msg void OnBnClickedEmbossFt();
 	Mat myImgAfterChange; 
 	BOOL colorToGray();
-	void CFilterDlg::CreateBitmapInfo(int w, int h, int bpp);
+	void CreateBitmapInfo(BITMAPINFO** newInfo, int w, int h, int bpp);
+	BITMAPINFO* myBmpInfoAfterChange;
 };
