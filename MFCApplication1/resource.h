@@ -8,6 +8,8 @@
 #define IDD_MFCAPPLICATION1_DIALOG      102
 #define IDR_MAINFRAME                   128
 #define IDD_DIALOG1                     129
+#define IDD_DIALOG2                     131
+#define IDD_COLOR_CONYROLS              131
 #define IDC_BUTTON1                     1000
 #define IDC_FILTER_BTN                  1000
 #define IDC_BUTTON2                     1001
@@ -21,7 +23,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        131
+#define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         1003
 #define _APS_NEXT_SYMED_VALUE           101
