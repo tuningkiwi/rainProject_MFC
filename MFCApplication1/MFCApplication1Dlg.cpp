@@ -363,7 +363,7 @@ void CMFCApplication1Dlg::OnBnClickedFilterBtn()
 //유진: 색상 추출 및 관련 기능 
 void CMFCApplication1Dlg::OnBnClickedColorBtn()
 {
-	CColorControls dlg;
+	CColorControls dlg(m_matImage, m_pBitmapInfo);
 	dlg.DoModal();
 }
 

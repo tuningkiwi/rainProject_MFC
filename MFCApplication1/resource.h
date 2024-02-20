@@ -15,6 +15,7 @@
 #define IDC_BUTTON2                     1001
 #define IDC_PC_VIEW                     1002
 #define IDC_COLOR_BTN                   1003
+#define IDC_IMAGE_CONTROL               1003
 #define IDC_AFFINE_BTN                  1004
 #define IDC_OBJECTDETECTION_BTN         1005
 #define IDC_BRIGHTNESSCTRL_BTN          1006
@@ -25,7 +26,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1003
+#define _APS_NEXT_CONTROL_VALUE         1004
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
