@@ -59,6 +59,7 @@ CMFCApplication1Dlg::CMFCApplication1Dlg(CWnd* pParent /*=nullptr*/)
 void CMFCApplication1Dlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_BUTTON1, FilterBtn);
 }
 
 BEGIN_MESSAGE_MAP(CMFCApplication1Dlg, CDialogEx)
@@ -66,9 +67,10 @@ BEGIN_MESSAGE_MAP(CMFCApplication1Dlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BUTTON2, &CMFCApplication1Dlg::OnBnClickedButton2)
-//	ON_WM_GETMINMAXINFO()
-ON_WM_GETMINMAXINFO()
-ON_WM_SIZE()
+	//	ON_WM_GETMINMAXINFO()
+	ON_WM_GETMINMAXINFO()
+	ON_WM_SIZE()
+	ON_BN_CLICKED(IDC_FILTER_BTN, &CMFCApplication1Dlg::OnBnClickedFilterBtn)
 END_MESSAGE_MAP()
 
 
@@ -109,6 +111,7 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	this->GetWindowRect(m_rectCurHist);// right:창의 너비 bottm: 창의 높이 
 	GetDlgItem(IDC_PC_VIEW)->MoveWindow(0, 0, int(m_rectCurHist.right * 5 / 6), m_rectCurHist.bottom);
 	GetDlgItem(IDC_BUTTON2)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 50, 150, 60);
+	GetDlgItem(IDC_FILTER_BTN)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 130, 150, 60);
 	GetDlgItem(IDOK)->MoveWindow(int(m_rectCurHist.right * 5 / 6), m_rectCurHist.bottom -280, 150, 60);
 	GetDlgItem(IDCANCEL)->MoveWindow(int(m_rectCurHist.right * 5 / 6), m_rectCurHist.bottom -200, 150, 60);
 
@@ -307,4 +310,36 @@ void CMFCApplication1Dlg::OnSize(UINT nType, int cx, int cy)
 	CDialogEx::OnSize(nType, cx, cy);
 
 	// TODO: Add your message handler code here
+}
+
+
+
+void CMFCApplication1Dlg::OnBnClickedFilterBtn()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CDialog filterDlg(IDD_DIALOG1);
+
+	// Create and show the dialog box
+	INT_PTR nRet = -1;
+	nRet = filterDlg.DoModal();
+
+	// Handle the return value from DoModal
+	switch (nRet)
+	{
+	case -1:
+		AfxMessageBox(_T("Dialog box could not be created!"));
+		break;
+	case IDABORT:
+		// Do something
+		break;
+	case IDOK:
+		// Do something
+		break;
+	case IDCANCEL:
+		// Do something
+		break;
+	default:
+		// Do something
+		break;
+	};
 }

@@ -42,4 +42,7 @@ public:
 	void DrawImage();
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	// 필터링 조정 다이얼로그
+	CButton FilterBtn;
+	afx_msg void OnBnClickedFilterBtn();
 };
