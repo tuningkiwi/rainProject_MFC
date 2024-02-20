@@ -6,7 +6,7 @@
 #include "framework.h"
 #include "MFCApplication1.h"
 #include "MFCApplication1Dlg.h"
-
+#include "CBRIGHTNESSCTRL.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif

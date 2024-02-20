@@ -8,7 +8,7 @@
 #include "MFCApplication1Dlg.h"
 #include "CFilterDlg.h"
 #include "afxdialogex.h"
-
+#include "CBRIGHTNESSCTRL.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -380,6 +380,8 @@ void CMFCApplication1Dlg::OnBnClickedObjectdetectionBtn()
 //동혁: 밝기 및 명암비 조절 
 void CMFCApplication1Dlg::OnBnClickedBrightnessctrlBtn()
 {
+	CBRIGHTNESSCTRL dlg;
+	dlg.DoModal();
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
 
