@@ -43,6 +43,7 @@ ON_BN_CLICKED(IDOK, &CFilterDlg::OnBnClickedOk)
 ON_WM_TIMER()
 ON_WM_DESTROY()
 ON_BN_CLICKED(IDC_EMBOSS_FT, &CFilterDlg::OnBnClickedEmbossFt)
+ON_BN_CLICKED(IDC_REVERT_FT, &CFilterDlg::OnBnClickedRevertFt)
 END_MESSAGE_MAP()
 
 
@@ -55,10 +56,12 @@ BOOL CFilterDlg::OnInitDialog()
 
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
 	MoveWindow(350, 140, 1280, 720);
-	//picCtrl_FT.MoveWindow(0,0,1000,720);
-	GetDlgItem(IDOK)->MoveWindow(1000,720-160, 200, 45);
-	GetDlgItem(IDCANCEL)->MoveWindow(1000,720-100, 200, 45);
 	embossFT.MoveWindow(1000, 40, 200, 45);
+	//picCtrl_FT.MoveWindow(0,0,1000,720);
+
+	GetDlgItem(IDCANCEL)->MoveWindow(1000,720-100, 200, 45);	
+	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);
+	GetDlgItem(IDC_REVERT_FT)->MoveWindow(1000, 720 - 220, 200, 45);
 	
 	//DrawImage(); dialog 호출시 oninitDiaog()뒤에 실행되는 메세지들에 의하여, 사진이 출력되지 않음 
 	SetTimer(1, 80, NULL);//100ms  사진 불러오기 위한 타이머 
@@ -159,8 +162,8 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 	CDialogEx::OnTimer(nIDEvent);
 }
 
-
-void CFilterDlg::OnDestroy()
+//윈도우 창이 DESTORY 갑자기 종료될때, 저장해야 하는 정보들 기능 수행
+void CFilterDlg::OnDestroy() 
 {
 	CDialogEx::OnDestroy();
 	//KillTimer(1);
@@ -234,4 +237,11 @@ void CFilterDlg::CreateBitmapInfo(BITMAPINFO** btmInfo, int w, int h, int bpp){
 
 	(*btmInfo)->bmiHeader.biWidth = w;
 	(*btmInfo)->bmiHeader.biHeight = -h;//음수는 원본이 왼쪽 위 모서리에 있는 하향식 DIB입니다.
+}
+
+
+void CFilterDlg::OnBnClickedRevertFt()
+{
+	// TODO: Add your control notification handler code here
+	DrawImage(myImg, myBitmapInfo);
 }
