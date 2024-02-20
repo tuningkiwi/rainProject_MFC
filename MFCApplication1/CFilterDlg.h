@@ -38,8 +38,8 @@ public:
 //	afx_msg void OnBnClickedImgloadFt();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnDestroy();
-	// 진흙효과를 내는 엠보싱 필터 구현버튼 입니다
-	CButton embossFT;
+	
+	CButton embossFT;// 진흙효과를 내는 엠보싱 필터 구현버튼
 	afx_msg void OnBnClickedEmbossFt();
 	Mat myImgAfterChange; 
 	BOOL colorToGray();
@@ -47,4 +47,8 @@ public:
 	BITMAPINFO* myBmpInfoAfterChange;
 	afx_msg void OnBnClickedRevertFt();
 	afx_msg void OnBnClickedCancel();
+	CStatic fogLB_FT;//안개필터 라벨 변수
+	CSliderCtrl fogslider_FT;//안개필터 강도 슬라이더
+//	afx_msg void OnNMCustomdrawSliderFogFt(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 };

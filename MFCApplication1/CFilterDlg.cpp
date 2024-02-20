@@ -33,6 +33,8 @@ void CFilterDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_PC_FT, picCtrl_FT);
 	DDX_Control(pDX, IDC_EMBOSS_FT, embossFT);
+	DDX_Control(pDX, IDC_FOGLB_FT, fogLB_FT);//IDC_SLIDER_GAUSSIAN_FT
+	DDX_Control(pDX, IDC_SLIDER_FOG_FT, fogslider_FT);
 }
 
 
@@ -45,6 +47,8 @@ ON_WM_DESTROY()
 ON_BN_CLICKED(IDC_EMBOSS_FT, &CFilterDlg::OnBnClickedEmbossFt)
 ON_BN_CLICKED(IDC_REVERT_FT, &CFilterDlg::OnBnClickedRevertFt)
 ON_BN_CLICKED(IDCANCEL, &CFilterDlg::OnBnClickedCancel)
+//ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_FOG_FT, &CFilterDlg::OnNMCustomdrawSliderFogFt)
+ON_WM_HSCROLL()
 END_MESSAGE_MAP()
 
 
@@ -58,7 +62,13 @@ BOOL CFilterDlg::OnInitDialog()
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
 	MoveWindow(350, 140, 1280, 720);
 	embossFT.MoveWindow(1000, 40, 200, 45);
-	//picCtrl_FT.MoveWindow(0,0,1000,720);
+	fogLB_FT.MoveWindow(1000, 130, 200, 45);
+	fogslider_FT.MoveWindow(1000, 160, 200, 45);
+	fogslider_FT.SetRange(0, 5);
+	fogslider_FT.SetTicFreq(1);
+	fogslider_FT.SetTic(1);
+	fogslider_FT.SetPos(0);
+	
 
 	GetDlgItem(IDCANCEL)->MoveWindow(1000,720-100, 200, 45);	
 	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);
@@ -66,6 +76,7 @@ BOOL CFilterDlg::OnInitDialog()
 	
 	//DrawImage(); dialog 호출시 oninitDiaog()뒤에 실행되는 메세지들에 의하여, 사진이 출력되지 않음 
 	SetTimer(1, 80, NULL);//100ms  사진 불러오기 위한 타이머 
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
@@ -159,6 +170,7 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 	switch (nIDEvent) {
 	case 1:
 		DrawImage(myImg, myBitmapInfo);//처음 로딩되는 이미지 
+		
 	}
 	KillTimer(1);//처음 필터창을 켰을때, 사진을 띄우기 위한 용도라 바로 kill 
 	CDialogEx::OnTimer(nIDEvent);
@@ -254,4 +266,30 @@ void CFilterDlg::OnBnClickedCancel()
 {
 	// TODO: Add your control notification handler code here
 	CDialogEx::OnCancel();
+}
+
+
+//void CFilterDlg::OnNMCustomdrawSliderFogFt(NMHDR* pNMHDR, LRESULT* pResult)
+//{
+//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	// TODO: Add your control notification handler code here
+//	int sigma = fogslider_FT.GetPos();
+//
+//	GaussianBlur(myImg, myImgAfterChange, Size(), (double)sigma);
+//	CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
+//	DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+//	*pResult = 0;
+//}
+
+
+void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	// TODO: Add your message handler code here and/or call default
+	int sigma = fogslider_FT.GetPos();
+	if (sigma != 0) {
+		GaussianBlur(myImg, myImgAfterChange, Size(), (double)sigma);
+		CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
+		DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+	}
+	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
