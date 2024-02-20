@@ -65,7 +65,6 @@ BEGIN_MESSAGE_MAP(CMFCApplication1Dlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_BN_CLICKED(IDC_BUTTON1, &CMFCApplication1Dlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CMFCApplication1Dlg::OnBnClickedButton2)
 //	ON_WM_GETMINMAXINFO()
 ON_WM_GETMINMAXINFO()
@@ -109,8 +108,7 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	CRect m_rectCurHist;
 	this->GetWindowRect(m_rectCurHist);// right:창의 너비 bottm: 창의 높이 
 	GetDlgItem(IDC_PC_VIEW)->MoveWindow(0, 0, int(m_rectCurHist.right * 5 / 6), m_rectCurHist.bottom);
-	GetDlgItem(IDC_BUTTON1)->MoveWindow(int(m_rectCurHist.right*5/6), 50,150,60);
-	GetDlgItem(IDC_BUTTON2)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 130, 150, 60);
+	GetDlgItem(IDC_BUTTON2)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 50, 150, 60);
 	GetDlgItem(IDOK)->MoveWindow(int(m_rectCurHist.right * 5 / 6), m_rectCurHist.bottom -280, 150, 60);
 	GetDlgItem(IDCANCEL)->MoveWindow(int(m_rectCurHist.right * 5 / 6), m_rectCurHist.bottom -200, 150, 60);
 
@@ -168,24 +166,25 @@ HCURSOR CMFCApplication1Dlg::OnQueryDragIcon()
 }
 
 
+//
+//void CMFCApplication1Dlg::OnBnClickedButton1()
+//{
+//	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+//	int nWidth = 1080; // 가로폭
+//	int nHeight = 720; // 세로폭	
+//	int nBpp = 8; // 픽셀당 비트수, 8: GRAY 24: COLOR 
+//
+//	// 이미지 생성
+//	m_image.Create(nWidth, nHeight, nBpp);
+//
+//	// 이미지 그리기
+//	CClientDC dc(GetDlgItem(IDC_PC_VIEW)); // 클라이언트 형태의 변수를 dc로 만들고 초기화를 this로 하겠다. -> this는 현재 가지고 있는 다이얼로그를 의미함
+//	m_image.Draw(dc, 0, 0); // 그리기 (어디에 그릴지, 위치를 x, y 축을 설정해 준다.)
+//
+//}
 
-void CMFCApplication1Dlg::OnBnClickedButton1()
-{
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	int nWidth = 1080; // 가로폭
-	int nHeight = 720; // 세로폭	
-	int nBpp = 8; // 픽셀당 비트수, 8: GRAY 24: COLOR 
 
-	// 이미지 생성
-	m_image.Create(nWidth, nHeight, nBpp);
-
-	// 이미지 그리기
-	CClientDC dc(GetDlgItem(IDC_PC_VIEW)); // 클라이언트 형태의 변수를 dc로 만들고 초기화를 this로 하겠다. -> this는 현재 가지고 있는 다이얼로그를 의미함
-	m_image.Draw(dc, 0, 0); // 그리기 (어디에 그릴지, 위치를 x, y 축을 설정해 준다.)
-
-}
-
-
+//BITMAP 정보 구조체 데이터 생성 
 void CMFCApplication1Dlg::CreateBitmapInfo(int w, int h, int bpp) {
 	if (m_pBitmapInfo != NULL) //기존 비트맵 정보 초기화 
 	{
@@ -223,6 +222,7 @@ void CMFCApplication1Dlg::CreateBitmapInfo(int w, int h, int bpp) {
 	m_pBitmapInfo->bmiHeader.biHeight = -h;//음수는 원본이 왼쪽 위 모서리에 있는 하향식 DIB입니다.
 }
 
+//다이얼로그창에 사진 띄우기 
 void CMFCApplication1Dlg::DrawImage() {
 	CRect m_rectCurWnd;
 	this->GetWindowRect(m_rectCurWnd);

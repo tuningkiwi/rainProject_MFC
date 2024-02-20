@@ -35,13 +35,11 @@ protected:
 
 public:
 	CImage m_image;
-	afx_msg void OnBnClickedButton1();
 	afx_msg void OnBnClickedButton2();
 	Mat m_matImage; // 이미지 정보를 담고 있는 객체.
 	BITMAPINFO* m_pBitmapInfo; // Bitmap 정보를 담고 있는 구조체.
 	void CreateBitmapInfo(int w, int h, int bpp);
 	void DrawImage();
-//	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 };
