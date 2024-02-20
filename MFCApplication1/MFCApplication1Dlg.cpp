@@ -369,6 +369,7 @@ void CMFCApplication1Dlg::OnBnClickedColorBtn()
 void CMFCApplication1Dlg::OnBnClickedAffineBtn()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	// 인태 주석 테스트 
 }
 
 //경태: 객체 검출 및 변형 
