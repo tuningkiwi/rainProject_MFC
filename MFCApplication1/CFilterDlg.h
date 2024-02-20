@@ -34,4 +34,11 @@ public:
 //	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 	afx_msg void OnBnClickedOk();
 	CStatic picCtrl_FT;
+	void DrawImage();
+//	afx_msg void OnBnClickedImgloadFt();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnDestroy();
+	// 진흙효과를 내는 엠보싱 필터 구현버튼 입니다
+	CButton embossFT;
+	afx_msg void OnBnClickedEmbossFt();
 };
