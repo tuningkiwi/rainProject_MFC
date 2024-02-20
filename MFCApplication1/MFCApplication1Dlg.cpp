@@ -6,6 +6,7 @@
 #include "framework.h"
 #include "MFCApplication1.h"
 #include "MFCApplication1Dlg.h"
+#include "CFilterDlg.h"
 #include "afxdialogex.h"
 
 #ifdef _DEBUG
@@ -60,6 +61,10 @@ void CMFCApplication1Dlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_BUTTON1, FilterBtn);
+	DDX_Control(pDX, IDC_COLOR_BTN, colorBtn);
+	DDX_Control(pDX, IDC_AFFINE_BTN, cropAffinBtn);
+	DDX_Control(pDX, IDC_OBJECTDETECTION_BTN, objDetectBtn);
+	DDX_Control(pDX, IDC_BRIGHTNESSCTRL_BTN, brightnessBtn);
 }
 
 BEGIN_MESSAGE_MAP(CMFCApplication1Dlg, CDialogEx)
@@ -71,6 +76,10 @@ BEGIN_MESSAGE_MAP(CMFCApplication1Dlg, CDialogEx)
 	ON_WM_GETMINMAXINFO()
 	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_FILTER_BTN, &CMFCApplication1Dlg::OnBnClickedFilterBtn)
+	ON_BN_CLICKED(IDC_COLOR_BTN, &CMFCApplication1Dlg::OnBnClickedColorBtn)
+	ON_BN_CLICKED(IDC_AFFINE_BTN, &CMFCApplication1Dlg::OnBnClickedAffineBtn)
+	ON_BN_CLICKED(IDC_OBJECTDETECTION_BTN, &CMFCApplication1Dlg::OnBnClickedObjectdetectionBtn)
+	ON_BN_CLICKED(IDC_BRIGHTNESSCTRL_BTN, &CMFCApplication1Dlg::OnBnClickedBrightnessctrlBtn)
 END_MESSAGE_MAP()
 
 
@@ -110,8 +119,13 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	CRect m_rectCurHist;
 	this->GetWindowRect(m_rectCurHist);// right:창의 너비 bottm: 창의 높이 
 	GetDlgItem(IDC_PC_VIEW)->MoveWindow(0, 0, int(m_rectCurHist.right * 5 / 6), m_rectCurHist.bottom);
+	
 	GetDlgItem(IDC_BUTTON2)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 50, 150, 60);
 	GetDlgItem(IDC_FILTER_BTN)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 130, 150, 60);
+	GetDlgItem(IDC_COLOR_BTN)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 210, 150, 60);
+	GetDlgItem(IDC_AFFINE_BTN)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 290, 150, 60);
+	GetDlgItem(IDC_OBJECTDETECTION_BTN)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 370, 150, 60);
+	GetDlgItem(IDC_BRIGHTNESSCTRL_BTN)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 450, 150, 60);
 	GetDlgItem(IDOK)->MoveWindow(int(m_rectCurHist.right * 5 / 6), m_rectCurHist.bottom -280, 150, 60);
 	GetDlgItem(IDCANCEL)->MoveWindow(int(m_rectCurHist.right * 5 / 6), m_rectCurHist.bottom -200, 150, 60);
 
@@ -313,11 +327,12 @@ void CMFCApplication1Dlg::OnSize(UINT nType, int cx, int cy)
 }
 
 
-
+//동희: 필터링 
 void CMFCApplication1Dlg::OnBnClickedFilterBtn()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	CDialog filterDlg(IDD_DIALOG1);
+	//CDialog filterDlg(IDD_DIALOG1);
+	CFilterDlg filterDlg(m_matImage, m_pBitmapInfo);
 
 	// Create and show the dialog box
 	INT_PTR nRet = -1;
@@ -342,4 +357,28 @@ void CMFCApplication1Dlg::OnBnClickedFilterBtn()
 		// Do something
 		break;
 	};
+}
+
+//유진: 색상 추출 및 관련 기능 
+void CMFCApplication1Dlg::OnBnClickedColorBtn()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+//인태: 자르기 및 어파인 변형 
+void CMFCApplication1Dlg::OnBnClickedAffineBtn()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+//경태: 객체 검출 및 변형 
+void CMFCApplication1Dlg::OnBnClickedObjectdetectionBtn()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+//동혁: 밝기 및 명암비 조절 
+void CMFCApplication1Dlg::OnBnClickedBrightnessctrlBtn()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
