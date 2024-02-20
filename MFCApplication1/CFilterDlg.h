@@ -32,4 +32,6 @@ public:
 	BITMAPINFO* myBitmapInfo; // Bitmap 정보를 담고 있는 구조체.
 //	virtual INT_PTR DoModal();
 //	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
+	afx_msg void OnBnClickedOk();
+	CStatic picCtrl_FT;
 };

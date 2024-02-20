@@ -31,11 +31,13 @@ CFilterDlg::~CFilterDlg()
 void CFilterDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_PC_FT, picCtrl_FT);
 }
 
 
 BEGIN_MESSAGE_MAP(CFilterDlg, CDialogEx)
 //	ON_WM_GETMINMAXINFO()
+ON_BN_CLICKED(IDOK, &CFilterDlg::OnBnClickedOk)
 END_MESSAGE_MAP()
 
 
@@ -48,6 +50,9 @@ BOOL CFilterDlg::OnInitDialog()
 
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
 	MoveWindow(350, 140, 1280, 720);
+	picCtrl_FT.MoveWindow(0,0,1000,720);
+	GetDlgItem(IDOK)->MoveWindow(1000,720-160, 200, 45);
+	GetDlgItem(IDCANCEL)->MoveWindow(1000,720-100, 200, 45);
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
@@ -69,3 +74,10 @@ BOOL CFilterDlg::OnInitDialog()
 //	CFilterDlg::OnGetMinMaxInfo(lpMMI);
 	//CDialogEx::OnGetMinMaxInfo(lpMMI);
 //}
+
+
+void CFilterDlg::OnBnClickedOk()
+{
+	// TODO: Add your control notification handler code here
+	CDialogEx::OnOK();
+}
