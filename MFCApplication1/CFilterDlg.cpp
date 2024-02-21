@@ -316,3 +316,4 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 }
 
 // 주석 추가 
+//주석 추가 중 
