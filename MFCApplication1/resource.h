@@ -10,9 +10,13 @@
 #define IDD_DIALOG1                     129
 #define IDD_                            131
 #define IDC_BRIGHTNESSCTRL_BTN_1        131
-#define IDD_BUTY                        133
-#define IDD_DIALOG2                     134
-#define IDD_COLOR_CONYROLS              135
+#define IDD_BUTY                        132
+#define IDD_DIALOG2                     133
+#define IDD_COLOR_CONYROLS              134
+#define IDR_MENU1                       135
+#define IDD_DIAL                        136
+#define IDD_rotaion_it                  136
+#define IDD_Affine_it                   136
 #define IDC_BUTTON1                     1000
 #define IDC_FILTER_BTN                  1000
 #define IDC_BUTTON2                     1001
