@@ -35,7 +35,16 @@
 #define IDC_SLIDER1                     1009
 #define IDC_SHARP_SLIDER_FT             1009
 #define IDC_PC_FT                       1010
+#define IDC_SLIDER2                     1010
 #define IDC_REVERT_FT                   1011
+#define IDC_EDIT1                       1014
+#define IDC_SPIN1                       1015
+#define IDC_EDIT2                       1016
+#define IDC_SPIN2                       1017
+#define IDC_STATIC9                     1020
+#define IDC_STATIC8                     1021
+#define IDC_CANVAS                      1022
+#define IDC_STATIC7                     1023
 
 // Next default values for new objects
 // 
@@ -43,7 +52,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        137
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1012
+#define _APS_NEXT_CONTROL_VALUE         1024
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
