@@ -20,6 +20,7 @@
 #define IDC_BUTTON1                     1000
 #define IDC_FILTER_BTN                  1000
 #define IDC_BILATERAL_FT                1000
+#define IDC_DETECT                      1000
 #define IDC_BUTTON2                     1001
 #define IDC_PC_VIEW                     1002
 #define IDC_COLOR_BTN                   1003
