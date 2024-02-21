@@ -314,3 +314,5 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	}
 	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
+
+// 주석 추가 
