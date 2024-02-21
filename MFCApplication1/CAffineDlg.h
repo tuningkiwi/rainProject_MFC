@@ -3,6 +3,10 @@
 #include "opencv2/opencv.hpp"
 using namespace cv;
 
+
+
+
+
 // CAffineDlg 대화 상자
 
 class CAffineDlg : public CDialogEx

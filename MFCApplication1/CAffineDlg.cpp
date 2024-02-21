@@ -12,9 +12,16 @@
 IMPLEMENT_DYNAMIC(CAffineDlg, CDialogEx)
 
 CAffineDlg::CAffineDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD, pParent)
+	: CDialogEx(IDD_Affine_it, pParent)
 {
 
+}
+
+CAffineDlg::CAffineDlg(Mat Img, BITMAPINFO* bitmapInfo)
+	: CDialogEx(IDD_Affine_it)
+{
+	myImg = Img; // 이미지 매트릭스 정보 가져오기 
+	myBitmapInfo = bitmapInfo;
 }
 
 CAffineDlg::~CAffineDlg()
