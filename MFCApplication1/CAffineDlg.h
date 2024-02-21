@@ -5,8 +5,6 @@ using namespace cv;
 
 
 
-
-
 // CAffineDlg 대화 상자
 
 class CAffineDlg : public CDialogEx
