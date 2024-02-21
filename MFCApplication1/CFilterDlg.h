@@ -55,6 +55,9 @@ public:
 	CSliderCtrl sharpSliderFT;
 	// sharpening label
 	CStatic sharpLB_FT;
+	// 양방향필터 버튼 변수
+	CButton bilateralBtn_FT;
+	afx_msg void OnBnClickedBilateralFt();
 };
 
 //백업용 코드 저장소 커밋 확인 

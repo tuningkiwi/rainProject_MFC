@@ -37,6 +37,7 @@ void CFilterDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLIDER_FOG_FT, fogslider_FT);
 	DDX_Control(pDX, IDC_SHARP_SLIDER_FT, sharpSliderFT);
 	DDX_Control(pDX, IDC_SHARP_FT, sharpLB_FT);
+	DDX_Control(pDX, IDC_BILATERAL_FT, bilateralBtn_FT);
 }
 
 
@@ -51,6 +52,7 @@ ON_BN_CLICKED(IDC_REVERT_FT, &CFilterDlg::OnBnClickedRevertFt)
 ON_BN_CLICKED(IDCANCEL, &CFilterDlg::OnBnClickedCancel)
 //ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_FOG_FT, &CFilterDlg::OnNMCustomdrawSliderFogFt)
 ON_WM_HSCROLL()
+ON_BN_CLICKED(IDC_BILATERAL_FT, &CFilterDlg::OnBnClickedBilateralFt)
 END_MESSAGE_MAP()
 
 
@@ -76,6 +78,7 @@ BOOL CFilterDlg::OnInitDialog()
 	sharpSliderFT.SetTicFreq(1);
 	sharpSliderFT.SetTic(1);
 	sharpSliderFT.SetPos(0);
+	bilateralBtn_FT.MoveWindow(1000, 370, 200, 45);
 	
 
 	GetDlgItem(IDCANCEL)->MoveWindow(1000,720-100, 200, 45);	
@@ -315,8 +318,12 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
-// 주석 추가 
-//주석 추가 중 
-// 주석 추가 중중
-//주석 추가 3
-//주석추가4
+void CFilterDlg::OnBnClickedBilateralFt()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	colorToGray();//color 사진의 경우 gray로 변경.
+	Mat dst;
+	bilateralFilter(myImgAfterChange, dst, -1, 10, 5); // -1 sigmaSpace로부터 자동생성됨. 10: 색공간에서의 가우시안 표준 편차 5: 좌표 공간에서의 가우시안 표준편차 
+	myImgAfterChange = dst;
+	DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+}

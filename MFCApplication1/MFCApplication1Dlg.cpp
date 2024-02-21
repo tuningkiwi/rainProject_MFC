@@ -340,7 +340,7 @@ void CMFCApplication1Dlg::OnBnClickedFilterBtn()
 	CFilterDlg filterDlg(m_matImage, m_pBitmapInfo);
 
 	// Create and show the dialog box
-	INT_PTR nRet = -1;
+	int nRet = -1;
 	nRet = filterDlg.DoModal();
 
 	// Handle the return value from DoModal
