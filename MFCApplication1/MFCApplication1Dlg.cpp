@@ -444,3 +444,4 @@ void CMFCApplication1Dlg::OnBnClickedOk()
 	imwrite(filepath, m_matImage);
 	CDialogEx::OnOK();
 }
+//주석 추가 
