@@ -58,6 +58,7 @@ ON_BN_CLICKED(IDC_BILATERAL_FT, &CFilterDlg::OnBnClickedBilateralFt)
 END_MESSAGE_MAP()
 
 
+
 // CFilterDlg 메시지 처리기
 
 

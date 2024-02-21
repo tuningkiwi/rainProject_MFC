@@ -43,6 +43,10 @@
 #define IDC_BACK                        1014
 #define IDC_L                           1016
 #define IDC_LUMINANCE_BTN               1016
+#define IDC_PC_IT                       1017
+#define IDC_BUTTON3                     1018
+#define IDC_BUTTON_RR                   1018
+#define IDC_BUTTON_LR                   1019
 
 // Next default values for new objects
 // 
@@ -50,7 +54,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        137
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1017
+#define _APS_NEXT_CONTROL_VALUE         1020
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
