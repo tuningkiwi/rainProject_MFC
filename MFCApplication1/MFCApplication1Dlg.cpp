@@ -354,9 +354,6 @@ void CMFCApplication1Dlg::OnBnClickedFilterBtn()
 		break;
 	case IDOK:
 		// Do something
-		m_matImage = filterDlg.myImgAfterChange;
-		m_pBitmapInfo = filterDlg.myBmpInfoAfterChange;
-		DrawImage();
 		break;
 	case IDCANCEL:
 		// Do something
