@@ -54,6 +54,7 @@ ON_WM_HSCROLL()
 END_MESSAGE_MAP()
 
 
+
 // CFilterDlg 메시지 처리기
 
 

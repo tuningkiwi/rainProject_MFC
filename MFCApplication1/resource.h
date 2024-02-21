@@ -15,6 +15,7 @@
 #define IDD_COLOR_CONYROLS              134
 #define IDR_MENU1                       135
 #define IDD_DIAL                        136
+#define IDD_rotaion_it                  136
 #define IDD_Affine_it                   136
 #define IDC_BUTTON1                     1000
 #define IDC_FILTER_BTN                  1000
@@ -36,14 +37,17 @@
 #define IDC_PC_FT                       1010
 #define IDC_REVERT_FT                   1011
 #define IDC_PC_IT                       1012
+#define IDC_BUTTON3                     1014
+#define IDC_BUTTON_RR                   1014
+#define IDC_BUTTON_LR                   1015
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        137
+#define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1013
+#define _APS_NEXT_CONTROL_VALUE         1016
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
