@@ -12,7 +12,8 @@ class CAffineDlg : public CDialogEx
 	DECLARE_DYNAMIC(CAffineDlg)
 
 public:
-	CAffineDlg(CWnd* pParent = nullptr);   // 표준 생성자입니다.
+	//CAffineDlg(CWnd* pParent = nullptr);   // 표준 생성자입니다.
+	CAffineDlg(); // 표준 생서자입니다.
 	CAffineDlg(Mat Img, BITMAPINFO* bitmapInfo);
 	virtual ~CAffineDlg();
 

@@ -11,8 +11,8 @@
 
 IMPLEMENT_DYNAMIC(CAffineDlg, CDialogEx)
 
-CAffineDlg::CAffineDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_Affine_it, pParent)
+CAffineDlg::CAffineDlg()
+	: CDialogEx(IDD_Affine_it)
 {
 
 }

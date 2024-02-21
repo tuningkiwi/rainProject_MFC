@@ -376,8 +376,31 @@ void CMFCApplication1Dlg::OnBnClickedAffineBtn()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	// 인태 주석 테스트
-	CAffineDlg dlg(m_matImage, m_pBitmapInfo);
-	dlg.DoModal();
+	CAffineDlg affinedlg(m_matImage, m_pBitmapInfo);
+	
+	// Create and show the dialog box
+	INT_PTR nRet = -1;
+	nRet = affinedlg.DoModal();
+
+	// Handle the return value from DoModal
+	switch (nRet)
+	{
+	case -1:
+		AfxMessageBox(_T("Dialog box could not be created!"));
+		break;
+	case IDABORT:
+		// Do something
+		break;
+	case IDOK:
+		// Do something
+		break;
+	case IDCANCEL:
+		// Do something
+		break;
+	default:
+		// Do something
+		break;
+	};
 }
 
 //경태: 객체 검출 및 변형 
