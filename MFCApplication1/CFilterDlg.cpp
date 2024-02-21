@@ -38,6 +38,8 @@ void CFilterDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SHARP_SLIDER_FT, sharpSliderFT);
 	DDX_Control(pDX, IDC_SHARP_FT, sharpLB_FT);
 	DDX_Control(pDX, IDC_BILATERAL_FT, bilateralBtn_FT);
+	DDX_Control(pDX, IDC_SLIDER_NOISE_FT, noiseFT);
+	DDX_Control(pDX, IDC_NOISELB_FT, noiseLB_FT);
 }
 
 
@@ -66,20 +68,25 @@ BOOL CFilterDlg::OnInitDialog()
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
 	MoveWindow(350, 140, 1280, 720);
 	embossFT.MoveWindow(1000, 40, 200, 45);
-	fogLB_FT.MoveWindow(1000, 130, 200, 45);
-	fogslider_FT.MoveWindow(1000, 160, 200, 45);
+	fogLB_FT.MoveWindow(1000, 105, 200, 20);
+	fogslider_FT.MoveWindow(1000, 125, 200, 20);
 	fogslider_FT.SetRange(0, 5);
 	fogslider_FT.SetTicFreq(1);
 	fogslider_FT.SetTic(1);
 	fogslider_FT.SetPos(0);
-	sharpLB_FT.MoveWindow(1000, 250, 200, 45);
-	sharpSliderFT.MoveWindow(1000, 280, 200, 45); 
+	sharpLB_FT.MoveWindow(1000, 165, 200, 20);
+	sharpSliderFT.MoveWindow(1000, 185, 200, 20); 
 	sharpSliderFT.SetRange(0, 5);
 	sharpSliderFT.SetTicFreq(1);
 	sharpSliderFT.SetTic(1);
 	sharpSliderFT.SetPos(0);
-	bilateralBtn_FT.MoveWindow(1000, 370, 200, 45);
-	
+	bilateralBtn_FT.MoveWindow(1000, 225, 200, 45);
+	noiseLB_FT.MoveWindow(1000, 285, 200, 20); 
+	noiseFT.MoveWindow(1000, 305, 200, 20);
+	noiseFT.SetRange(0,100);
+	noiseFT.SetTicFreq(10);
+	noiseFT.SetTic(1);
+	noiseFT.SetPos(0);
 
 	GetDlgItem(IDCANCEL)->MoveWindow(1000,720-100, 200, 45);	
 	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);
@@ -305,6 +312,7 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		}
 	}
 	else if (*pScrollBar == sharpSliderFT) {
+
 		int sigma = sharpSliderFT.GetPos();
 		if (sigma != 0) {
 			GaussianBlur(myImg, myImgAfterChange, Size(), (double)sigma);
@@ -315,6 +323,18 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			DrawImage(myImgAfterChange, myBmpInfoAfterChange);
 		}
 	}
+	else if (*pScrollBar == noiseFT) {
+		colorToGray();//그레이스케일 이미지로 변환  
+		int stddev = noiseFT.GetPos();
+		Mat noise(myImgAfterChange.size(), CV_32SC1);
+		randn(noise, 0, stddev);
+
+		Mat dst;
+		add(myImgAfterChange, noise, dst, Mat(), CV_8U);
+		myImgAfterChange = dst;
+		DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+	}
+
 	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
