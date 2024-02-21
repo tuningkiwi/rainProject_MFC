@@ -59,4 +59,5 @@ public:
 	afx_msg void OnBnClickedAffineBtn();
 	afx_msg void OnBnClickedBrightnessctrlBtn();
 	afx_msg void OnBnClickedOk();
+	afx_msg void OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct);
 };

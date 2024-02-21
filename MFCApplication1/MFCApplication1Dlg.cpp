@@ -89,6 +89,7 @@ BEGIN_MESSAGE_MAP(CMFCApplication1Dlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTY_BTN, &CMFCApplication1Dlg::OnBnClickedButyBtn)
 	ON_BN_CLICKED(IDC_BRIGHTNESSCTRL_BTN, &CMFCApplication1Dlg::OnBnClickedBrightnessctrlBtn)
 	ON_BN_CLICKED(IDOK, &CMFCApplication1Dlg::OnBnClickedOk)
+	ON_WM_DRAWITEM()
 END_MESSAGE_MAP()
 
 
@@ -127,17 +128,31 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	//현재 window 크기 출력
 	CRect m_rectCurHist;
 	this->GetWindowRect(m_rectCurHist);// right:창의 너비 bottm: 창의 높이 
-	GetDlgItem(IDC_PC_VIEW)->MoveWindow(0, 0, int(m_rectCurHist.right * 5 / 6), m_rectCurHist.bottom);
-	
-	GetDlgItem(IDC_BUTTON2)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 50, 150, 60);
-	GetDlgItem(IDC_FILTER_BTN)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 130, 150, 60);
-	GetDlgItem(IDC_COLOR_BTN)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 210, 150, 60);
-	GetDlgItem(IDC_AFFINE_BTN)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 290, 150, 60);
-	GetDlgItem(IDC_BUTY_BTN)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 370, 150, 60);
-	GetDlgItem(IDC_BRIGHTNESSCTRL_BTN)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 450, 150, 60);
-	GetDlgItem(IDOK)->MoveWindow(int(m_rectCurHist.right * 5 / 6), m_rectCurHist.bottom -280, 150, 60);
-	GetDlgItem(IDCANCEL)->MoveWindow(int(m_rectCurHist.right * 5 / 6), m_rectCurHist.bottom -200, 150, 60);
+	int btnlocLeft = int(m_rectCurHist.right * 5 / 6);
+	int btnWidth = int(m_rectCurHist.right * 1 / 6);
+	GetDlgItem(IDC_PC_VIEW)->MoveWindow(0, 0, btnlocLeft, m_rectCurHist.bottom);
 
+	GetDlgItem(IDC_BUTTON2)->MoveWindow(btnlocLeft, 50, btnWidth, 60);
+	GetDlgItem(IDC_FILTER_BTN)->MoveWindow(btnlocLeft, 130, btnWidth, 60);
+	GetDlgItem(IDC_COLOR_BTN)->MoveWindow(btnlocLeft, 210, btnWidth, 60);
+	GetDlgItem(IDC_AFFINE_BTN)->MoveWindow(btnlocLeft, 290, btnWidth, 60);
+	GetDlgItem(IDC_BUTY_BTN)->MoveWindow(btnlocLeft, 370, btnWidth, 60);
+	GetDlgItem(IDC_BRIGHTNESSCTRL_BTN)->MoveWindow(btnlocLeft, 450, btnWidth, 60);
+	GetDlgItem(IDOK)->MoveWindow(btnlocLeft, m_rectCurHist.bottom -280, btnWidth, 60);
+	GetDlgItem(IDCANCEL)->MoveWindow(btnlocLeft, m_rectCurHist.bottom -200, btnWidth, 60);
+
+	CDialogEx::SetBackgroundColor(0x004D3428, 1);//3B261B 2A1B0D
+	CFont font;
+	font.CreatePointFont(180, _T("함초롬돋움 확장 보통"));//함초롬돋움 확장 보통
+	GetDlgItem(IDC_BUTTON2)->SetFont(&font);
+	GetDlgItem(IDC_FILTER_BTN)->SetFont(&font);
+	GetDlgItem(IDC_COLOR_BTN)->SetFont(&font);
+	GetDlgItem(IDC_AFFINE_BTN)->SetFont(&font);
+	GetDlgItem(IDC_BUTY_BTN)->SetFont(&font);
+	GetDlgItem(IDC_BRIGHTNESSCTRL_BTN)->SetFont(&font);
+	GetDlgItem(IDOK)->SetFont(&font);
+	GetDlgItem(IDCANCEL)->SetFont(&font);
+	font.Detach();//font 종료 꼭 해주기 메모리 할당 해제 
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -180,6 +195,7 @@ void CMFCApplication1Dlg::OnPaint()
 	}
 	else
 	{
+		
 		CDialogEx::OnPaint();
 	}
 }
@@ -468,3 +484,70 @@ void CMFCApplication1Dlg::OnBnClickedOk()
 	CDialogEx::OnOK();
 }
 //주석 추가 
+
+void CMFCApplication1Dlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	switch (nIDCtl) {
+		case IDC_BUTTON2: case IDC_FILTER_BTN:	case IDC_COLOR_BTN:
+		case IDC_AFFINE_BTN: case IDC_BUTY_BTN:	case IDC_BRIGHTNESSCTRL_BTN:
+		case IDOK: case IDCANCEL:
+		{
+			if (lpDrawItemStruct->itemAction & 0x07) {
+				CDC* p_dc = CDC::FromHandle(lpDrawItemStruct->hDC);
+				if (lpDrawItemStruct->itemState & ODS_SELECTED) {//버튼 클릭시 
+					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71));//버튼의 색상
+					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105), RGB(60, 75, 105));//버튼 외곽선
+					p_dc->SetTextColor(RGB(140, 147, 161));
+				}
+				else {//기본 상태  //&lpDrawItemStruct->rcItem 버튼의 크기
+					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105));//버튼의 색상
+					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71), RGB(42, 52, 71));//버튼 외곽선
+					p_dc->SetTextColor(RGB(140, 147, 161));
+				}
+
+				p_dc->SetBkMode(TRANSPARENT);
+			}
+		}
+		default: break;
+	}
+	CDC* p_dc = CDC::FromHandle(lpDrawItemStruct->hDC);
+	switch (nIDCtl) {
+		case IDC_BUTTON2: {
+			p_dc->DrawText(L"사진불러오기", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+			break;
+		}
+		case IDC_FILTER_BTN: {
+			p_dc->DrawText(L"필터링", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+			break;
+		}
+		case IDC_COLOR_BTN: {
+			p_dc->DrawText(L"컬러링", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+			break;
+		}
+		case IDC_AFFINE_BTN: {
+			p_dc->DrawText(L"어파인", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+			break;
+		}
+		case IDC_BUTY_BTN: {
+			p_dc->DrawText(L"뷰티", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+			break;
+		}
+		case IDC_BRIGHTNESSCTRL_BTN: {
+			p_dc->DrawText(L"밝기", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+			break;
+		}
+		case IDOK: {
+			p_dc->DrawText(L"저장", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+			break;
+		}
+		case IDCANCEL: {
+			p_dc->DrawText(L"취소", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+			break;
+		}
+		default: break;
+	}
+
+//	CDialogEx::OnDrawItem(nIDCtl, lpDrawItemStruct);
+}
