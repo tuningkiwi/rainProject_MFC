@@ -62,6 +62,15 @@ public:
 	CSliderCtrl noiseFT;
 	// 노이즈 라벨
 	CStatic noiseLB_FT;
+	CPoint prev_mousePos;
+	CPoint circlePos;
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+//	afx_msg void OnPaint();
+	// 마우스로 클릭시 해당 주변 블러처리
+	CButton partBlutBtn;
+	afx_msg void OnBnClickedPartblurFt();
+	BOOL partBlurModeOn;//부분블러 모드 ON 
+	afx_msg void OnPaint();
 };
 
 //백업용 코드 저장소 커밋 확인 

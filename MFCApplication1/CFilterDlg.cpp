@@ -40,6 +40,7 @@ void CFilterDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BILATERAL_FT, bilateralBtn_FT);
 	DDX_Control(pDX, IDC_SLIDER_NOISE_FT, noiseFT);
 	DDX_Control(pDX, IDC_NOISELB_FT, noiseLB_FT);
+	DDX_Control(pDX, IDC_PARTBLUR_FT, partBlutBtn);
 }
 
 
@@ -55,6 +56,10 @@ ON_BN_CLICKED(IDCANCEL, &CFilterDlg::OnBnClickedCancel)
 //ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_FOG_FT, &CFilterDlg::OnNMCustomdrawSliderFogFt)
 ON_WM_HSCROLL()
 ON_BN_CLICKED(IDC_BILATERAL_FT, &CFilterDlg::OnBnClickedBilateralFt)
+ON_WM_MOUSEMOVE()
+//ON_WM_PAINT()
+ON_BN_CLICKED(IDC_PARTBLUR_FT, &CFilterDlg::OnBnClickedPartblurFt)
+ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 
@@ -88,11 +93,12 @@ BOOL CFilterDlg::OnInitDialog()
 	noiseFT.SetTicFreq(10);
 	noiseFT.SetTic(1);
 	noiseFT.SetPos(0);
+	partBlutBtn.MoveWindow(1000, 335, 200, 45);
 
 	GetDlgItem(IDCANCEL)->MoveWindow(1000,720-100, 200, 45);	
 	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);
 	GetDlgItem(IDC_REVERT_FT)->MoveWindow(1000, 720 - 220, 200, 45);
-	
+	partBlurModeOn = false;
 	//DrawImage(); dialog 호출시 oninitDiaog()뒤에 실행되는 메세지들에 의하여, 사진이 출력되지 않음 
 	SetTimer(1, 80, NULL);//100ms  사진 불러오기 위한 타이머 
 
@@ -347,4 +353,46 @@ void CFilterDlg::OnBnClickedBilateralFt()
 	bilateralFilter(myImgAfterChange, dst, -1, 10, 5); // -1 sigmaSpace로부터 자동생성됨. 10: 색공간에서의 가우시안 표준 편차 5: 좌표 공간에서의 가우시안 표준편차 
 	myImgAfterChange = dst;
 	DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+}
+
+
+void CFilterDlg::OnMouseMove(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+	//if (partBlurModeOn) {
+	//	
+	//	// TODO: Add your message handler code here
+	//	circlePos.x += point.x - prev_mousePos.x;
+	//	circlePos.y += point.y - prev_mousePos.y;
+	//	prev_mousePos = point;
+	//	Invalidate();
+	//}
+
+	CDialogEx::OnMouseMove(nFlags, point);
+}
+
+
+//void CFilterDlg::OnPaint()
+//{
+//	CPaintDC mouseCircleDC(this); // device context for painting
+	// TODO: Add your message handler code here
+//	mouseCircleDC.Ellipse(circlePos.x - 15, circlePos.y - 15, circlePos.x + 15, circlePos.y + 15);
+	// Do not call CDialogEx::OnPaint() for painting messages
+//}
+
+
+void CFilterDlg::OnBnClickedPartblurFt()
+{
+	//// TODO: Add your control notification handler code here
+	partBlurModeOn = true;
+	//CPaintDC mouseCircleDC(this); // device context for painting
+	//mouseCircleDC.Ellipse(circlePos.x - 15, circlePos.y - 15, circlePos.x + 15, circlePos.y + 15);
+}
+
+
+void CFilterDlg::OnPaint()
+{
+	CPaintDC dc(this); // device context for painting
+	// TODO: Add your message handler code here
+	// Do not call CDialogEx::OnPaint() for painting messages
 }
