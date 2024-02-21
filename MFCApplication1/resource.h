@@ -24,9 +24,18 @@
 #define IDC_COLOR_BTN                   1003
 #define IDC_IMAGE_CONTROL               1003
 #define IDC_AFFINE_BTN                  1004
+#define IDC_EMBOSS_FT                   1004
 #define IDC_OBJECTDETECTION_BTN         1005
 #define IDC_BUTY_BTN                    1005
 #define IDC_BRIGHTNESSCTRL_BTN          1006
+#define IDC_SLIDER_GAUSSIAN_FT          1006
+#define IDC_SLIDER_FOG_FT               1006
+#define IDC_FOGLB_FT                    1007
+#define IDC_SHARP_FT                    1008
+#define IDC_SLIDER1                     1009
+#define IDC_SHARP_SLIDER_FT             1009
+#define IDC_PC_FT                       1010
+#define IDC_REVERT_FT                   1011
 
 // Next default values for new objects
 // 
@@ -35,6 +44,7 @@
 #define _APS_NEXT_RESOURCE_VALUE        140
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         1004
+#define _APS_NEXT_CONTROL_VALUE         1010
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
