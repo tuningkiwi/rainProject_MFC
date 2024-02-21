@@ -28,6 +28,13 @@ protected:
 public:
 	virtual BOOL OnInitDialog();//다이얼로그가 생성될 때 호출되는 초기화
 	Mat myImg;// 이미지 정보를 담고 있는 객체.
-	BITMAPINFO* myBitmapInfo; // Bitmap 정보를 담고 있는 구조체.
-	
+	BITMAPINFO* myBitmapInfo; // Bitmap 정보를 담고 있는 구조체.	
+	CStatic m_imageControl;
+
+	void DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo);
+	void CreateBitmapInfo(BITMAPINFO** newInfo, int w, int h, int bpp);
+
+	afx_msg void OnDestroy();
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };
