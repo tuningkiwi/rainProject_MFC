@@ -235,7 +235,7 @@ void CColorControls::OnBnClickedLuminanceBtn()
 	m_luminance_btn.SetPalette(&m_stock_palette);
 	m_luminance_btn.SetColor(RGB(0, 255, 0));
 
-	COLORREF color = m_luminance_btn.GetColor();
+	COLORREF color = m_luminance_btn.GetColor(); 
 }
 
 
