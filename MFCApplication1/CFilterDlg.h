@@ -51,6 +51,10 @@ public:
 	CSliderCtrl fogslider_FT;//안개필터 강도 슬라이더
 //	afx_msg void OnNMCustomdrawSliderFogFt(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	// sharpening slider
+	CSliderCtrl sharpSliderFT;
+	// sharpening label
+	CStatic sharpLB_FT;
 };
 
 //백업용 코드 저장소 커밋 확인 

@@ -35,6 +35,8 @@ void CFilterDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EMBOSS_FT, embossFT);
 	DDX_Control(pDX, IDC_FOGLB_FT, fogLB_FT);//IDC_SLIDER_GAUSSIAN_FT
 	DDX_Control(pDX, IDC_SLIDER_FOG_FT, fogslider_FT);
+	DDX_Control(pDX, IDC_SHARP_SLIDER_FT, sharpSliderFT);
+	DDX_Control(pDX, IDC_SHARP_FT, sharpLB_FT);
 }
 
 
@@ -68,6 +70,12 @@ BOOL CFilterDlg::OnInitDialog()
 	fogslider_FT.SetTicFreq(1);
 	fogslider_FT.SetTic(1);
 	fogslider_FT.SetPos(0);
+	sharpLB_FT.MoveWindow(1000, 250, 200, 45);
+	sharpSliderFT.MoveWindow(1000, 280, 200, 45); 
+	sharpSliderFT.SetRange(0, 5);
+	sharpSliderFT.SetTicFreq(1);
+	sharpSliderFT.SetTic(1);
+	sharpSliderFT.SetPos(0);
 	
 
 	GetDlgItem(IDCANCEL)->MoveWindow(1000,720-100, 200, 45);	
@@ -285,11 +293,24 @@ void CFilterDlg::OnBnClickedCancel()
 void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	// TODO: Add your message handler code here and/or call default
-	int sigma = fogslider_FT.GetPos();
-	if (sigma != 0) {
-		GaussianBlur(myImg, myImgAfterChange, Size(), (double)sigma);
-		CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
-		DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+	if (*pScrollBar == fogslider_FT) {
+		int sigma = fogslider_FT.GetPos();
+		if (sigma != 0) {
+			GaussianBlur(myImg, myImgAfterChange, Size(), (double)sigma);
+			CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
+			DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+		}
+	}
+	else if (*pScrollBar == sharpSliderFT) {
+		int sigma = sharpSliderFT.GetPos();
+		if (sigma != 0) {
+			GaussianBlur(myImg, myImgAfterChange, Size(), (double)sigma);
+			float alpha = 1.f;
+			Mat dst = (1 + alpha) * myImg - alpha * myImgAfterChange;
+			myImgAfterChange = dst;
+			CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
+			DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+		}
 	}
 	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
