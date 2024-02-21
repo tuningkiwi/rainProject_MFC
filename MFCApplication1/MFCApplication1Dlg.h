@@ -45,20 +45,17 @@ public:
 	// 필터링 조정 다이얼로그
 	CButton FilterBtn;
 	afx_msg void OnBnClickedFilterBtn();
+	// 뷰티 조정 다이얼로그
+	CButton ButyBtn;
+	afx_msg void OnBnClickedButyBtn();
 
-	//경태
-
-	// 컬러 추출 및 관련 기능
 	// 컬러 추출 및 관련 기능
 	CButton colorBtn;
 	// 자르기 및 어파인 변형 다이얼로그
 	CButton cropAffinBtn;
-	// 객체검출 및 변형 다이얼로그
-	CButton objDetectBtn;
 	// 밝기 및 명암비 조절 다이얼로그
 	CButton brightnessBtn;
 	afx_msg void OnBnClickedColorBtn();
 	afx_msg void OnBnClickedAffineBtn();
-	afx_msg void OnBnClickedObjectdetectionBtn();
 	afx_msg void OnBnClickedBrightnessctrlBtn();
 };

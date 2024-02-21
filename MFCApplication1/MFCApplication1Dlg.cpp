@@ -7,11 +7,13 @@
 #include "MFCApplication1.h"
 #include "MFCApplication1Dlg.h"
 #include "CFilterDlg.h"
+#include "CButyDlg.h"
 #include "afxdialogex.h"
 #include "CBRIGHTNESSCTRL.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+#include "CButyDlg.h"
 
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
@@ -63,7 +65,7 @@ void CMFCApplication1Dlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON1, FilterBtn);
 	DDX_Control(pDX, IDC_COLOR_BTN, colorBtn);
 	DDX_Control(pDX, IDC_AFFINE_BTN, cropAffinBtn);
-	DDX_Control(pDX, IDC_OBJECTDETECTION_BTN, objDetectBtn);
+	DDX_Control(pDX, IDC_BUTY_BTN, ButyBtn);
 	DDX_Control(pDX, IDC_BRIGHTNESSCTRL_BTN, brightnessBtn);
 }
 
@@ -78,7 +80,7 @@ BEGIN_MESSAGE_MAP(CMFCApplication1Dlg, CDialogEx)
 	ON_BN_CLICKED(IDC_FILTER_BTN, &CMFCApplication1Dlg::OnBnClickedFilterBtn)
 	ON_BN_CLICKED(IDC_COLOR_BTN, &CMFCApplication1Dlg::OnBnClickedColorBtn)
 	ON_BN_CLICKED(IDC_AFFINE_BTN, &CMFCApplication1Dlg::OnBnClickedAffineBtn)
-	ON_BN_CLICKED(IDC_OBJECTDETECTION_BTN, &CMFCApplication1Dlg::OnBnClickedObjectdetectionBtn)
+	ON_BN_CLICKED(IDC_BUTY_BTN, &CMFCApplication1Dlg::OnBnClickedButyBtn)
 	ON_BN_CLICKED(IDC_BRIGHTNESSCTRL_BTN, &CMFCApplication1Dlg::OnBnClickedBrightnessctrlBtn)
 END_MESSAGE_MAP()
 
@@ -124,7 +126,7 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	GetDlgItem(IDC_FILTER_BTN)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 130, 150, 60);
 	GetDlgItem(IDC_COLOR_BTN)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 210, 150, 60);
 	GetDlgItem(IDC_AFFINE_BTN)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 290, 150, 60);
-	GetDlgItem(IDC_OBJECTDETECTION_BTN)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 370, 150, 60);
+	GetDlgItem(IDC_BUTY_BTN)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 370, 150, 60);
 	GetDlgItem(IDC_BRIGHTNESSCTRL_BTN)->MoveWindow(int(m_rectCurHist.right * 5 / 6), 450, 150, 60);
 	GetDlgItem(IDOK)->MoveWindow(int(m_rectCurHist.right * 5 / 6), m_rectCurHist.bottom -280, 150, 60);
 	GetDlgItem(IDCANCEL)->MoveWindow(int(m_rectCurHist.right * 5 / 6), m_rectCurHist.bottom -200, 150, 60);
@@ -372,9 +374,34 @@ void CMFCApplication1Dlg::OnBnClickedAffineBtn()
 }
 
 //경태: 객체 검출 및 변형 
-void CMFCApplication1Dlg::OnBnClickedObjectdetectionBtn()
+void CMFCApplication1Dlg::OnBnClickedButyBtn()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	//CDialog filterDlg(IDD_DIALOG1);
+	CButyDlg butyDlg(m_matImage, m_pBitmapInfo);
+
+	// Create and show the dialog box
+	INT_PTR nRet = -1;
+	nRet = butyDlg.DoModal();
+
+	// Handle the return value from DoModal
+	switch (nRet)
+	{
+	case -1:
+		AfxMessageBox(_T("Dialog box could not be created!"));
+		break;
+	case IDABORT:
+		// Do something
+		break;
+	case IDOK:
+		// Do something
+		break;
+	case IDCANCEL:
+		// Do something
+		break;
+	default:
+		// Do something
+		break;
+	};
 }
 
 //동혁: 밝기 및 명암비 조절 
