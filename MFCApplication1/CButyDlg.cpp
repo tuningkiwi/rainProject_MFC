@@ -5,7 +5,9 @@
 #include "MFCApplication1.h"
 #include "afxdialogex.h"
 #include "CButyDlg.h"
-
+#include "opencv2/objdetect.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/imgproc.hpp"
 
 // CButyDlg 대화 상자
 
@@ -43,6 +45,7 @@ BEGIN_MESSAGE_MAP(CButyDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_REVERT_FT, &CButyDlg::OnBnClickedRevertFt)
 	ON_BN_CLICKED(IDCANCEL, &CButyDlg::OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_DETECT, &CButyDlg::OnBnClickedDetect)
+	ON_WM_HSCROLL()
 END_MESSAGE_MAP()
 
 
@@ -58,6 +61,20 @@ BOOL CButyDlg::OnInitDialog()
 	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);
 	GetDlgItem(IDC_REVERT_FT)->MoveWindow(1000, 720 - 220, 200, 45);
 	GetDlgItem(IDC_DETECT)->MoveWindow(1000, 720 - 280, 200, 45);
+
+	// Slider control 초기화
+	CSliderCtrl* pSlider = static_cast<CSliderCtrl*>(GetDlgItem(IDC_SLIDER_EYE));
+	if (pSlider)
+	{
+		pSlider->SetRange(1, 100); // 적절한 범위 설정
+		pSlider->SetPos(50);       // 초기값 설정
+
+		// Slider control의 위치 설정 (절대적인 수치 사용)
+		pSlider->MoveWindow(1000, 720 - 280 - 55, 200, 45);  // 적절한 수치로 설정
+	}
+
+	// 초록색 원의 초기 크기를 50으로 설정
+	eyeRadius = 50;
 
 	//DrawImage(); dialog 호출시 oninitDiaog()뒤에 실행되는 메세지들에 의하여, 사진이 출력되지 않음 
 	SetTimer(1, 80, NULL);//100ms  사진 불러오기 위한 타이머 
@@ -193,6 +210,8 @@ void CButyDlg::OnBnClickedRevertFt()
 	// TODO: Add your control notification handler code here
 	DrawImage(myImg, myBitmapInfo);
 	MessageBox(L"원본으로 돌아갑니다", L"알림", MB_OK);
+
+	Invalidate();
 }
 
 //필터 창을 종료하고, 부모창 사진에는 변경이 안되어 있어야함. 
@@ -204,5 +223,52 @@ void CButyDlg::OnBnClickedCancel()
 
 void CButyDlg::OnBnClickedDetect()
 {
-	
+	try
+	{
+		// Convert the Mat image to grayscale for eye detection
+		Mat grayImage;
+		cvtColor(myImg, grayImage, COLOR_BGR2GRAY);
+
+		// Load pre-trained eye cascade classifier
+		CascadeClassifier eyeCascade;
+		eyeCascade.load("C:\\opencv\\build\\etc\\haarcascades\\haarcascade_eye.xml");
+
+		// Detect eyes in the image
+		std::vector<Rect> eyes;
+		eyeCascade.detectMultiScale(grayImage, eyes, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(30, 30));
+
+		// Loop over detected eyes
+		for (size_t i = 0; i < eyes.size(); i++)
+		{
+			Point eyeCenter(eyes[i].x + eyes[i].width / 2, eyes[i].y + eyes[i].height / 2);
+			int radius = cvRound(eyeRadius);
+			circle(myImg, eyeCenter, radius, Scalar(0, 255, 0), 2);
+
+			Mat eyeROI = myImg(eyes[i]);
+			resize(eyeROI, eyeROI, Size(eyeROI.cols * eyeRadius, eyeROI.rows * eyeRadius));
+			eyeROI.copyTo(myImg(eyes[i]));
+		}
+
+		// Redraw the image with eye detection
+		DrawImage(myImg, myBitmapInfo);
+	}
+	catch (const Exception& ex)
+	{
+		// Handle the exception (e.g., display an error message)
+		AfxMessageBox(CString("Error during eye detection: ") + ex.what());
+	}
+}
+
+void CButyDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	if (pScrollBar->GetDlgCtrlID() == IDC_SLIDER_EYE)
+	{
+		// 눈의 크기를 slider 값으로 설정
+		eyeRadius = static_cast<int>(SendDlgItemMessage(IDC_SLIDER_EYE, TBM_GETPOS, 0, 0));
+
+		// 다시 그리기
+		DrawImage(myImg, myBitmapInfo);
+	}
+
+	CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
 }

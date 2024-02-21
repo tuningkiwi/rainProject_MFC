@@ -36,6 +36,7 @@
 #define IDC_SHARP_FT                    1008
 #define IDC_SLIDER1                     1009
 #define IDC_SHARP_SLIDER_FT             1009
+#define IDC_SLIDER_EYE                  1009
 #define IDC_PC_FT                       1010
 #define IDC_REVERT_FT                   1011
 #define IDC_NOISELB_FT                  1012

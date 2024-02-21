@@ -35,6 +35,8 @@ public:
 	CStatic picCtrl_FT;
 	Mat myImgAfterChange;
 	BITMAPINFO* myBmpInfoAfterChange;
+	CImage m_displayImage;
+	int eyeRadius; // 추가된 부분
 
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
@@ -42,6 +44,7 @@ public:
 	afx_msg void OnBnClickedRevertFt();
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnBnClickedDetect();
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 };
 
 //백업용 코드 저장소 커밋 확인 
