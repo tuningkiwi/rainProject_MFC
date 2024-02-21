@@ -40,6 +40,9 @@
 #define IDC_NOISELB_FT                  1012
 #define IDC_SLIDER2                     1013
 #define IDC_SLIDER_NOISE_FT             1013
+#define IDC_BACK                        1014
+#define IDC_L                           1016
+#define IDC_LUMINANCE_BTN               1016
 
 // Next default values for new objects
 // 
@@ -47,7 +50,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        137
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1014
+#define _APS_NEXT_CONTROL_VALUE         1017
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
