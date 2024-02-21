@@ -58,4 +58,5 @@ public:
 	afx_msg void OnBnClickedColorBtn();
 	afx_msg void OnBnClickedAffineBtn();
 	afx_msg void OnBnClickedBrightnessctrlBtn();
+	afx_msg void OnBnClickedOk();
 };

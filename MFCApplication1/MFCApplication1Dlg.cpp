@@ -85,6 +85,7 @@ BEGIN_MESSAGE_MAP(CMFCApplication1Dlg, CDialogEx)
 	ON_BN_CLICKED(IDC_AFFINE_BTN, &CMFCApplication1Dlg::OnBnClickedAffineBtn)
 	ON_BN_CLICKED(IDC_BUTY_BTN, &CMFCApplication1Dlg::OnBnClickedButyBtn)
 	ON_BN_CLICKED(IDC_BRIGHTNESSCTRL_BTN, &CMFCApplication1Dlg::OnBnClickedBrightnessctrlBtn)
+	ON_BN_CLICKED(IDOK, &CMFCApplication1Dlg::OnBnClickedOk)
 END_MESSAGE_MAP()
 
 
@@ -340,7 +341,7 @@ void CMFCApplication1Dlg::OnBnClickedFilterBtn()
 	CFilterDlg filterDlg(m_matImage, m_pBitmapInfo);
 
 	// Create and show the dialog box
-	int nRet = -1;
+	INT_PTR nRet = -1;
 	nRet = filterDlg.DoModal();
 
 	// Handle the return value from DoModal
@@ -423,3 +424,9 @@ void CMFCApplication1Dlg::OnBnClickedBrightnessctrlBtn()
 }
 
 //경태 깃 분기 만들기 
+
+void CMFCApplication1Dlg::OnBnClickedOk()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CDialogEx::OnOK();
+}
