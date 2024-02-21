@@ -12,6 +12,9 @@
 #include "afxdialogex.h"
 #include "CBRIGHTNESSCTRL.h"
 #include "CAffineDlg.h"
+#include <iostream>
+#include <ctime> 
+#include <string>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -428,6 +431,16 @@ void CMFCApplication1Dlg::OnBnClickedBrightnessctrlBtn()
 void CMFCApplication1Dlg::OnBnClickedOk()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	imwrite("./rainResult/img1.bmp", m_matImage);
+	std::time_t result = std::time(nullptr);
+	std::string name = std::ctime(&result);//마지막에 \n이 삽입됨
+	std::string newName = "";
+	for (int i = 0; i < name.size()-1; i++) {
+		std::cout << i << ":" << name[i] << std::endl;
+		if (name[i] != 0x20 && name[i] != ':') {//공백문자 
+			newName += name[i];
+		}
+	}
+	std::string filepath = "./rainResult/" + newName + ".bmp";
+	imwrite(filepath, m_matImage);
 	CDialogEx::OnOK();
 }
