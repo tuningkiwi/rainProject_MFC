@@ -11,6 +11,7 @@
 #define IDR_MENU1                       131
 #define IDD_DIAL                        132
 #define IDD_rotaion_it                  132
+#define IDD_Affine_it                   132
 #define IDC_BUTTON1                     1000
 #define IDC_FILTER_BTN                  1000
 #define IDC_BUTTON2                     1001
