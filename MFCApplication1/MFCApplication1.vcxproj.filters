@@ -36,6 +36,9 @@
     <ClInclude Include="CFilterDlg.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="CColorControls.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
     <ClInclude Include="CBRIGHTNESSCTRL.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -54,6 +57,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="CFilterDlg.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CColorControls.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="CBRIGHTNESSCTRL.cpp">

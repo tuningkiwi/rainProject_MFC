@@ -8,6 +8,7 @@
 #include "MFCApplication1Dlg.h"
 #include "CFilterDlg.h"
 #include "CButyDlg.h"
+#include "CColorControls.h"
 #include "afxdialogex.h"
 #include "CBRIGHTNESSCTRL.h"
 #ifdef _DEBUG
@@ -364,7 +365,8 @@ void CMFCApplication1Dlg::OnBnClickedFilterBtn()
 //유진: 색상 추출 및 관련 기능 
 void CMFCApplication1Dlg::OnBnClickedColorBtn()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CColorControls dlg(m_matImage, m_pBitmapInfo);
+	dlg.DoModal();
 }
 
 //인태: 자르기 및 어파인 변형 

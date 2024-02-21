@@ -186,6 +186,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CColorControls.h" />
     <ClInclude Include="CBRIGHTNESSCTRL.h" />
     <ClInclude Include="CButyDlg.h" />
     <ClInclude Include="CFilterDlg.h" />
@@ -197,6 +198,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CColorControls.cpp" />
     <ClCompile Include="ButyClass.cpp" />
     <ClCompile Include="CBRIGHTNESSCTRL.cpp" />
     <ClCompile Include="CButyDlg.cpp" />
