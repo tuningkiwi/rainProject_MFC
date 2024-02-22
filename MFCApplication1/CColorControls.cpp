@@ -34,7 +34,9 @@ void CColorControls::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_IMAGE_CONTROL, m_imageControl);
-	//  DDX_Control(pDX, IDC_LUMINANCE_BTN, m_luminance_btn);
+
+	DDX_Control(pDX, IDC_MFCCOLORBUTTON_COLOR, m_mfcColorBtn);
+	DDX_Control(pDX, IDC_STATIC_COLOR, m_staticColor);
 }
 
 
@@ -48,8 +50,10 @@ BEGIN_MESSAGE_MAP(CColorControls, CDialogEx)
 	ON_BN_CLICKED(IDC_BACK, &CColorControls::OnBnClickedBack)
 	ON_BN_CLICKED(IDC_LUMINANCE_BTN, &CColorControls::OnBnClickedLuminanceBtn)
 
-//	ON_WM_PAINT()
+	//ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_WM_CTLCOLOR()
+	ON_BN_CLICKED(IDC_MFCCOLORBUTTON_COLOR, &CColorControls::OnBnClickedMfccolorbuttonColor)
 END_MESSAGE_MAP()
 
 
@@ -67,10 +71,14 @@ BOOL CColorControls::OnInitDialog()
 	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);
 	GetDlgItem(IDC_BACK)->MoveWindow(1000, 720 - 220, 200, 45);
 	GetDlgItem(IDC_LUMINANCE_BTN)->MoveWindow(1000, 50, 200, 45);
-
+	GetDlgItem(IDC_MFCCOLORBUTTON_COLOR)->MoveWindow(1000, 110, 200, 30);
+	GetDlgItem(IDC_STATIC_COLOR)->MoveWindow(1000, 170, 200, 50);
 
 	//DrawImage(); dialog 호출시 oninitDiaog()뒤에 실행되는 메세지들에 의하여, 사진이 출력되지 않음 
 	SetTimer(1, 80, NULL);//100ms  사진 불러오기 위한 타이머 
+
+	m_mfcColorBtn.SetColor(RGB(255, 255, 255));
+	m_brushColor.CreateSolidBrush(m_mfcColorBtn.GetColor());
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
@@ -107,6 +115,11 @@ void CColorControls::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
 		GetDlgItem(IDC_IMAGE_CONTROL)->MoveWindow(x, y, requestImg.cols, requestImg.rows);
 	}
 
+	//CPaintDC dc1(GetDlgItem(IDC_LUMINANCE_BTN)); // device context for painting
+	//CRect rect1;
+	//GetDlgItem(IDC_LUMINANCE_BTN)->GetWindowRect(&rect1);
+	//ScreenToClient(&rect1);
+	//dc1.FillSolidRect(rect1, m_selectedColor);
 
 	//GetClientRect(left, top, right, bottom ) 클라이언트 영역의 좌표
 	//함수가 성공하면 반환 값이 0이 아닙니다.
@@ -215,12 +228,11 @@ void CColorControls::OnBnClickedLuminanceBtn()
 	
 	if (dlg.DoModal() == IDOK) {
 
-		COLORREF color = dlg.GetColor();
-
+		COLORREF color = dlg.GetColor();		
 		TRACE(_T("RGB value of the selected color - red = %u, ")
 			_T("green = %u, blue = %u\n"),
 			GetRValue(color), GetGValue(color), GetBValue(color));
-
+				
 	}
 	 
 	//CClientDC dc(this);
@@ -255,9 +267,11 @@ void CColorControls::OnBnClickedLuminanceBtn()
 
 //void CColorControls::OnPaint()
 //{
-	//CPaintDC dc(this); // device context for painting
-	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
-	// 그리기 메시지에 대해서는 CDialogEx::OnPaint()을(를) 호출하지 마십시오.
+//	CPaintDC dc(this); // device context for painting
+//	
+//
+//	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
+//	// 그리기 메시지에 대해서는 CDialogEx::OnPaint()을(를) 호출하지 마십시오.
 //}
 
 
@@ -266,4 +280,26 @@ HCURSOR CColorControls::OnQueryDragIcon()
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 
 	return CDialogEx::OnQueryDragIcon();
+}
+
+
+HBRUSH CColorControls::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	// TODO:  여기서 DC의 특성을 변경합니다.
+	if (nCtlColor == CTLCOLOR_STATIC && pWnd->GetDlgCtrlID() == IDC_STATIC_COLOR)
+		hbr = m_brushColor;
+	// TODO:  기본값이 적당하지 않으면 다른 브러시를 반환합니다.
+	return hbr;
+}
+
+
+void CColorControls::OnBnClickedMfccolorbuttonColor()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	m_brushColor.DeleteObject();
+	m_brushColor.CreateSolidBrush(m_mfcColorBtn.GetColor());
+	m_staticColor.Invalidate();
+	m_staticColor.UpdateWindow();
 }

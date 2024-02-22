@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "afxdialogex.h"
-#include "afxcolorpickerctrl.h"
+#include "afxcolordialog.h"
 #include "windows.h"
 #include "opencv2/opencv.hpp"
 using namespace cv;
@@ -45,16 +45,19 @@ public:
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnBnClickedBack();
 
-
-//	CMFCColorPickerCtrl m_luminance_btn;
-	afx_msg void OnBnClickedLuminanceBtn();
-	enum COLORTYPE { CURRENT, LUMINANCE, PICKER, HEX, HEX_GREYSCALE }; //색상 비교, 휘도 선택, 펼쳐진 형태, 육각형 색상표
-	
-	CPalette m_stock_palette; //팔레트 정보를 저장할 객체를 멤버 변수로 선언
-	
+//	CMFCColorPickerCtrl m_luminance_btn;	
+//	enum COLORTYPE { CURRENT, LUMINANCE, PICKER, HEX, HEX_GREYSCALE }; //색상 비교, 휘도 선택, 펼쳐진 형태, 육각형 색상표
+//	CPalette m_stock_palette; //팔레트 정보를 저장할 객체를 멤버 변수로 선언	
 	//CMFCColorPickerCtrl m_colorPicker;
 	//CPalette palette;
 
-//	afx_msg void OnPaint();
+	afx_msg void OnBnClickedLuminanceBtn();
+	//afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
+	
+	CMFCColorButton m_mfcColorBtn;
+	CStatic m_staticColor;
+	CBrush m_brushColor;
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	afx_msg void OnBnClickedMfccolorbuttonColor();
 };
