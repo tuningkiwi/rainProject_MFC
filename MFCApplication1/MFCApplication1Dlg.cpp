@@ -154,6 +154,7 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	GetDlgItem(IDCANCEL)->SetFont(&font);
 	font.Detach();//font 종료 꼭 해주기 메모리 할당 해제 
 
+
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -195,7 +196,12 @@ void CMFCApplication1Dlg::OnPaint()
 	}
 	else
 	{
-		
+		CPaintDC dc(this);
+		CRect wnd;
+		this->GetWindowRect(wnd);// right:창의 너비 bottm: 창의 높이 
+		int xloc = int(wnd.right * 5 / 6);
+		int backImgWid = int(wnd.right * 1 / 6);
+		dc.FillSolidRect(xloc, 0, backImgWid, wnd.bottom, RGB(40, 56, 84));//35, 47, 69
 		CDialogEx::OnPaint();
 	}
 }
@@ -504,7 +510,7 @@ void CMFCApplication1Dlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStru
 				else {//기본 상태  //&lpDrawItemStruct->rcItem 버튼의 크기
 					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105));//버튼의 색상
 					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71), RGB(42, 52, 71));//버튼 외곽선
-					p_dc->SetTextColor(RGB(140, 147, 161));
+					p_dc->SetTextColor(RGB(171, 182, 199));
 				}
 
 				p_dc->SetBkMode(TRANSPARENT);
