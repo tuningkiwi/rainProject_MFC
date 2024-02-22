@@ -59,7 +59,9 @@ ON_BN_CLICKED(IDC_BILATERAL_FT, &CFilterDlg::OnBnClickedBilateralFt)
 ON_WM_MOUSEMOVE()
 //ON_WM_PAINT()
 ON_BN_CLICKED(IDC_PARTBLUR_FT, &CFilterDlg::OnBnClickedPartblurFt)
-ON_WM_PAINT()
+//ON_WM_PAINT()
+ON_WM_DRAWITEM()
+ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 
@@ -101,7 +103,19 @@ BOOL CFilterDlg::OnInitDialog()
 	partBlurModeOn = false;
 	//DrawImage(); dialog 호출시 oninitDiaog()뒤에 실행되는 메세지들에 의하여, 사진이 출력되지 않음 
 	SetTimer(1, 80, NULL);//100ms  사진 불러오기 위한 타이머 
+	CDialogEx::SetBackgroundColor(0x004D3428, 1);
 
+	CFont font;
+	font.CreatePointFont(120, _T("함초롬돋움 확장 보통"));//함초롬돋움 확장 보통
+	embossFT.SetFont(&font);
+	fogLB_FT.SetFont(&font);
+	sharpLB_FT.SetFont(&font);
+	bilateralBtn_FT.SetFont(&font);
+	noiseLB_FT.SetFont(&font);
+	partBlutBtn.SetFont(&font);
+	GetDlgItem(IDOK)->SetFont(&font);
+	GetDlgItem(IDCANCEL)->SetFont(&font);
+	font.Detach();//font 종료 꼭 해주기 메모리 할당 해제 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
@@ -374,10 +388,23 @@ void CFilterDlg::OnMouseMove(UINT nFlags, CPoint point)
 
 //void CFilterDlg::OnPaint()
 //{
-//	CPaintDC mouseCircleDC(this); // device context for painting
-	// TODO: Add your message handler code here
-//	mouseCircleDC.Ellipse(circlePos.x - 15, circlePos.y - 15, circlePos.x + 15, circlePos.y + 15);
-	// Do not call CDialogEx::OnPaint() for painting messages
+	//if (IsIconic())
+	//{
+	//	CPaintDC dc(this); // 그리기를 위한 디바이스 컨텍스트입니다.
+
+	//	SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
+
+	//}
+	//else
+	//{
+	//	CPaintDC dc(this);
+	//	CRect wnd;
+	//	this->GetWindowRect(wnd);// right:창의 너비 bottm: 창의 높이 
+	//	int xloc = int(wnd.right * 5 / 6);
+	//	int backImgWid = int(wnd.right * 1 / 6);
+	//	dc.FillSolidRect(xloc, 0, backImgWid, wnd.bottom, RGB(40, 56, 84));//35, 47, 69
+	//	//CDialogEx::OnPaint();
+	//}
 //}
 
 
@@ -390,9 +417,78 @@ void CFilterDlg::OnBnClickedPartblurFt()
 }
 
 
-void CFilterDlg::OnPaint()
+
+
+void CFilterDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
-	CPaintDC dc(this); // device context for painting
-	// TODO: Add your message handler code here
-	// Do not call CDialogEx::OnPaint() for painting messages
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	switch (nIDCtl) {
+		case IDC_EMBOSS_FT: case IDC_BILATERAL_FT:	case IDC_PARTBLUR_FT:
+		case IDC_REVERT_FT:
+		case IDOK: case IDCANCEL:
+		{
+			if (lpDrawItemStruct->itemAction & 0x07) {
+				CDC* p_dc = CDC::FromHandle(lpDrawItemStruct->hDC);
+				if (lpDrawItemStruct->itemState & ODS_SELECTED) {//버튼 클릭시 
+					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71));//버튼의 색상
+					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105), RGB(60, 75, 105));//버튼 외곽선
+					p_dc->SetTextColor(RGB(140, 147, 161));
+				}
+				else {//기본 상태  //&lpDrawItemStruct->rcItem 버튼의 크기
+					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105));//버튼의 색상
+					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71), RGB(42, 52, 71));//버튼 외곽선
+					p_dc->SetTextColor(RGB(171, 182, 199));
+				}
+
+				p_dc->SetBkMode(TRANSPARENT);
+			}
+		}
+		default: break;
+	}
+	CDC* p_dc = CDC::FromHandle(lpDrawItemStruct->hDC);
+	switch (nIDCtl) {
+	case IDC_EMBOSS_FT: {
+		p_dc->DrawText(L"진흙필터", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDC_BILATERAL_FT: {
+		p_dc->DrawText(L"양방향필터", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDC_PARTBLUR_FT: {
+		p_dc->DrawText(L"부분블러", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDC_REVERT_FT: {
+		p_dc->DrawText(L"되돌리기", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDOK: {
+		p_dc->DrawText(L"저장", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDCANCEL: {
+		p_dc->DrawText(L"취소", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	default: break;
+	}
+	//CDialogEx::OnDrawItem(nIDCtl, lpDrawItemStruct);
+}
+
+
+HBRUSH CFilterDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	// TODO:  여기서 DC의 특성을 변경합니다.
+	int staticLb = pWnd->GetDlgCtrlID(); 
+	switch (staticLb) {
+		case IDC_FOGLB_FT: case IDC_SHARP_FT:
+		case IDC_NOISELB_FT: case IDC_REVERT_FT: 
+		pDC->SetTextColor(RGB(171, 182, 199));
+	}
+
+	// TODO:  기본값이 적당하지 않으면 다른 브러시를 반환합니다.
+	return hbr;
 }

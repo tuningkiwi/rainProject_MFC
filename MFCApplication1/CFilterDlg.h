@@ -70,7 +70,9 @@ public:
 	CButton partBlutBtn;
 	afx_msg void OnBnClickedPartblurFt();
 	BOOL partBlurModeOn;//부분블러 모드 ON 
-	afx_msg void OnPaint();
+//	afx_msg void OnPaint();
+	afx_msg void OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct);
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 };
 
 //백업용 코드 저장소 커밋 확인 
