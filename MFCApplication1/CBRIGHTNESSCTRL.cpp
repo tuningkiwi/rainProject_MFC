@@ -172,3 +172,4 @@ void CBRIGHTNESSCTRL::OnTimer(UINT_PTR nIDEvent)
 
 //	return CDialogEx::get_accChild(varChild, ppdispChild);
 //}
+//주석추가
