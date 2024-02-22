@@ -154,7 +154,7 @@ void CFilterDlg::OnBnClickedOk()
 
 //다이얼로그창에 사진 띄우기 
 void CFilterDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
-	KillTimer(1); 
+	KillTimer(1);
 
 	//필터창 크기
 	CRect rect;
@@ -182,6 +182,8 @@ void CFilterDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
 		int x = cvRound((wx - requestImg.cols) / 2);
 		int y = cvRound((wy - requestImg.rows) / 2);
 		GetDlgItem(IDC_PC_FT)->MoveWindow(x, y, requestImg.cols, requestImg.rows);
+		picLTRB.left = x; picLTRB.top = y;
+		picLTRB.right = x + requestImg.cols; picLTRB.bottom = y+ requestImg.rows;
 	}
 
 
@@ -212,10 +214,13 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 	// TODO: Add your message handler code here and/or call default
 	switch (nIDEvent) {
 	case 1:
+		//처음 다이얼로그 창을 띄울 때 onInitDialog()에서 drawimage가 이후 
+		// 자동 수행되는 메시지 함수에의해서 출력이 안되서 
+		//onInitDialog()에 타이머로 걸어놓음  
 		DrawImage(myImg, myBitmapInfo);//처음 로딩되는 이미지 
-		
+		break;
+	
 	}
-	KillTimer(1);//처음 필터창을 켰을때, 사진을 띄우기 위한 용도라 바로 kill 
 	CDialogEx::OnTimer(nIDEvent);
 }
 
@@ -223,9 +228,6 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 void CFilterDlg::OnDestroy() 
 {
 	CDialogEx::OnDestroy();
-	//KillTimer(1);
-	//저장 버튼 눌렀을 때, bmpinfo 변경되야 함 
-	//취소 버튼 눌렀을 떄, bmpinfo 유지되야함. 
 
 	// TODO: Add your message handler code here
 }
@@ -245,6 +247,7 @@ void CFilterDlg::OnBnClickedEmbossFt()//1채널 필터링
 	DrawImage(myImgAfterChange, myBmpInfoAfterChange);
 }
 
+//컬러(채널3)를 그레이(채널1)로 변경 
 BOOL CFilterDlg::colorToGray()
 {
 	// TODO: Add your implementation code here.
@@ -325,6 +328,8 @@ void CFilterDlg::OnBnClickedCancel()
 //}
 
 
+//트랙바 조절에 따른 처리 기능 
+//각 필터의 강도 조절 
 void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	// TODO: Add your message handler code here and/or call default
@@ -363,6 +368,7 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
+//양방향필터 
 void CFilterDlg::OnBnClickedBilateralFt()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
@@ -416,11 +422,12 @@ void CFilterDlg::OnBnClickedPartblurFt()
 {
 	//// TODO: Add your control notification handler code here
 	partBlurModeOn = !partBlurModeOn;
+	
 }
 
 
 
-
+//버튼 컬러 구현 
 void CFilterDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
@@ -430,14 +437,14 @@ void CFilterDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 			if (lpDrawItemStruct->itemAction & 0x07) {
 				CDC* p_dc = CDC::FromHandle(lpDrawItemStruct->hDC);
 				if (lpDrawItemStruct->itemState && ODS_SELECTED && partBlurModeOn == false) {//버튼 클릭시 
-					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71));//버튼의 색상
-					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105), RGB(60, 75, 105));//버튼 외곽선
-					p_dc->SetTextColor(RGB(140, 147, 161));
-				}
-				else {//기본 상태  //&lpDrawItemStruct->rcItem 버튼의 크기
 					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105));//버튼의 색상
 					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71), RGB(42, 52, 71));//버튼 외곽선
 					p_dc->SetTextColor(RGB(171, 182, 199));
+				}
+				else {//기본 상태  //&lpDrawItemStruct->rcItem 버튼의 크기
+					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71));//버튼의 색상
+					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105), RGB(60, 75, 105));//버튼 외곽선
+					p_dc->SetTextColor(RGB(140, 147, 161));
 				}
 
 				p_dc->SetBkMode(TRANSPARENT);
@@ -449,14 +456,15 @@ void CFilterDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 			if (lpDrawItemStruct->itemAction & 0x07) {
 				CDC* p_dc = CDC::FromHandle(lpDrawItemStruct->hDC);
 				if (lpDrawItemStruct->itemState && ODS_SELECTED) {//버튼 클릭시 
-					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71));//버튼의 색상
-					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105), RGB(60, 75, 105));//버튼 외곽선
-					p_dc->SetTextColor(RGB(140, 147, 161));
-				}
-				else {//기본 상태  //&lpDrawItemStruct->rcItem 버튼의 크기
 					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105));//버튼의 색상
 					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71), RGB(42, 52, 71));//버튼 외곽선
 					p_dc->SetTextColor(RGB(171, 182, 199));
+				}
+				else {//기본 상태  //&lpDrawItemStruct->rcItem 버튼의 크기
+					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71));//버튼의 색상
+					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105), RGB(60, 75, 105));//버튼 외곽선
+					p_dc->SetTextColor(RGB(140, 147, 161)); 
+					
 				}
 
 				p_dc->SetBkMode(TRANSPARENT);
@@ -510,7 +518,7 @@ HBRUSH CFilterDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 	// TODO:  여기서 DC의 특성을 변경합니다.
 	int staticLb = pWnd->GetDlgCtrlID(); 
-	switch (staticLb) {
+	switch (staticLb) {//라벨의 텍스트 컬러를 변경합니다 
 		case IDC_FOGLB_FT: case IDC_SHARP_FT:
 		case IDC_NOISELB_FT: case IDC_REVERT_FT: 
 		case IDC_STATIC_POINTLOC:
@@ -531,12 +539,79 @@ void CFilterDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	//	2. IDC_STATIC_POINTLOC >> 현재 위치 출력
 	if (partBlurModeOn ==true) {//부분 블러 모드 버튼을 클릭했을 때 
 		blurLoc = point;//누른 지점을 저장한다
-		//CString pLoc(_T("포인터위치 x:%u y:%u",point.x,point.y));
-		//std::string filepath = "./rainResult/" + newName + ".bmp";
 		CString loc;
 		loc.Format(_T("point x: %u y: %u"), point.x, point.y);
 		SetDlgItemText(IDC_STATIC_POINTLOC, (LPCTSTR)loc);
+		partBlurProc(point);
+		DrawImage(myImgAfterChange, myBmpInfoAfterChange);
 	}
 
 	CDialogEx::OnLButtonDown(nFlags, point);
+}
+
+
+//블러 처리 : 컬러영상에 대한 / 흑백영상은 추후 구현 
+//평균값 마스크: 3x3 1/9 필터 
+void CFilterDlg::partBlurProc(CPoint point) {
+	//1. 마우스 포인터 위치값으로, 이미지상의 실제 위치를 계산한다 
+	// picLTRB에는 마지막 draw 했을 때의 rect 정보가 담김
+	CPoint locInImg;
+	locInImg.x = point.x - picLTRB.left;
+	locInImg.y = point.y - picLTRB.top;
+
+	CRect blurArea;//블러 영역 
+	int range = 50;
+	blurArea.left = locInImg.x - range; blurArea.top = locInImg.y - range;
+	blurArea.right = locInImg.x + range; blurArea.bottom = locInImg.y + range;
+	if (blurArea.left < 1) { blurArea.left = 1; }
+	if(blurArea.top <1) { blurArea.top = 1; }
+	if (blurArea.right > picLTRB.right- picLTRB.left) { 
+		blurArea.right = picLTRB.right - picLTRB.left; }
+	if (blurArea.bottom > picLTRB.bottom - picLTRB.top) {
+		blurArea.bottom = picLTRB.bottom - picLTRB.top;	}
+
+	Mat src;
+	if (myImgAfterChange.data == NULL) {//아무것도 저장되어 있지 않는 상태 
+		myImgAfterChange = myImg.clone();
+		src = myImg.clone();
+	}
+	else {
+		src = myImgAfterChange.clone(); 
+	}
+	for (int y = blurArea.top; y <= blurArea.bottom; y++) {
+		for (int x = blurArea.left; x <= blurArea.right; x++) {
+			if(x-1<1||y-1<1||x+1>blurArea.right||y+1>blurArea.bottom){
+				continue;
+			}
+			Vec3b& p1 = src.at<Vec3b>(y - 1, x - 1);
+			Vec3b& p2 = src.at<Vec3b>(y - 1, x);
+			Vec3b& p3 = src.at<Vec3b>(y - 1, x + 1);
+			Vec3b& p4 = src.at<Vec3b>(y, x - 1);
+			Vec3b& p5 = src.at<Vec3b>(y, x);
+			Vec3b& p6 = src.at<Vec3b>(y, x + 1);
+			Vec3b& p7 = src.at<Vec3b>(y + 1, x - 1);
+			Vec3b& p8 = src.at<Vec3b>(y + 1, x);
+			Vec3b& p9 = src.at<Vec3b>(y+1, x+1);
+
+			Vec3b& dst = myImgAfterChange.at<Vec3b>(y, x);
+			//dst[0] = 0;
+			//dst[1] = 0;
+			//dst[2] = 0;
+
+			//b
+			dst[0] = int(cvRound((p1[0] + p2[0] + p3[0] + p4[0] +
+				p5[0] + p6[0] + p7[0] + p8[0] + p9[0])/9));
+			int b = dst[0];
+			//g
+			dst[1] = int(cvRound((p1[1] + p2[1] + p3[1] + p4[1] +
+				p5[1] + p6[1] + p7[1] + p8[1] + p9[1])/9));
+			int g = dst[1];
+			//r
+			dst[2] = int(cvRound((p1[2] + p2[2] + p3[2] + p4[2] +
+				p5[2] + p6[2] + p7[2] + p8[2] + p9[2])/ 9));
+			int r = dst[2];
+		}
+	}
+	CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
+	
 }

@@ -4,7 +4,8 @@
 #include <string>
 using namespace cv;
 
-
+#define	MEANBLUR	1
+#define	BLACKBLUR 	2
 
 // CFilterDlg 대화 상자
 
@@ -28,56 +29,44 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	virtual BOOL OnInitDialog();
+	virtual BOOL OnInitDialog();//다이얼로그 띄우기 직전 아이템 속성 업데이트 
 	Mat myImg;// 이미지 정보를 담고 있는 객체.
 	BITMAPINFO* myBitmapInfo; // Bitmap 정보를 담고 있는 구조체.
-//	virtual INT_PTR DoModal();
-//	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
-	afx_msg void OnBnClickedOk();
+	afx_msg void OnBnClickedOk();//부모창에 변환된 이미지 전달
 	CStatic picCtrl_FT;
-	void DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo);
-//	afx_msg void OnBnClickedImgloadFt();
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
-	afx_msg void OnDestroy();
+	void DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo);//이미지 그리기
+	afx_msg void OnTimer(UINT_PTR nIDEvent);//타이머
+	afx_msg void OnDestroy();//윈도우가 강제 종료될 시, 데이터를 저장함
 	
 	CButton embossFT;// 진흙효과를 내는 엠보싱 필터 구현버튼
-	afx_msg void OnBnClickedEmbossFt();
+	afx_msg void OnBnClickedEmbossFt();//진흙효과내는 엠보싱 필터 기능함수 
 	Mat myImgAfterChange; 
-	BOOL colorToGray();
+	BOOL colorToGray();//컬러영상 >> 그레이 영상으로 변환 
 	void CreateBitmapInfo(BITMAPINFO** newInfo, int w, int h, int bpp);
 	BITMAPINFO* myBmpInfoAfterChange;
-	afx_msg void OnBnClickedRevertFt();
-	afx_msg void OnBnClickedCancel();
+	afx_msg void OnBnClickedRevertFt();//원본 사진으로 되돌리기 기능
+	afx_msg void OnBnClickedCancel();// 변환된 사진 저장하지 않고 창 종료 
 	CStatic fogLB_FT;//안개필터 라벨 변수
 	CSliderCtrl fogslider_FT;//안개필터 강도 슬라이더
-//	afx_msg void OnNMCustomdrawSliderFogFt(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	// sharpening slider
-	CSliderCtrl sharpSliderFT;
-	// sharpening label
-	CStatic sharpLB_FT;
-	// 양방향필터 버튼 변수
-	CButton bilateralBtn_FT;
-	afx_msg void OnBnClickedBilateralFt();
-	// 노이즈필터
-	CSliderCtrl noiseFT;
-	// 노이즈 라벨
-	CStatic noiseLB_FT;
-	CPoint prev_mousePos;
-	CPoint circlePos;
-	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-//	afx_msg void OnPaint();
-	// 마우스로 클릭시 해당 주변 블러처리
-	CButton partBlutBtn;
+	CSliderCtrl sharpSliderFT;// sharpening slider
+	CStatic sharpLB_FT;// sharpening label
+	CButton bilateralBtn_FT;// 양방향필터 버튼 변수
+	afx_msg void OnBnClickedBilateralFt();//양방향필터 메소드 
+	CSliderCtrl noiseFT;// 노이즈필터 슬라이더
+	CStatic noiseLB_FT;// 노이즈 라벨
+	CPoint prev_mousePos;//이전 마우스 위치 
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);	
+	CButton partBlutBtn;//마우스로 클릭시 해당 주변 블러처리
 	afx_msg void OnBnClickedPartblurFt();
 	BOOL partBlurModeOn;//부분블러 모드 ON 
-	CPoint blurLoc;
-//	afx_msg void OnPaint();
+	CPoint blurLoc;//블러적용할 left, top
+	CRect picLTRB;//윈도우 상에서 현재 사진의 위치 
 	afx_msg void OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	// 부분블러모드시 마우스 클릭한 곳 위치 출력
-	CStatic pointLocFT;
+	CStatic pointLocFT;// 부분블러모드시 마우스 클릭한 곳 위치 출력
+	void partBlurProc(CPoint point);//부분 블러 처리 메소드 
 };
 
 //백업용 코드 저장소 커밋 확인 
