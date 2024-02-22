@@ -72,6 +72,7 @@ void CMFCApplication1Dlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_AFFINE_BTN, cropAffinBtn);
 	DDX_Control(pDX, IDC_BUTY_BTN, ButyBtn);
 	DDX_Control(pDX, IDC_BRIGHTNESSCTRL_BTN, brightnessBtn);
+	DDX_Control(pDX, IDC_VIDEO_BTN, videoBtn);
 }
 
 BEGIN_MESSAGE_MAP(CMFCApplication1Dlg, CDialogEx)
@@ -87,8 +88,11 @@ BEGIN_MESSAGE_MAP(CMFCApplication1Dlg, CDialogEx)
 	ON_BN_CLICKED(IDC_AFFINE_BTN, &CMFCApplication1Dlg::OnBnClickedAffineBtn)
 	ON_BN_CLICKED(IDC_BUTY_BTN, &CMFCApplication1Dlg::OnBnClickedButyBtn)
 	ON_BN_CLICKED(IDC_BRIGHTNESSCTRL_BTN, &CMFCApplication1Dlg::OnBnClickedBrightnessctrlBtn)
+	ON_BN_CLICKED(IDC_VIDEO_BTN, &CMFCApplication1Dlg::OnBnClickedVideoBtn)
 	ON_BN_CLICKED(IDOK, &CMFCApplication1Dlg::OnBnClickedOk)
 	ON_WM_DRAWITEM()
+	ON_WM_DESTROY()
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 
@@ -124,6 +128,18 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+	capture = new VideoCapture(0);
+	if (!capture->isOpened())
+	{
+		MessageBox(_T("웹캠을 열수 없습니다. \n"));
+	}
+
+	//웹캠 크기를  320x240으로 지정    
+	capture->set(CAP_PROP_FRAME_WIDTH, 320);
+	capture->set(CAP_PROP_FRAME_HEIGHT, 240);
+
+	SetTimer(1000, 30, NULL);
+	
 	//현재 window 크기 출력
 	CRect m_rectCurHist;
 	this->GetWindowRect(m_rectCurHist);// right:창의 너비 bottm: 창의 높이 
@@ -137,6 +153,7 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	GetDlgItem(IDC_AFFINE_BTN)->MoveWindow(btnlocLeft, 290, btnWidth, 60);
 	GetDlgItem(IDC_BUTY_BTN)->MoveWindow(btnlocLeft, 370, btnWidth, 60);
 	GetDlgItem(IDC_BRIGHTNESSCTRL_BTN)->MoveWindow(btnlocLeft, 450, btnWidth, 60);
+	GetDlgItem(IDC_VIDEO_BTN)->MoveWindow(btnlocLeft, 530, btnWidth, 60);
 	GetDlgItem(IDOK)->MoveWindow(btnlocLeft, m_rectCurHist.bottom -280, btnWidth, 60);
 	GetDlgItem(IDCANCEL)->MoveWindow(btnlocLeft, m_rectCurHist.bottom -200, btnWidth, 60);
 
@@ -149,6 +166,7 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	GetDlgItem(IDC_AFFINE_BTN)->SetFont(&font);
 	GetDlgItem(IDC_BUTY_BTN)->SetFont(&font);
 	GetDlgItem(IDC_BRIGHTNESSCTRL_BTN)->SetFont(&font);
+	GetDlgItem(IDC_VIDEO_BTN)->SetFont(&font);
 	GetDlgItem(IDOK)->SetFont(&font);
 	GetDlgItem(IDCANCEL)->SetFont(&font);
 	font.Detach();//font 종료 꼭 해주기 메모리 할당 해제 
@@ -211,9 +229,6 @@ HCURSOR CMFCApplication1Dlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }
-
-
-
 
 
 //BITMAP 정보 구조체 데이터 생성 
@@ -281,8 +296,6 @@ void CMFCApplication1Dlg::DrawImage() {
 		int y = cvRound((wy - m_matImage.rows) / 2);
 		GetDlgItem(IDC_PC_VIEW)->MoveWindow(x, y, m_matImage.cols, m_matImage.rows);
 	}
-
-
 	
 	GetDlgItem(IDC_PC_VIEW)->GetClientRect(&rect);
 
@@ -533,4 +546,135 @@ void CMFCApplication1Dlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStru
 	}
 
 //	CDialogEx::OnDrawItem(nIDCtl, lpDrawItemStruct);
+}
+
+void CMFCApplication1Dlg::OnBnClickedVideoBtn()
+{
+	
+}
+
+void CMFCApplication1Dlg::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+
+	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
+}
+
+
+void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+
+    //mat_frame가 입력 이미지입니다.
+	capture->read(mat_frame);
+
+	//이곳에 OpenCV 함수들을 적용합니다.
+	//여기에서는 그레이스케일 이미지로 변환합니다.
+	cvtColor(mat_frame, mat_frame, COLOR_BGR2GRAY);
+
+	//화면에 보여주기 위한 처리입니다.
+	int bpp = 8 * mat_frame.elemSize();
+	assert((bpp == 8 || bpp == 24 || bpp == 32));
+
+	int padding = 0;
+	//32 bit image is always DWORD aligned because each pixel requires 4 bytes
+	if (bpp < 32)
+		padding = 4 - (mat_frame.cols % 4);
+
+	if (padding == 4)
+		padding = 0;
+
+	int border = 0;
+	//32 bit image is always DWORD aligned because each pixel requires 4 bytes
+	if (bpp < 32)
+	{
+		border = 4 - (mat_frame.cols % 4);
+	}
+
+	Mat mat_temp;
+	if (border > 0 || mat_frame.isContinuous() == false)
+	{
+		// Adding needed columns on the right (max 3 px)
+		cv::copyMakeBorder(mat_frame, mat_temp, 0, 0, 0, border, cv::BORDER_CONSTANT, 0);
+	}
+	else
+	{
+		mat_temp = mat_frame;
+	}
+
+	RECT r;
+	//m_picture.GetClientRect(&r);
+	r.right = 200;
+	r.bottom = 200;
+	cv::Size winSize(r.right, r.bottom);
+
+	cimage_mfc.Create(winSize.width, winSize.height, 24);
+
+	BITMAPINFO* bitInfo = (BITMAPINFO*)malloc(sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD));
+	bitInfo->bmiHeader.biBitCount = bpp;
+	bitInfo->bmiHeader.biWidth = mat_temp.cols;
+	bitInfo->bmiHeader.biHeight = -mat_temp.rows;
+	bitInfo->bmiHeader.biPlanes = 1;
+	bitInfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	bitInfo->bmiHeader.biCompression = BI_RGB;
+	bitInfo->bmiHeader.biClrImportant = 0;
+	bitInfo->bmiHeader.biClrUsed = 0;
+	bitInfo->bmiHeader.biSizeImage = 0;
+	bitInfo->bmiHeader.biXPelsPerMeter = 0;
+	bitInfo->bmiHeader.biYPelsPerMeter = 0;
+
+	//그레이스케일 인경우 팔레트가 필요
+	if (bpp == 8)
+	{
+		RGBQUAD* palette = bitInfo->bmiColors;
+		for (int i = 0; i < 256; i++)
+		{
+			palette[i].rgbBlue = palette[i].rgbGreen = palette[i].rgbRed = (BYTE)i;
+			palette[i].rgbReserved = 0;
+		}
+	}
+
+	// Image is bigger or smaller than into destination rectangle
+	// we use stretch in full rect
+
+	if (mat_temp.cols == winSize.width && mat_temp.rows == winSize.height)
+	{
+		// source and destination have same size
+		// transfer memory block
+		// NOTE: the padding border will be shown here. Anyway it will be max 3px width
+
+		SetDIBitsToDevice(cimage_mfc.GetDC(),
+			//destination rectangle
+			0, 0, winSize.width, winSize.height,
+			0, 0, 0, mat_temp.rows,
+			mat_temp.data, bitInfo, DIB_RGB_COLORS);
+	}
+	else
+	{
+		// destination rectangle
+		int destx = 0, desty = 0;
+		int destw = winSize.width;
+		int desth = winSize.height;
+
+		// rectangle defined on source bitmap
+		// using imgWidth instead of mat_temp.cols will ignore the padding border
+		int imgx = 0, imgy = 0;
+		int imgWidth = mat_temp.cols - border;
+		int imgHeight = mat_temp.rows;
+
+		StretchDIBits(cimage_mfc.GetDC(),
+			destx, desty, destw, desth,
+			imgx, imgy, imgWidth, imgHeight,
+			mat_temp.data, bitInfo, DIB_RGB_COLORS, SRCCOPY);
+	}
+
+	HDC dc = ::GetDC(m_picture.m_hWnd);
+	cimage_mfc.BitBlt(dc, 0, 0);
+
+	::ReleaseDC(m_picture.m_hWnd, dc);
+
+	cimage_mfc.ReleaseDC();
+	cimage_mfc.Destroy();
+
+	CDialogEx::OnTimer(nIDEvent);
 }
