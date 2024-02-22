@@ -42,6 +42,7 @@ void CFilterDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_NOISELB_FT, noiseLB_FT);
 	DDX_Control(pDX, IDC_PARTBLUR_FT, partBlutBtn);
 	DDX_Control(pDX, IDC_STATIC_POINTLOC, pointLocFT);
+	DDX_Control(pDX, IDC_SLIDER_PARTBLUR, partBlurSlider);
 }
 
 
@@ -64,6 +65,7 @@ ON_BN_CLICKED(IDC_PARTBLUR_FT, &CFilterDlg::OnBnClickedPartblurFt)
 ON_WM_DRAWITEM()
 ON_WM_CTLCOLOR()
 ON_WM_LBUTTONDOWN()
+//ON_STN_CLICKED(IDC_STATIC_POINTLOC, &CFilterDlg::OnStnClickedStaticPointloc)
 END_MESSAGE_MAP()
 
 
@@ -82,23 +84,26 @@ BOOL CFilterDlg::OnInitDialog()
 	fogslider_FT.MoveWindow(1000, 125, 200, 20);
 	fogslider_FT.SetRange(0, 5);
 	fogslider_FT.SetTicFreq(1);
-	fogslider_FT.SetTic(1);
+	fogslider_FT.SetTic(5);
 	fogslider_FT.SetPos(0);
 	sharpLB_FT.MoveWindow(1000, 165, 200, 20);
 	sharpSliderFT.MoveWindow(1000, 185, 200, 20); 
 	sharpSliderFT.SetRange(0, 5);
 	sharpSliderFT.SetTicFreq(1);
-	sharpSliderFT.SetTic(1);
 	sharpSliderFT.SetPos(0);
 	bilateralBtn_FT.MoveWindow(1000, 225, 200, 45);
 	noiseLB_FT.MoveWindow(1000, 285, 200, 20); 
 	noiseFT.MoveWindow(1000, 305, 200, 20);
 	noiseFT.SetRange(0,100);
 	noiseFT.SetTicFreq(10);
-	noiseFT.SetTic(1);
 	noiseFT.SetPos(0);
 	partBlutBtn.MoveWindow(1000, 335, 200, 45);
-	pointLocFT.MoveWindow(1000, 390, 200, 45);
+	pointLocFT.MoveWindow(1000, 390, 200, 20);
+	partBlurSlider.MoveWindow(1000, 410, 200, 20);
+	partBlurSlider.SetRange(1, 5);
+	partBlurSlider.SetTicFreq(1);
+	partBlurSlider.SetPos(1);
+	blurRangeHalfWid = 1;
 
 	GetDlgItem(IDCANCEL)->MoveWindow(1000,720-100, 200, 45);	
 	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);
@@ -364,6 +369,9 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		myImgAfterChange = dst;
 		DrawImage(myImgAfterChange, myBmpInfoAfterChange);
 	}
+	else if (*pScrollBar == partBlurSlider) {
+		blurRangeHalfWid = partBlurSlider.GetPos();
+	}
 
 	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
@@ -555,12 +563,12 @@ void CFilterDlg::OnLButtonDown(UINT nFlags, CPoint point)
 void CFilterDlg::partBlurProc(CPoint point) {
 	//1. 마우스 포인터 위치값으로, 이미지상의 실제 위치를 계산한다 
 	// picLTRB에는 마지막 draw 했을 때의 rect 정보가 담김
-	CPoint locInImg;
-	locInImg.x = point.x - picLTRB.left;
+	CPoint locInImg;//본인 창에서의 이미지 위치 x= left, y =top 
+	locInImg.x = point.x - picLTRB.left;// 
 	locInImg.y = point.y - picLTRB.top;
 
-	CRect blurArea;//블러 영역 
-	int range = 50;
+	CRect blurArea;//이미지 공간 안에서의 블러 영역 
+	int range = blurRangeHalfWid*50;
 	blurArea.left = locInImg.x - range; blurArea.top = locInImg.y - range;
 	blurArea.right = locInImg.x + range; blurArea.bottom = locInImg.y + range;
 	if (blurArea.left < 1) { blurArea.left = 1; }
@@ -615,3 +623,9 @@ void CFilterDlg::partBlurProc(CPoint point) {
 	CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
 	
 }
+
+
+//void CFilterDlg::OnStnClickedStaticPointloc()
+//{
+//	// TODO: Add your control notification handler code here
+//}

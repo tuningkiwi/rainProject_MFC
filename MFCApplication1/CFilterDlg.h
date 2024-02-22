@@ -67,6 +67,10 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	CStatic pointLocFT;// 부분블러모드시 마우스 클릭한 곳 위치 출력
 	void partBlurProc(CPoint point);//부분 블러 처리 메소드 
+	// 부분블러 적용 범위 크기 조절
+// 부분블러 적용 범위 크기 조절
+	CSliderCtrl partBlurSlider;
+	int blurRangeHalfWid;
 };
 
 //백업용 코드 저장소 커밋 확인 

@@ -1,6 +1,6 @@
 ﻿//{{NO_DEPENDENCIES}}
-// Microsoft Visual C++에서 생성한 포함 파일입니다.
-// MFCApplication1.rc에서 사용되고 있습니다.
+// Microsoft Visual C++ generated include file.
+// Used by MFCApplication1.rc
 //
 #define IDM_ABOUTBOX                    0x0010
 #define IDD_ABOUTBOX                    100
@@ -21,7 +21,6 @@
 #define IDC_FILTER_BTN                  1000
 #define IDC_BILATERAL_FT                1000
 #define IDC_REVERSE_IT                  1000
-
 #define IDC_BUTTON2                     1001
 #define IDC_PC_VIEW                     1002
 #define IDC_COLOR_BTN                   1003
@@ -51,7 +50,6 @@
 #define IDC_BUTTON_RR                   1018
 #define IDC_BUTTON_LR                   1019
 #define IDC_PARTBLUR_FT                 1020
-
 #define IDC_STATIC_delete               1021
 #define IDC_STATIC_POINTLOC             1022
 #define IDC_EDIT1                       1023
@@ -65,6 +63,7 @@
 #define IDC_SLIDER2                     1031
 #define IDC_SIZE_TEXT                   1032
 #define IDC_DETECT                      1033
+#define IDC_SLIDER_PARTBLUR             1034
 
 // Next default values for new objects
 // 
@@ -72,7 +71,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        137
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1034
+#define _APS_NEXT_CONTROL_VALUE         1035
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
