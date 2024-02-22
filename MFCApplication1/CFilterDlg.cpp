@@ -41,6 +41,7 @@ void CFilterDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLIDER_NOISE_FT, noiseFT);
 	DDX_Control(pDX, IDC_NOISELB_FT, noiseLB_FT);
 	DDX_Control(pDX, IDC_PARTBLUR_FT, partBlutBtn);
+	DDX_Control(pDX, IDC_STATIC_POINTLOC, pointLocFT);
 }
 
 
@@ -62,6 +63,7 @@ ON_BN_CLICKED(IDC_PARTBLUR_FT, &CFilterDlg::OnBnClickedPartblurFt)
 //ON_WM_PAINT()
 ON_WM_DRAWITEM()
 ON_WM_CTLCOLOR()
+ON_WM_LBUTTONDOWN()
 END_MESSAGE_MAP()
 
 
@@ -96,6 +98,7 @@ BOOL CFilterDlg::OnInitDialog()
 	noiseFT.SetTic(1);
 	noiseFT.SetPos(0);
 	partBlutBtn.MoveWindow(1000, 335, 200, 45);
+	pointLocFT.MoveWindow(1000, 390, 200, 45);
 
 	GetDlgItem(IDCANCEL)->MoveWindow(1000,720-100, 200, 45);	
 	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);
@@ -412,9 +415,14 @@ void CFilterDlg::OnMouseMove(UINT nFlags, CPoint point)
 void CFilterDlg::OnBnClickedPartblurFt()
 {
 	//// TODO: Add your control notification handler code here
-	partBlurModeOn = true;
-	//CPaintDC mouseCircleDC(this); // device context for painting
-	//mouseCircleDC.Ellipse(circlePos.x - 15, circlePos.y - 15, circlePos.x + 15, circlePos.y + 15);
+	if (partBlurModeOn) { //ON >> OFF 
+		partBlurModeOn = false;
+
+	}
+	else {// OFF >> ON 
+		partBlurModeOn = true;
+	}
+
 }
 
 
@@ -457,8 +465,18 @@ void CFilterDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 		break;
 	}
 	case IDC_PARTBLUR_FT: {
-		p_dc->DrawText(L"부분블러", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-		break;
+		if (partBlurModeOn) {
+			p_dc->DrawText(L"부분블러ON", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+			partBlurModeOn = false;
+			break;
+		}
+		else {
+			p_dc->DrawText(L"부분블러OFF", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+			partBlurModeOn = true;
+			break;
+		}
+
+		
 	}
 	case IDC_REVERT_FT: {
 		p_dc->DrawText(L"되돌리기", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
@@ -487,9 +505,31 @@ HBRUSH CFilterDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	switch (staticLb) {
 		case IDC_FOGLB_FT: case IDC_SHARP_FT:
 		case IDC_NOISELB_FT: case IDC_REVERT_FT: 
+		case IDC_STATIC_POINTLOC:
 		pDC->SetTextColor(RGB(171, 182, 199));
 	}
 
 	// TODO:  기본값이 적당하지 않으면 다른 브러시를 반환합니다.
 	return hbr;
+}
+
+
+void CFilterDlg::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+
+	//1. IDC_STATIC_POINTLOC  위치 조정.
+	//	1. LBUTTON DOWN >> CPOINT  값을 가져옴
+	//	2. IDC_STATIC_POINTLOC >> 현재 위치 출력
+	if (partBlurModeOn) {//부분 블러 모드 버튼을 클릭했을 때 
+		blurLoc = point;//누른 지점을 저장한다
+		//CString pLoc(_T("포인터위치 x:%u y:%u",point.x,point.y));
+		//std::string filepath = "./rainResult/" + newName + ".bmp";
+		CString loc;
+		loc.Format(_T("point x: %u y: %u"), point.x, point.y);
+		SetDlgItemText(IDC_STATIC_POINTLOC, (LPCTSTR)loc);
+		partBlurModeOn = false; 
+	}
+
+	CDialogEx::OnLButtonDown(nFlags, point);
 }

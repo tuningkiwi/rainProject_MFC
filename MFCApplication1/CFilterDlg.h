@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "afxdialogex.h"
 #include "opencv2/opencv.hpp"
+#include <string>
 using namespace cv;
 
 
@@ -70,9 +71,13 @@ public:
 	CButton partBlutBtn;
 	afx_msg void OnBnClickedPartblurFt();
 	BOOL partBlurModeOn;//부분블러 모드 ON 
+	CPoint blurLoc;
 //	afx_msg void OnPaint();
 	afx_msg void OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	// 부분블러모드시 마우스 클릭한 곳 위치 출력
+	CStatic pointLocFT;
 };
 
 //백업용 코드 저장소 커밋 확인 
