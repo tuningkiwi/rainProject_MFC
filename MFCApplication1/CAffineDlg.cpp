@@ -226,6 +226,7 @@ void CAffineDlg::OnBnClickedButtonRr()
 	// 이미지를 회전
 	cv::rotate(ChangeImg, currentRotatedImg, ROTATE_90_CLOCKWISE);
 
+
 	// 화면에 회전된 이미지 표시
 	ReadImage(currentRotatedImg, myBitmapInfo);
 	resultImg = currentRotatedImg.clone();
