@@ -43,6 +43,7 @@ BEGIN_MESSAGE_MAP(CAffineDlg, CDialogEx)
 	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDOK, &CAffineDlg::OnBnClickedOk)
 	ON_BN_CLICKED(IDCANCEL, &CAffineDlg::OnBnClickedCancel)
+	ON_BN_CLICKED(IDC_REVERSE_IT, &CAffineDlg::OnBnClickedReverseIt)
 
 END_MESSAGE_MAP()
 
@@ -188,4 +189,12 @@ void CAffineDlg::OnBnClickedCancel()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	CDialogEx::OnCancel();
+}
+
+
+void CAffineDlg::OnBnClickedReverseIt()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	ReadImage(myImg, myBitmapInfo);
+	MessageBox(L"원본 이미지로 돌아갑니다", L"알림", MB_OK);
 }
