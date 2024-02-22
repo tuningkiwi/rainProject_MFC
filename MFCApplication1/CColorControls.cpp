@@ -34,7 +34,7 @@ void CColorControls::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_IMAGE_CONTROL, m_imageControl);
-	DDX_Control(pDX, IDC_LUMINANCE_BTN, m_luminance_btn);
+	//  DDX_Control(pDX, IDC_LUMINANCE_BTN, m_luminance_btn);
 }
 
 
@@ -48,7 +48,7 @@ BEGIN_MESSAGE_MAP(CColorControls, CDialogEx)
 	ON_BN_CLICKED(IDC_BACK, &CColorControls::OnBnClickedBack)
 	ON_BN_CLICKED(IDC_LUMINANCE_BTN, &CColorControls::OnBnClickedLuminanceBtn)
 
-	ON_WM_PAINT()
+//	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 END_MESSAGE_MAP()
 
@@ -66,6 +66,8 @@ BOOL CColorControls::OnInitDialog()
 	GetDlgItem(IDCANCEL)->MoveWindow(1000, 720 - 100, 200, 45);
 	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);
 	GetDlgItem(IDC_BACK)->MoveWindow(1000, 720 - 220, 200, 45);
+	GetDlgItem(IDC_LUMINANCE_BTN)->MoveWindow(1000, 50, 200, 45);
+
 
 	//DrawImage(); dialog 호출시 oninitDiaog()뒤에 실행되는 메세지들에 의하여, 사진이 출력되지 않음 
 	SetTimer(1, 80, NULL);//100ms  사진 불러오기 위한 타이머 
@@ -146,7 +148,7 @@ void CColorControls::OnTimer(UINT_PTR nIDEvent)
 
 	}
 	KillTimer(1);//처음 필터창을 켰을때, 사진을 띄우기 위한 용도라 바로 kill 
-	CDialogEx::OnTimer(nIDEvent);
+	//CDialogEx::OnTimer(nIDEvent);
 }
 
 void CColorControls::CreateBitmapInfo(BITMAPINFO** btmInfo, int w, int h, int bpp) {
@@ -209,42 +211,47 @@ void CColorControls::OnBnClickedBack()
 void CColorControls::OnBnClickedLuminanceBtn()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	CClientDC dc(this);
-	typedef struct UserPaletteData
-	{
-		LOGPALETTE log_palette;
-		PALETTEENTRY entry[256 - 1]; //log_palette에서 초과되는 색상 값을 저장
-
-	}UPD;
-
-	UPD upd;
-	upd.log_palette.palVersion = 0x300; //팔레트 버전
-	upd.log_palette.palNumEntries = (WORD)256;//팔레트 수
-
-	//dc에 연결된 256개의 색상을 가져온다
-	if (!::GetSystemPaletteEntries(dc, 0, 256, upd.log_palette.palPalEntry)) {
-		memset(upd.log_palette.palPalEntry, 0, sizeof(PALETTEENTRY) * 256);
+	CColorDialog dlg(RGB(255, 0, 0), CC_FULLOPEN, this);
+	
+	if (dlg.DoModal() == IDOK) {
 	}
+	 
+	//CClientDC dc(this);
+	//typedef struct UserPaletteData
+	//{
+	//	LOGPALETTE log_palette;
+	//	PALETTEENTRY entry[256 - 1]; //log_palette에서 초과되는 색상 값을 저장
 
-	//가져온 색상으로 팔레트를 생성
-	m_stock_palette.CreatePalette(NULL);
+	//}UPD;
 
-	//m_colorPicker.SetPalette(palette);
+	//UPD upd;
+	//upd.log_palette.palVersion = 0x300; //팔레트 버전
+	//upd.log_palette.palNumEntries = (WORD)256;//팔레트 수
 
-	m_luminance_btn.SetType(CMFCColorPickerCtrl::LUMINANCE);
-	m_luminance_btn.SetPalette(&m_stock_palette);
-	m_luminance_btn.SetColor(RGB(0, 255, 0));
+	////dc에 연결된 256개의 색상을 가져온다
+	//if (!::GetSystemPaletteEntries(dc, 0, 256, upd.log_palette.palPalEntry)) {
+	//	memset(upd.log_palette.palPalEntry, 0, sizeof(PALETTEENTRY) * 256);
+	//}
 
-	COLORREF color = m_luminance_btn.GetColor(); 
+	////가져온 색상으로 팔레트를 생성
+	//m_stock_palette.CreatePalette(NULL);
+
+	////m_colorPicker.SetPalette(palette);
+
+	//m_luminance_btn.SetType(CMFCColorPickerCtrl::LUMINANCE);
+	//m_luminance_btn.SetPalette(&m_stock_palette);
+	//m_luminance_btn.SetColor(RGB(0, 255, 0));
+
+	//COLORREF color = m_luminance_btn.GetColor(); 
 }
 
 
-void CColorControls::OnPaint()
-{
-	CPaintDC dc(this); // device context for painting
+//void CColorControls::OnPaint()
+//{
+	//CPaintDC dc(this); // device context for painting
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 	// 그리기 메시지에 대해서는 CDialogEx::OnPaint()을(를) 호출하지 마십시오.
-}
+//}
 
 
 HCURSOR CColorControls::OnQueryDragIcon()

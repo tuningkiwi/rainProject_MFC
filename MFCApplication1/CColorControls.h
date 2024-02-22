@@ -46,7 +46,7 @@ public:
 	afx_msg void OnBnClickedBack();
 
 
-	CMFCColorPickerCtrl m_luminance_btn;
+//	CMFCColorPickerCtrl m_luminance_btn;
 	afx_msg void OnBnClickedLuminanceBtn();
 	enum COLORTYPE { CURRENT, LUMINANCE, PICKER, HEX, HEX_GREYSCALE }; //색상 비교, 휘도 선택, 펼쳐진 형태, 육각형 색상표
 	
@@ -55,6 +55,6 @@ public:
 	//CMFCColorPickerCtrl m_colorPicker;
 	//CPalette palette;
 
-	afx_msg void OnPaint();
+//	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 };
