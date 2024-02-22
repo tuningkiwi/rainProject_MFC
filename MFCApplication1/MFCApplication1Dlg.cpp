@@ -19,7 +19,6 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-#include "CButyDlg.h"
 
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
@@ -214,22 +213,7 @@ HCURSOR CMFCApplication1Dlg::OnQueryDragIcon()
 }
 
 
-//
-//void CMFCApplication1Dlg::OnBnClickedButton1()
-//{
-//	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-//	int nWidth = 1080; // 가로폭
-//	int nHeight = 720; // 세로폭	
-//	int nBpp = 8; // 픽셀당 비트수, 8: GRAY 24: COLOR 
-//
-//	// 이미지 생성
-//	m_image.Create(nWidth, nHeight, nBpp);
-//
-//	// 이미지 그리기
-//	CClientDC dc(GetDlgItem(IDC_PC_VIEW)); // 클라이언트 형태의 변수를 dc로 만들고 초기화를 this로 하겠다. -> this는 현재 가지고 있는 다이얼로그를 의미함
-//	m_image.Draw(dc, 0, 0); // 그리기 (어디에 그릴지, 위치를 x, y 축을 설정해 준다.)
-//
-//}
+
 
 
 //BITMAP 정보 구조체 데이터 생성 
@@ -298,15 +282,7 @@ void CMFCApplication1Dlg::DrawImage() {
 		GetDlgItem(IDC_PC_VIEW)->MoveWindow(x, y, m_matImage.cols, m_matImage.rows);
 	}
 
-	
-	//GetClientRect() 
-	//창 클라이언트 영역의 좌표를 검색합니다. 
-	// 클라이언트 좌표는 클라이언트 영역의 왼쪽 위와 
-	// 오른쪽 아래 모서리를 지정합니다. 
-	// 클라이언트 좌표는 창 클라이언트 영역의 왼쪽 위 모서리를 
-	// 기준으로 하기 때문에 왼쪽 위 모서리의 좌표는 (0,0)입니다.
-	//함수가 성공하면 반환 값이 0이 아닙니다.
-	//GetDlgItem(IDC_PC_VIEW)->GetClientRect(&rect);
+
 	
 	GetDlgItem(IDC_PC_VIEW)->GetClientRect(&rect);
 
