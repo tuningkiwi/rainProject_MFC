@@ -38,7 +38,6 @@
 #define IDC_PC_FT                       1010
 #define IDC_REVERT_FT                   1011
 #define IDC_NOISELB_FT                  1012
-#define IDC_SLIDER2                     1013
 #define IDC_SLIDER_NOISE_FT             1013
 #define IDC_BACK                        1014
 #define IDC_L                           1016
