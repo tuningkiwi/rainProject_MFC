@@ -89,8 +89,9 @@ BOOL CColorControls::OnInitDialog()
 	m_mfcColorBtn.SetColor(RGB(255, 255, 255));//색 편집창 기본값
 	m_brushColor.CreateSolidBrush(m_mfcColorBtn.GetColor());
 
-	m_slider_h.SetRange(0, 100);
-
+	m_slider_h.SetRange(0, 100);	
+	m_slider_h.SetPos(50);
+		
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
@@ -333,22 +334,22 @@ void CColorControls::OnNMCustomdrawSliderH(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
 	CSliderCtrl* slider = (CSliderCtrl*)GetDlgItem(IDC_SLIDER_H);
 	CStatic* Edit = (CStatic*)GetDlgItem(IDC_SLIDER_EDIT_H);
-	slider->SetRange(0, 100);
 	int pos = slider->GetPos();
 	CString str;
 	str.Format(L"%d", pos);
 	Edit->SetWindowTextW(str);
 	
 	// OpenCV 이미지의 각 채널을 가져옵니다.
-	vector<Mat> bgr_planes;
-	split(myImg, bgr_planes);
+	//vector<Mat> bgr_planes;
+	//split(myImg, bgr_planes);
 
-	bgr_planes[0] = bgr_planes[0] + pos; // Blue 채널에 pos 값을 더합니다.
+	//bgr_planes[0] = bgr_planes[0] + pos; // Blue 채널에 pos 값을 더합니다.
 
 	// 변경된 채널을 다시 합쳐서 새로운 이미지를 생성합니다.
-	merge(bgr_planes, myImgAfterChange);
+	//merge(bgr_planes, myImgAfterChange);
 
 	// 변경된 이미지를 화면에 표시
 	//DrawImage(myImgAfterChange, myBmpInfoAfterChange);

@@ -53,6 +53,7 @@ public:
 	CMFCColorButton m_mfcColorBtn;
 	CStatic m_staticColor;
 	CBrush m_brushColor;
+	CEdit m_color_edit;
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnBnClickedMfccolorbuttonColor();
 
@@ -60,5 +61,5 @@ public:
 	CSliderCtrl m_slider_h;
 	afx_msg void OnNMCustomdrawSliderH(NMHDR* pNMHDR, LRESULT* pResult);
 	CEdit m_slider_edit_h;
-	CEdit m_color_edit;
+	
 };
