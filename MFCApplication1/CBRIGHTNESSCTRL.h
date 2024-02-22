@@ -10,7 +10,7 @@ class CBRIGHTNESSCTRL : public CDialogEx
 	DECLARE_DYNAMIC(CBRIGHTNESSCTRL)
 
 public:
-	CBRIGHTNESSCTRL();   // 표준 생성자입니다.
+	CBRIGHTNESSCTRL();   // 기본 생성자
 	CBRIGHTNESSCTRL(Mat Img, BITMAPINFO* bitmapInfo);
 	virtual ~CBRIGHTNESSCTRL();
 
@@ -24,8 +24,14 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
+	virtual BOOL OnInitDialog();
+
+	void CreateBitmapInfo(BITMAPINFO** newInfo, int w, int h, int bpp);
+	void DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo);
 	
 	Mat myImg;// 이미지 정보를 담고 있는 객체.
 	BITMAPINFO* myBitmapInfo; // Bitmap 정보를 담고 있는 구조체.
-	void DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo);
+	
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnDestroy();
 };
