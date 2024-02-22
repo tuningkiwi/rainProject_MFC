@@ -214,6 +214,13 @@ void CColorControls::OnBnClickedLuminanceBtn()
 	CColorDialog dlg(RGB(255, 0, 0), CC_FULLOPEN, this);
 	
 	if (dlg.DoModal() == IDOK) {
+
+		COLORREF color = dlg.GetColor();
+
+		TRACE(_T("RGB value of the selected color - red = %u, ")
+			_T("green = %u, blue = %u\n"),
+			GetRValue(color), GetGValue(color), GetBValue(color));
+
 	}
 	 
 	//CClientDC dc(this);
