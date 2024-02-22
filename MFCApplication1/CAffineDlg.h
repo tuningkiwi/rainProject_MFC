@@ -29,6 +29,8 @@ protected:
 public:
 	virtual BOOL OnInitDialog();
 	Mat myImg;// 이미지 정보를 담고 있는 객체.
+	Mat currentRotatedImg; // 회전된 이미지를 저장하기 위한 변수 
+	Mat rotImg;
 	BITMAPINFO* myBitmapInfo; // Bitmap 정보를 담고 있는 구조체.
 	void ReadImage(Mat originImg, BITMAPINFO* originBmpInfo);
 	CStatic picCtrl_IT;
@@ -40,4 +42,6 @@ public:
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnBnClickedReverseIt();
+	afx_msg void OnBnClickedButtonRr();
+	afx_msg void OnBnClickedButtonLr();
 };

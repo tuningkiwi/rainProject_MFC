@@ -20,7 +20,7 @@ CAffineDlg::CAffineDlg()
 CAffineDlg::CAffineDlg(Mat Img, BITMAPINFO* bitmapInfo)
 	: CDialogEx(IDD_Affine_it)
 {
-	myImg = Img; // 이미지 매트릭스 정보 가져오기 
+	myImg = Img;
 	myBitmapInfo = bitmapInfo;
 }
 
@@ -44,6 +44,8 @@ BEGIN_MESSAGE_MAP(CAffineDlg, CDialogEx)
 	ON_BN_CLICKED(IDOK, &CAffineDlg::OnBnClickedOk)
 	ON_BN_CLICKED(IDCANCEL, &CAffineDlg::OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_REVERSE_IT, &CAffineDlg::OnBnClickedReverseIt)
+	ON_BN_CLICKED(IDC_BUTTON_RR, &CAffineDlg::OnBnClickedButtonRr)
+	ON_BN_CLICKED(IDC_BUTTON_LR, &CAffineDlg::OnBnClickedButtonLr)
 
 END_MESSAGE_MAP()
 
@@ -65,6 +67,7 @@ BOOL CAffineDlg::OnInitDialog()
 	GetDlgItem(IDC_REVERSE_IT)->MoveWindow(1000, 720 - 220, 200, 45);
 	
 	SetTimer(1, 80, NULL);//100ms  사진 불러오기 위한 타이머 
+
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
@@ -197,4 +200,41 @@ void CAffineDlg::OnBnClickedReverseIt()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	ReadImage(myImg, myBitmapInfo);
 	MessageBox(L"원본 이미지로 돌아갑니다", L"알림", MB_OK);
+}
+
+
+void CAffineDlg::OnBnClickedButtonRr()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	rotImg = myImg.clone();
+	
+	// 현재 이미지를 이전에 회전된 이미지로 설정
+	if (!currentRotatedImg.empty()) {
+		rotImg = currentRotatedImg;
+	}
+
+	// 이미지를 회전
+	rotate(rotImg, currentRotatedImg, ROTATE_90_CLOCKWISE);
+
+	// 화면에 회전된 이미지 표시
+	ReadImage(currentRotatedImg, myBitmapInfo);
+}
+
+
+void CAffineDlg::OnBnClickedButtonLr()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	rotImg = myImg.clone();
+
+
+	// 현재 이미지를 이전에 회전된 이미지로 설정
+	if (!currentRotatedImg.empty()) {
+		rotImg = currentRotatedImg;
+	}
+
+	// 이미지를 회전
+	rotate(rotImg, currentRotatedImg, ROTATE_90_COUNTERCLOCKWISE);
+
+	// 화면에 회전된 이미지 표시
+	ReadImage(currentRotatedImg, myBitmapInfo);
 }
