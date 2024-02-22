@@ -415,14 +415,7 @@ void CFilterDlg::OnMouseMove(UINT nFlags, CPoint point)
 void CFilterDlg::OnBnClickedPartblurFt()
 {
 	//// TODO: Add your control notification handler code here
-	if (partBlurModeOn) { //ON >> OFF 
-		partBlurModeOn = false;
-
-	}
-	else {// OFF >> ON 
-		partBlurModeOn = true;
-	}
-
+	partBlurModeOn = !partBlurModeOn;
 }
 
 
@@ -432,13 +425,11 @@ void CFilterDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	switch (nIDCtl) {
-		case IDC_EMBOSS_FT: case IDC_BILATERAL_FT:	case IDC_PARTBLUR_FT:
-		case IDC_REVERT_FT:
-		case IDOK: case IDCANCEL:
+		case IDC_PARTBLUR_FT:
 		{
 			if (lpDrawItemStruct->itemAction & 0x07) {
 				CDC* p_dc = CDC::FromHandle(lpDrawItemStruct->hDC);
-				if (lpDrawItemStruct->itemState & ODS_SELECTED) {//버튼 클릭시 
+				if (lpDrawItemStruct->itemState && ODS_SELECTED && partBlurModeOn == false) {//버튼 클릭시 
 					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71));//버튼의 색상
 					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105), RGB(60, 75, 105));//버튼 외곽선
 					p_dc->SetTextColor(RGB(140, 147, 161));
@@ -450,7 +441,26 @@ void CFilterDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 				}
 
 				p_dc->SetBkMode(TRANSPARENT);
-			}
+			}break;
+		}
+		case IDC_EMBOSS_FT: case IDC_BILATERAL_FT:
+		case IDC_REVERT_FT:
+		case IDOK: case IDCANCEL: {
+			if (lpDrawItemStruct->itemAction & 0x07) {
+				CDC* p_dc = CDC::FromHandle(lpDrawItemStruct->hDC);
+				if (lpDrawItemStruct->itemState && ODS_SELECTED) {//버튼 클릭시 
+					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71));//버튼의 색상
+					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105), RGB(60, 75, 105));//버튼 외곽선
+					p_dc->SetTextColor(RGB(140, 147, 161));
+				}
+				else {//기본 상태  //&lpDrawItemStruct->rcItem 버튼의 크기
+					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105));//버튼의 색상
+					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71), RGB(42, 52, 71));//버튼 외곽선
+					p_dc->SetTextColor(RGB(171, 182, 199));
+				}
+
+				p_dc->SetBkMode(TRANSPARENT);
+			}break;
 		}
 		default: break;
 	}
@@ -465,14 +475,12 @@ void CFilterDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 		break;
 	}
 	case IDC_PARTBLUR_FT: {
-		if (partBlurModeOn) {
+		if (partBlurModeOn ==true) {
 			p_dc->DrawText(L"부분블러ON", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			partBlurModeOn = false;
 			break;
 		}
 		else {
 			p_dc->DrawText(L"부분블러OFF", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			partBlurModeOn = true;
 			break;
 		}
 
@@ -521,14 +529,13 @@ void CFilterDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	//1. IDC_STATIC_POINTLOC  위치 조정.
 	//	1. LBUTTON DOWN >> CPOINT  값을 가져옴
 	//	2. IDC_STATIC_POINTLOC >> 현재 위치 출력
-	if (partBlurModeOn) {//부분 블러 모드 버튼을 클릭했을 때 
+	if (partBlurModeOn ==true) {//부분 블러 모드 버튼을 클릭했을 때 
 		blurLoc = point;//누른 지점을 저장한다
 		//CString pLoc(_T("포인터위치 x:%u y:%u",point.x,point.y));
 		//std::string filepath = "./rainResult/" + newName + ".bmp";
 		CString loc;
 		loc.Format(_T("point x: %u y: %u"), point.x, point.y);
 		SetDlgItemText(IDC_STATIC_POINTLOC, (LPCTSTR)loc);
-		partBlurModeOn = false; 
 	}
 
 	CDialogEx::OnLButtonDown(nFlags, point);
