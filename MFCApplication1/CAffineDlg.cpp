@@ -283,3 +283,5 @@ void CAffineDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
+// 주석 테스트 
+
