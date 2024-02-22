@@ -86,7 +86,7 @@ BOOL CColorControls::OnInitDialog()
 	//DrawImage(); dialog 호출시 oninitDiaog()뒤에 실행되는 메세지들에 의하여, 사진이 출력되지 않음 
 	SetTimer(1, 80, NULL);//100ms  사진 불러오기 위한 타이머 
 
-	m_mfcColorBtn.SetColor(RGB(255, 255, 255));
+	m_mfcColorBtn.SetColor(RGB(255, 255, 255));//색 편집창 기본값
 	m_brushColor.CreateSolidBrush(m_mfcColorBtn.GetColor());
 
 	m_slider_h.SetRange(0, 100);
@@ -313,9 +313,7 @@ void CColorControls::OnBnClickedMfccolorbuttonColor()
 	m_brushColor.CreateSolidBrush(m_mfcColorBtn.GetColor());
 	m_staticColor.Invalidate();
 	m_staticColor.UpdateWindow();
-
-	//CButton* pColorButton = (CButton*)GetDlgItem(IDC_MFCCOLORBUTTON_COLOR);
-
+		
 	// Color Button Control의 현재 색상을 가져옵니다.
 	COLORREF color = m_mfcColorBtn.GetColor();
 
@@ -343,5 +341,17 @@ void CColorControls::OnNMCustomdrawSliderH(NMHDR* pNMHDR, LRESULT* pResult)
 	str.Format(L"%d", pos);
 	Edit->SetWindowTextW(str);
 	
+	// OpenCV 이미지의 각 채널을 가져옵니다.
+	vector<Mat> bgr_planes;
+	split(myImg, bgr_planes);
+
+	bgr_planes[0] = bgr_planes[0] + pos; // Blue 채널에 pos 값을 더합니다.
+
+	// 변경된 채널을 다시 합쳐서 새로운 이미지를 생성합니다.
+	merge(bgr_planes, myImgAfterChange);
+
+	// 변경된 이미지를 화면에 표시
+	//DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+
 	*pResult = 0;
 }

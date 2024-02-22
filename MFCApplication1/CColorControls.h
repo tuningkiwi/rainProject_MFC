@@ -2,9 +2,9 @@
 #include "afxdialogex.h"
 #include "afxcolordialog.h"
 #include "windows.h"
-
 #include "opencv2/opencv.hpp"
 using namespace cv;
+using namespace std;
 
 // CColorControls 대화 상자
 
@@ -32,6 +32,9 @@ public:
 	BITMAPINFO* myBitmapInfo; // Bitmap 정보를 담고 있는 구조체.	
 	CStatic m_imageControl;
 
+	Mat myImgAfterChange;
+	BITMAPINFO* myBmpInfoAfterChange;
+
 	void DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo);
 	void CreateBitmapInfo(BITMAPINFO** newInfo, int w, int h, int bpp);
 
@@ -46,12 +49,14 @@ public:
 	//afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	
+	//색 편집창
 	CMFCColorButton m_mfcColorBtn;
 	CStatic m_staticColor;
 	CBrush m_brushColor;
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnBnClickedMfccolorbuttonColor();
 
+	//슬라이더
 	CSliderCtrl m_slider_h;
 	afx_msg void OnNMCustomdrawSliderH(NMHDR* pNMHDR, LRESULT* pResult);
 	CEdit m_slider_edit_h;
