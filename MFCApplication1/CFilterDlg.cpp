@@ -566,7 +566,8 @@ void CFilterDlg::partBlurProc(CPoint point) {
 	CPoint locInImg;//본인 창에서의 이미지 위치 x= left, y =top 
 	locInImg.x = point.x - picLTRB.left;// 
 	locInImg.y = point.y - picLTRB.top;
-
+	//진흙필터 >되돌리기> 부분블러 ON > 에러 
+	//range 범위가 벗어낫을 때 에러 
 	CRect blurArea;//이미지 공간 안에서의 블러 영역 
 	int range = blurRangeHalfWid*50;
 	blurArea.left = locInImg.x - range; blurArea.top = locInImg.y - range;
