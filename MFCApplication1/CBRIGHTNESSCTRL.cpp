@@ -29,7 +29,9 @@ BOOL CBRIGHTNESSCTRL::OnInitDialog()
 	CDialog::OnInitDialog(); 
 	MoveWindow(350, 120, 1280, 720);
 
-	GetDlgItem(IDC_CANVAS)->MoveWindow(1200, 700, 25, 25); //이미지 불러온창
+	CRect wndSz;
+	this->GetWindowRect(wndSz);// right:창의 너비 bottm: 창의 높이 
+	GetDlgItem(IDC_CANVAS)->MoveWindow(0, 0, int(wndSz.right * 5 / 6), wndSz.bottom);
 
 	GetDlgItem(IDC_STATIC8)->MoveWindow(960, 140, 25, 25); // 밝기
 	GetDlgItem(IDC_STATIC9)->MoveWindow(960, 260, 25, 25);// 대비
@@ -62,6 +64,7 @@ void CBRIGHTNESSCTRL::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CBRIGHTNESSCTRL, CDialogEx)
 //	ON_STN_ENABLE(IDC_CANVAS, &CBRIGHTNESSCTRL::OnStnEnableCanvas)
+ON_WM_TIMER()
 END_MESSAGE_MAP()
 // CBRIGHTNESSCTRL 메시지 처리기
 
@@ -69,14 +72,14 @@ void CBRIGHTNESSCTRL::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) // �
 {
 	KillTimer(1);
 	CRect canvas; // 먼저 메인에서 불러온 이미지를 이어서 받을 사각형 과(의)객체 'canvas' 생성
-	this->GetClientRect(canvas); //사각형 객체에='canvas' [사각형의 x, y 좌표설정이되는 = (0, 0) 함수'GetClientRect']
+	this->GetClientRect(&canvas); //사각형 객체에='canvas' [사각형의 x, y 좌표설정이되는 = (0, 0) 함수'GetClientRect']
 	int wx = int(canvas.right * 5 / 6);
 	int wy = canvas.bottom;
 
 	//불러올 사진 cols 가져오기.
 
 	CClientDC dc(GetDlgItem(IDC_CANVAS));
-	CRect rect;// 이미지를 넣을 사각형 
+	//CRect rect;// 이미지를 넣을 사각형 
 	if (requestImg.cols > wx) {
 		
 		int resize_h = cvRound((wx * requestImg.rows) / requestImg.cols);
@@ -89,29 +92,29 @@ void CBRIGHTNESSCTRL::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) // �
 		int y = cvRound((wy - requestImg.rows) / 2);
 		GetDlgItem(IDC_CANVAS)->MoveWindow(x, y, requestImg.cols, requestImg.rows);
 	}
-	GetDlgItem(IDC_CANVAS)->GetClientRect(canvas);
+	GetDlgItem(IDC_CANVAS)->GetClientRect(&canvas);
 	SetStretchBltMode(dc.GetSafeHdc(),COLORONCOLOR);
-	StretchDIBits(dc.GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), 0, 0, requestImg.cols, requestImg.rows,
+	StretchDIBits(dc.GetSafeHdc(), 0, 0, canvas.Width(), canvas.Height(), 0, 0, requestImg.cols, requestImg.rows,
 		requestImg.data, requestBmpInfo, DIB_RGB_COLORS, SRCCOPY);
 	
 }
+//
+//void CBRIGHTNESSCTRL::OnTimer(UINT_PTR nIDEvent)
+//{
+//	switch (nIDEvent)
+//	{
+//		case 1:
+//			DrawImage(myImg ,myBitmapInfo);
+//	}
+//	KillTimer(1);
+//	CDialogEx::OnTimer(nIDEvent);
+//	
+//}
 
-void CBRIGHTNESSCTRL::OnTimer(UINT_PTR nIDEvent)
-{
-	switch (nIDEvent)
-	{
-		case 1:
-			DrawImage(myImg ,myBitmapInfo);
-	}
-	KillTimer(1);
-	CDialogEx::OnTimer(nIDEvent);
-	
-}
-
-void CBRIGHTNESSCTRL::OnDestroy()
-{
-	CDialogEx::OnDestroy();
-}
+//void CBRIGHTNESSCTRL::OnDestroy()
+//{
+//	CDialogEx::OnDestroy();
+//}
 
 void CBRIGHTNESSCTRL::CreateBitmapInfo(BITMAPINFO** btmInfo, int w, int h, int bpp) {
 	if (*btmInfo != NULL) //기존 비트맵 정보 초기화 
@@ -149,3 +152,23 @@ void CBRIGHTNESSCTRL::CreateBitmapInfo(BITMAPINFO** btmInfo, int w, int h, int b
 	(*btmInfo)->bmiHeader.biWidth = w;
 	(*btmInfo)->bmiHeader.biHeight = -h;//음수는 원본이 왼쪽 위 모서리에 있는 하향식 DIB입니다.
 }
+
+void CBRIGHTNESSCTRL::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	switch (nIDEvent)
+	{
+		case 1:
+			DrawImage(myImg ,myBitmapInfo);
+	}
+	KillTimer(1);
+	CDialogEx::OnTimer(nIDEvent);
+}
+
+
+//HRESULT CBRIGHTNESSCTRL::get_accChild(VARIANT varChild, IDispatch** ppdispChild)
+//{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+
+//	return CDialogEx::get_accChild(varChild, ppdispChild);
+//}

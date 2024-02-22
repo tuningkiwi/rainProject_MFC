@@ -32,6 +32,8 @@ public:
 	Mat myImg;// 이미지 정보를 담고 있는 객체.
 	BITMAPINFO* myBitmapInfo; // Bitmap 정보를 담고 있는 구조체.
 	
+	//afx_msg void OnTimer(UINT_PTR nIDEvent);
+	//afx_msg void OnDestroy();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
-	afx_msg void OnDestroy();
+//	virtual HRESULT get_accChild(VARIANT varChild, IDispatch** ppdispChild);
 };
