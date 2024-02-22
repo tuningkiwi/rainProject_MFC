@@ -210,6 +210,7 @@ void CAffineDlg::OnBnClickedReverseIt()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	ReadImage(myImg, myBitmapInfo);
 	MessageBox(L"원본 이미지로 돌아갑니다", L"알림", MB_OK);
+	currentRotatedImg = myImg.clone();
 }
 
 
@@ -217,18 +218,18 @@ void CAffineDlg::OnBnClickedButtonRr()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	ChangeImg = myImg.clone();
-	
-	// 현재 이미지를 이전에 회전된 이미지로 설정
-	if (!currentRotatedImg.empty()) {
+	if (!currentRotatedImg.empty())
+	{
 		ChangeImg = currentRotatedImg;
 	}
-
+	
 	// 이미지를 회전
-	rotate(ChangeImg, currentRotatedImg, ROTATE_90_CLOCKWISE);
+	cv::rotate(ChangeImg, currentRotatedImg, ROTATE_90_CLOCKWISE);
+
 
 	// 화면에 회전된 이미지 표시
 	ReadImage(currentRotatedImg, myBitmapInfo);
-	myImg = currentRotatedImg.clone();
+	resultImg = currentRotatedImg.clone();
 }
 
 
@@ -237,18 +238,17 @@ void CAffineDlg::OnBnClickedButtonLr()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	ChangeImg = myImg.clone();
 
-
-	// 현재 이미지를 이전에 회전된 이미지로 설정
-	if (!currentRotatedImg.empty()) {
+	if (!currentRotatedImg.empty())
+	{
 		ChangeImg = currentRotatedImg;
 	}
 
 	// 이미지를 회전
-	rotate(ChangeImg, currentRotatedImg, ROTATE_90_COUNTERCLOCKWISE);
+	cv::rotate(ChangeImg, currentRotatedImg, ROTATE_90_COUNTERCLOCKWISE);
 
 	// 화면에 회전된 이미지 표시
 	ReadImage(currentRotatedImg, myBitmapInfo);
-	myImg = currentRotatedImg.clone();
+	resultImg = currentRotatedImg.clone();
 }
 
 

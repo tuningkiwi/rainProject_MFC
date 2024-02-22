@@ -381,11 +381,11 @@ void CMFCApplication1Dlg::OnBnClickedAffineBtn()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	// 인태 주석 테스트
-	CAffineDlg affinedlg(m_matImage, m_pBitmapInfo);
+	CAffineDlg AffineDlg(m_matImage, m_pBitmapInfo);
 	
 	// Create and show the dialog box
 	INT_PTR nRet = -1;
-	nRet = affinedlg.DoModal();
+	nRet = AffineDlg.DoModal();
 
 	// Handle the return value from DoModal
 	switch (nRet)
@@ -398,6 +398,9 @@ void CMFCApplication1Dlg::OnBnClickedAffineBtn()
 		break;
 	case IDOK:
 		// Do something
+		m_matImage = AffineDlg.resultImg;
+		m_pBitmapInfo = AffineDlg.myBitmapInfo;
+		DrawImage();
 		break;
 	case IDCANCEL:
 		// Do something
