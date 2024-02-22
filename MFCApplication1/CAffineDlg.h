@@ -4,7 +4,7 @@
 using namespace cv;
 
 
-
+//인태 브런치 테스트 
 // CAffineDlg 대화 상자
 
 class CAffineDlg : public CDialogEx
