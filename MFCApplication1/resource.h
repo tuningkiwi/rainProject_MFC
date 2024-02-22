@@ -50,6 +50,15 @@
 #define IDC_PARTBLUR_FT                 1020
 #define IDC_STATIC_delete               1021
 #define IDC_STATIC_POINTLOC             1022
+#define IDC_EDIT1                       1023
+#define IDC_SPIN1                       1024
+#define IDC_EDIT2                       1025
+#define IDC_SPIN2                       1026
+#define IDC_STATIC9                     1027
+#define IDC_STATIC8                     1028
+#define IDC_CANVAS                      1029
+#define IDC_STATIC7                     1030
+#define IDC_SLIDER2                     1031
 
 // Next default values for new objects
 // 
@@ -57,7 +66,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        137
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1023
+#define _APS_NEXT_CONTROL_VALUE         1032
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

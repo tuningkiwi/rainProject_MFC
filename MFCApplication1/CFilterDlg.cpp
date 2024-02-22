@@ -158,7 +158,7 @@ void CFilterDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
 
 	//필터창 크기
 	CRect rect;
-	this->GetClientRect(&rect);
+	this->GetClientRect(&rect); // 기본 사각형의 x,y 좌표설정이되고 =(0,0) 시작되는함수'GetClientRect' 함수에 
 	//CRect ftWnd(0,0,1280,720);// four-integers are left, top, right, and bottom
 	// picctrl 너비, 높이 조정 
 	int wx = int(rect.right * 5 / 6);

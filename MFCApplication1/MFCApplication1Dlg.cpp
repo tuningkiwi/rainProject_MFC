@@ -466,8 +466,9 @@ void CMFCApplication1Dlg::OnBnClickedButyBtn()
 //동혁: 밝기 및 명암비 조절 
 void CMFCApplication1Dlg::OnBnClickedBrightnessctrlBtn()
 {
-	CBRIGHTNESSCTRL dlg;
-	dlg.DoModal();
+	CBRIGHTNESSCTRL brightdlg(m_matImage, m_pBitmapInfo);
+	brightdlg.DoModal();
+	
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
 
