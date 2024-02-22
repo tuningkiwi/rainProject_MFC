@@ -57,9 +57,14 @@ public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnBnClickedMfccolorbuttonColor();
 
-	//슬라이더
+	//HSV 슬라이더
 	CSliderCtrl m_slider_h;
-	afx_msg void OnNMCustomdrawSliderH(NMHDR* pNMHDR, LRESULT* pResult);
+	CSliderCtrl m_slider_s;
+	CSliderCtrl m_slider_v;	
+
 	CEdit m_slider_edit_h;
-	
+	CEdit m_slider_edit_s;
+	CEdit m_slider_edit_v;
+	void CColorControls::UpdateSliderValue(int sliderID, int editID);
+	afx_msg void OnNMCustomdrawSliderH(NMHDR* pNMHDR, LRESULT* pResult);
 };

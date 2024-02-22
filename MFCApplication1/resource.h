@@ -43,6 +43,7 @@
 #define IDC_NOISELB_FT                  1012
 #define IDC_SLIDER2                     1013
 #define IDC_SLIDER_NOISE_FT             1013
+#define IDC_SLIDER_S                    1013
 #define IDC_BACK                        1014
 #define IDC_L                           1016
 #define IDC_LUMINANCE_BTN               1016
@@ -53,8 +54,14 @@
 #define IDC_PARTBLUR_FT                 1020
 #define IDC_STATIC_COLOR                1024
 #define IDC_SLIDER_EDIT_H               1026
-#define IDC_EDIT2                       1027
 #define IDC_COLOR_EDIT                  1027
+#define IDC_SLIDER_NAME_H               1029
+#define IDC_SLIDER_EDIT_S               1030
+#define IDC_SLIDER_NAME_S               1031
+#define IDC_SLIDER_V                    1032
+#define IDC_EDIT5                       1033
+#define IDC_SLIDER_EDIT_V               1033
+#define IDC_SLIDER_NAME_V               1034
 
 // Next default values for new objects
 // 
@@ -62,7 +69,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        138
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1028
+#define _APS_NEXT_CONTROL_VALUE         1035
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
