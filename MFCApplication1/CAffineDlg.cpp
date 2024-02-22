@@ -34,6 +34,7 @@ void CAffineDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PC_IT, picCtrl_IT);
 	DDX_Control(pDX, IDC_BUTTON_RR, rotationR);
 	DDX_Control(pDX, IDC_BUTTON_LR, rotationL);
+	DDX_Control(pDX, IDC_SIZE_SLIDER, SizeSlide);
 }
 
 
@@ -46,6 +47,7 @@ BEGIN_MESSAGE_MAP(CAffineDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_REVERSE_IT, &CAffineDlg::OnBnClickedReverseIt)
 	ON_BN_CLICKED(IDC_BUTTON_RR, &CAffineDlg::OnBnClickedButtonRr)
 	ON_BN_CLICKED(IDC_BUTTON_LR, &CAffineDlg::OnBnClickedButtonLr)
+	ON_WM_HSCROLL()
 
 END_MESSAGE_MAP()
 
@@ -59,9 +61,17 @@ BOOL CAffineDlg::OnInitDialog()
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
 
 	MoveWindow(350, 140, 1280, 720);
-	rotationR.MoveWindow(1000, 80, 200, 45);
-	rotationL.MoveWindow(1000, 160, 200, 45);
+	rotationR.MoveWindow(1000, 120, 200, 45);
+	rotationL.MoveWindow(1000, 200, 200, 45);
 	
+	GetDlgItem(IDC_SIZE_TEXT)->MoveWindow(1000, 280, 200, 45);
+	SizeSlide.MoveWindow(1000, 320, 200, 45);
+	SizeSlide.SetRange(0, 10);
+	SizeSlide.SetTicFreq(1);
+	SizeSlide.SetTic(1);
+	SizeSlide.SetPos(5);
+	
+
 	GetDlgItem(IDCANCEL)->MoveWindow(1000, 720 - 100, 200, 45);
 	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);
 	GetDlgItem(IDC_REVERSE_IT)->MoveWindow(1000, 720 - 220, 200, 45);
@@ -181,7 +191,7 @@ void CAffineDlg::MakeBitmapInfo(BITMAPINFO** btmInfo, int w, int h, int bpp) {
 	(*btmInfo)->bmiHeader.biHeight = -h;//음수는 원본이 왼쪽 위 모서리에 있는 하향식 DIB입니다.
 }
 
-void CAffineDlg::OnBnClickedOk()
+void CAffineDlg::OnBnClickedOk()  // 적용 버튼 누르면 부모Dlg에서 변경된 이미지가 출력
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	CDialogEx::OnOK();
@@ -206,35 +216,70 @@ void CAffineDlg::OnBnClickedReverseIt()
 void CAffineDlg::OnBnClickedButtonRr()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	rotImg = myImg.clone();
+	ChangeImg = myImg.clone();
 	
 	// 현재 이미지를 이전에 회전된 이미지로 설정
 	if (!currentRotatedImg.empty()) {
-		rotImg = currentRotatedImg;
+		ChangeImg = currentRotatedImg;
 	}
 
 	// 이미지를 회전
-	rotate(rotImg, currentRotatedImg, ROTATE_90_CLOCKWISE);
+	rotate(ChangeImg, currentRotatedImg, ROTATE_90_CLOCKWISE);
 
 	// 화면에 회전된 이미지 표시
 	ReadImage(currentRotatedImg, myBitmapInfo);
+	myImg = currentRotatedImg.clone();
 }
 
 
 void CAffineDlg::OnBnClickedButtonLr()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	rotImg = myImg.clone();
+	ChangeImg = myImg.clone();
 
 
 	// 현재 이미지를 이전에 회전된 이미지로 설정
 	if (!currentRotatedImg.empty()) {
-		rotImg = currentRotatedImg;
+		ChangeImg = currentRotatedImg;
 	}
 
 	// 이미지를 회전
-	rotate(rotImg, currentRotatedImg, ROTATE_90_COUNTERCLOCKWISE);
+	rotate(ChangeImg, currentRotatedImg, ROTATE_90_COUNTERCLOCKWISE);
 
 	// 화면에 회전된 이미지 표시
 	ReadImage(currentRotatedImg, myBitmapInfo);
+	myImg = currentRotatedImg.clone();
 }
+
+
+void CAffineDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	ChangeImg = myImg.clone();
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	if (*pScrollBar == SizeSlide) 
+	{
+		// 슬라이더에서 변경된 위치 얻기
+		int pos = SizeSlide.GetPos();
+
+		// 슬라이더의 범위를 0부터 10으로 설정했으므로, 크기 조절 비율을 조정합니다. 5가 원본입니다
+		double originalSize = 5.0;
+		double sliderRange = 10.0;
+		double scaledPos = originalSize + (pos - 5) * (originalSize / sliderRange);
+		
+
+		// 새로운 이미지 크기 계산
+		double ratio = scaledPos / originalSize;
+		int newWidth = static_cast<int>(ChangeImg.cols * ratio);
+		int newHeight = static_cast<int>(ChangeImg.rows * ratio);
+
+		// 이미지 크기 조절
+		resize(ChangeImg, SizeImg, Size(newWidth, newHeight), 0, 0, INTER_NEAREST);
+
+		// 변경된 이미지 출력
+		ReadImage(SizeImg, myBitmapInfo);
+		myImg = SizeImg.clone();
+	}
+
+	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
+}
+

@@ -30,12 +30,14 @@ public:
 	virtual BOOL OnInitDialog();
 	Mat myImg;// 이미지 정보를 담고 있는 객체.
 	Mat currentRotatedImg; // 회전된 이미지를 저장하기 위한 변수 
-	Mat rotImg;
+	Mat SizeImg;
+	Mat ChangeImg; // Affine 이미지 정보를 담기위한 원본에 원본 이미지 
 	BITMAPINFO* myBitmapInfo; // Bitmap 정보를 담고 있는 구조체.
 	void ReadImage(Mat originImg, BITMAPINFO* originBmpInfo);
 	CStatic picCtrl_IT;
 	CButton rotationR;
 	CButton rotationL;
+	CSliderCtrl SizeSlide;
 	void MakeBitmapInfo(BITMAPINFO** newInfo, int w, int h, int bpp);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnDestroy();
@@ -44,4 +46,6 @@ public:
 	afx_msg void OnBnClickedReverseIt();
 	afx_msg void OnBnClickedButtonRr();
 	afx_msg void OnBnClickedButtonLr();
-};
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	//afx_msg void ResizeImage(int newSize);
+}; 
