@@ -2,6 +2,7 @@
 #include "afxdialogex.h"
 #include "afxcolordialog.h"
 #include "windows.h"
+
 #include "opencv2/opencv.hpp"
 using namespace cv;
 
@@ -12,7 +13,6 @@ class CColorControls : public CDialogEx
 	DECLARE_DYNAMIC(CColorControls)
 
 public:
-	//CColorControls(CWnd* pParent = nullptr);   // 표준 생성자입니다.
 	CColorControls();   // 표준 생성자입니다.
 	CColorControls(Mat Img, BITMAPINFO* bitmapInfo);
 	virtual ~CColorControls();
@@ -23,9 +23,7 @@ public:
 #endif
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);// DDX/DDV 지원입니다.
-	//CWnd m_imageControl; // 이미지를 표시할 컨트롤 변수 선언
-	
+	virtual void DoDataExchange(CDataExchange* pDX);// DDX/DDV 지원입니다.		
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual BOOL OnInitDialog(); //다이얼로그가 생성될 때 호출되는 초기화
@@ -45,13 +43,6 @@ public:
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnBnClickedBack();
 
-//	CMFCColorPickerCtrl m_luminance_btn;	
-//	enum COLORTYPE { CURRENT, LUMINANCE, PICKER, HEX, HEX_GREYSCALE }; //색상 비교, 휘도 선택, 펼쳐진 형태, 육각형 색상표
-//	CPalette m_stock_palette; //팔레트 정보를 저장할 객체를 멤버 변수로 선언	
-	//CMFCColorPickerCtrl m_colorPicker;
-	//CPalette palette;
-
-	afx_msg void OnBnClickedLuminanceBtn();
 	//afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	
@@ -60,4 +51,9 @@ public:
 	CBrush m_brushColor;
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnBnClickedMfccolorbuttonColor();
+
+	CSliderCtrl m_slider_h;
+	afx_msg void OnNMCustomdrawSliderH(NMHDR* pNMHDR, LRESULT* pResult);
+	CEdit m_slider_edit_h;
+	CEdit m_color_edit;
 };
