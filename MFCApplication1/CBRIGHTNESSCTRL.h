@@ -28,12 +28,22 @@ public:
 
 	void CreateBitmapInfo(BITMAPINFO** newInfo, int w, int h, int bpp);
 	void DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo);
-	
+	BOOL colorToGray();
+	BOOL GrayToColor();
+	Mat matChangImg;
+	Mat matChangImg2;
+	BITMAPINFO* BitChangeImg;
+	BITMAPINFO* BitChangeImg2;
 	Mat myImg;// 이미지 정보를 담고 있는 객체.
+	Mat backupImg;// 이미지 정보를 담고 있는 객체.
 	BITMAPINFO* myBitmapInfo; // Bitmap 정보를 담고 있는 구조체.
+	afx_msg void OnBnClickedButton2();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	
 	//afx_msg void OnTimer(UINT_PTR nIDEvent);
 	//afx_msg void OnDestroy();
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
-//	virtual HRESULT get_accChild(VARIANT varChild, IDispatch** ppdispChild);
+	
+// virtual HRESULT get_accChild(VARIANT varChild, IDispatch** ppdispChild);
+	
+	afx_msg void OnBnClickedButton3();
 };

@@ -5,7 +5,8 @@
 #include "MFCApplication1.h"
 #include "afxdialogex.h"
 #include "CBRIGHTNESSCTRL.h"
-
+#include "opencv2/opencv.hpp"
+using namespace cv;
 
 // CBRIGHTNESSCTRL 대화 상자
 
@@ -37,11 +38,11 @@ BOOL CBRIGHTNESSCTRL::OnInitDialog()
 	GetDlgItem(IDC_STATIC9)->MoveWindow(960, 260, 25, 25);// 대비
 	GetDlgItem(IDC_STATIC7)->MoveWindow(960, 710, 50, 50); // 'SETTING'그룹창
 
-	GetDlgItem(IDC_SPIN2)->MoveWindow(1195, 280, 20, 20);
-	GetDlgItem(IDC_EDIT2)->MoveWindow(1175, 280, 20, 20);
+	GetDlgItem(IDC_SPIN2)->MoveWindow(1170, 284, 20, 20);
+	GetDlgItem(IDC_EDIT2)->MoveWindow(1150, 284, 20, 20);
 
-	GetDlgItem(IDC_SPIN1)->MoveWindow(1195, 163, 20, 20);
-	GetDlgItem(IDC_EDIT1)->MoveWindow(1175, 163, 20, 20);
+	GetDlgItem(IDC_SPIN1)->MoveWindow(1170, 161, 20, 20);
+	GetDlgItem(IDC_EDIT1)->MoveWindow(1150, 161, 20, 20);
 
 	GetDlgItem(IDC_SLIDER1)->MoveWindow(960, 160, 180, 45);
 	GetDlgItem(IDC_SLIDER2)->MoveWindow(960, 280, 180, 45);
@@ -49,7 +50,8 @@ BOOL CBRIGHTNESSCTRL::OnInitDialog()
 	GetDlgItem(IDCANCEL)->MoveWindow(1000, 720 - 100, 200, 45);
 	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);
 
-
+	GetDlgItem(IDC_BUTTON2)->MoveWindow(980, 370 ,75,40); 
+	GetDlgItem(IDC_BUTTON3)->MoveWindow(1100, 370, 75, 40); 
 	SetTimer(1, 80, NULL);
 	return TRUE; // 포커스 설정을 위한 기본값 반환
 }
@@ -65,6 +67,8 @@ void CBRIGHTNESSCTRL::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CBRIGHTNESSCTRL, CDialogEx)
 //	ON_STN_ENABLE(IDC_CANVAS, &CBRIGHTNESSCTRL::OnStnEnableCanvas)
 ON_WM_TIMER()
+ON_BN_CLICKED(IDC_BUTTON2, &CBRIGHTNESSCTRL::OnBnClickedButton2)
+ON_BN_CLICKED(IDC_BUTTON3, &CBRIGHTNESSCTRL::OnBnClickedButton3)
 END_MESSAGE_MAP()
 // CBRIGHTNESSCTRL 메시지 처리기
 
@@ -173,3 +177,70 @@ void CBRIGHTNESSCTRL::OnTimer(UINT_PTR nIDEvent)
 //	return CDialogEx::get_accChild(varChild, ppdispChild);
 //}
 //주석추가
+
+void CBRIGHTNESSCTRL::OnBnClickedButton2()
+{
+	if (colorToGray()) 
+	{
+		DrawImage(myImg, BitChangeImg); // 변환된 이미지 표시
+	}
+}
+
+void CBRIGHTNESSCTRL::OnBnClickedButton3()
+{
+	if (GrayToColor()) 
+	{
+		DrawImage(myImg, BitChangeImg2);
+	}
+}
+
+BOOL CBRIGHTNESSCTRL::colorToGray()
+{
+	if (myImg.channels() == 3) // 이미지가 칼라 이미지인지 확인
+	{
+		// 칼라 이미지를 백업
+		backupImg = myImg.clone();
+
+		// 흑백 이미지로 변환
+		cv::cvtColor(myImg, myImg, cv::COLOR_BGR2GRAY);
+
+		// 이미지 정보 업데이트
+		CreateBitmapInfo(&BitChangeImg, myImg.cols, myImg.rows, 8); // 흑백 이미지로 변환되었으므로 채널 수는 1이므로 8로 설정
+
+		// 성공 메시지 출력
+		CString successMessage = _T("이미지가 성공적으로 흑백으로 변환되었습니다.");
+		MessageBox(successMessage, _T("성공"), MB_OK | MB_ICONINFORMATION);
+		return true;
+	}
+	else
+	{
+		// 에러 메시지 출력
+		CString errorMessage = _T("이미지는 이미 흑백 이미지입니다.");
+		MessageBox(errorMessage, _T("에러"), MB_OK | MB_ICONERROR);
+		return false;
+	}
+}
+
+BOOL CBRIGHTNESSCTRL::GrayToColor()
+{
+	if (myImg.channels() == 1) // 이미지가 흑백 이미지인지 확인
+	{
+		// 백업된 칼라 이미지를 불러오기
+		myImg = backupImg.clone();
+
+		// 이미지 정보 업데이트
+		CreateBitmapInfo(&BitChangeImg2, myImg.cols, myImg.rows, 8); // 칼라 이미지로 변환되었으므로 채널 수는 3이므로 24로 설정
+
+		// 성공 메시지 출력
+		CString successMessage = _T("이미지가 성공적으로 칼라로 변환되었습니다.");
+		MessageBox(successMessage, _T("성공"), MB_OK | MB_ICONINFORMATION);
+		return true;
+	}
+	else
+	{
+		// 에러 메시지 출력
+		CString errorMessage = _T("이미지는 이미 컬러 이미지입니다.");
+		MessageBox(errorMessage, _T("에러"), MB_OK | MB_ICONERROR);
+		return false;
+	}
+}
