@@ -41,6 +41,8 @@ BEGIN_MESSAGE_MAP(CAffineDlg, CDialogEx)
 
 	ON_WM_TIMER()
 	ON_WM_DESTROY()
+	ON_BN_CLICKED(IDOK, &CAffineDlg::OnBnClickedOk)
+	ON_BN_CLICKED(IDCANCEL, &CAffineDlg::OnBnClickedCancel)
 
 END_MESSAGE_MAP()
 
@@ -59,7 +61,8 @@ BOOL CAffineDlg::OnInitDialog()
 	
 	GetDlgItem(IDCANCEL)->MoveWindow(1000, 720 - 100, 200, 45);
 	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);
-
+	GetDlgItem(IDC_REVERSE_IT)->MoveWindow(1000, 720 - 220, 200, 45);
+	
 	SetTimer(1, 80, NULL);//100ms  사진 불러오기 위한 타이머 
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -172,4 +175,17 @@ void CAffineDlg::MakeBitmapInfo(BITMAPINFO** btmInfo, int w, int h, int bpp) {
 
 	(*btmInfo)->bmiHeader.biWidth = w;
 	(*btmInfo)->bmiHeader.biHeight = -h;//음수는 원본이 왼쪽 위 모서리에 있는 하향식 DIB입니다.
+}
+
+void CAffineDlg::OnBnClickedOk()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CDialogEx::OnOK();
+}
+
+
+void CAffineDlg::OnBnClickedCancel()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CDialogEx::OnCancel();
 }

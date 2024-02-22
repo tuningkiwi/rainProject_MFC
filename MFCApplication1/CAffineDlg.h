@@ -37,4 +37,6 @@ public:
 	void MakeBitmapInfo(BITMAPINFO** newInfo, int w, int h, int bpp);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnDestroy();
+	afx_msg void OnBnClickedOk();
+	afx_msg void OnBnClickedCancel();
 };
