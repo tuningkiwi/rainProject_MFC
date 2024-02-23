@@ -166,7 +166,7 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	GetDlgItem(IDCANCEL)->SetFont(&font);
 	font.Detach();//font 종료 꼭 해주기 메모리 할당 해제 
 
-	filterWndMode = 0;//0은 사진 1은 동영상  
+	filterWndOpenMode = 0;//0은 사진 1은 동영상  
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -395,7 +395,7 @@ void CMFCApplication1Dlg::OnSize(UINT nType, int cx, int cy)
 void CMFCApplication1Dlg::OnBnClickedFilterBtn()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	CFilterDlg filterDlg(m_matImage, m_pBitmapInfo, 0);
+	CFilterDlg filterDlg(m_matImage, m_pBitmapInfo, 1);
 
 	// Create and show the dialog box
 	INT_PTR nRet = -1;
@@ -554,6 +554,7 @@ void CMFCApplication1Dlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStru
 	switch (nIDCtl) {
 	case IDC_BUTTON2: case IDC_FILTER_BTN:	case IDC_COLOR_BTN:
 	case IDC_AFFINE_BTN: case IDC_BUTY_BTN:	case IDC_BRIGHTNESSCTRL_BTN:
+	case IDC_VIDEO_BTN: case IDC_MERGE_FACE:
 	case IDOK: case IDCANCEL:
 	{
 		if (lpDrawItemStruct->itemAction & 0x07) {
@@ -605,7 +606,13 @@ void CMFCApplication1Dlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStru
 		break;
 	}
 	case IDCANCEL: {
-		p_dc->DrawText(L"취소", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		p_dc->DrawText(L"종료", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}case IDC_VIDEO_BTN: {
+		p_dc->DrawText(L"동영상촬영", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	} case IDC_MERGE_FACE: {
+		p_dc->DrawText(L"합성", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 		break;
 	}
 	default: break;

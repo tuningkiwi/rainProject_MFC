@@ -40,6 +40,11 @@ public:
 	CPoint blurLoc;//블러적용할 left, top
 	CRect picLTRB;//윈도우 상에서 현재 사진의 위치 
 	int blurRangeHalfWid;
+	VideoCapture* capture;//비디오
+	Mat mat_frame;
+	Mat frame;
+	CStatic m_picture;
+	CImage cimage_mfc;
 
 	CStatic picCtrl_FT;
 	CButton embossFT;// 진흙효과를 내는 엠보싱 필터 구현버튼
@@ -72,6 +77,7 @@ public:
 	void CreateBitmapInfo(BITMAPINFO** newInfo, int w, int h, int bpp);
 	BOOL colorToGray();//컬러영상 >> 그레이 영상으로 변환 
 	void partBlurProc(CPoint point);//부분 블러 처리 메소드 
+	void CFilterDlg::videoPrint();//비디오 출력
 
 };
 
