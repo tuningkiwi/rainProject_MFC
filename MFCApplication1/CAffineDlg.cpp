@@ -216,7 +216,7 @@ void CAffineDlg::OnBnClickedReverseIt()
 	SizeSlide.SetPos(1);
 }
 
-
+//이미지 시계 방향 회전
 void CAffineDlg::OnBnClickedButtonRr()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
@@ -245,7 +245,7 @@ void CAffineDlg::OnBnClickedButtonRr()
 	resultImg = currentRotatedImg.clone();
 }
 
-
+//이미지 반시계 방향 회전
 void CAffineDlg::OnBnClickedButtonLr()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
@@ -276,6 +276,7 @@ void CAffineDlg::OnBnClickedButtonLr()
 }
 
 
+//이미지 크기 조절
 void CAffineDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
