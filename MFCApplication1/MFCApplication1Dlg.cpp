@@ -329,7 +329,7 @@ void CMFCApplication1Dlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) 
 	if (requestImg.cols > wx) {
 		//cols: 1080 = rows : wid;
 		int resize_h = cvRound((wx * requestImg.rows) / requestImg.cols);
-		int resize_w = requestImg.cols; //width를 최대크기로 설정 
+		int resize_w = wx; //width를 최대크기로 설정 
 		if (wy - resize_h < 0) { //width를 맞추니, height가 넘친다 
 			resize_w = wy * wx / resize_h;
 		}
@@ -423,7 +423,7 @@ void CMFCApplication1Dlg::OnBnClickedFilterBtn()
 		// Do something
 		m_matImage = filterDlg.myImgAfterChange;
 		m_pBitmapInfo = filterDlg.myBmpInfoAfterChange;
-		DrawImage();
+		DrawImage(m_matImage, m_pBitmapInfo);
 		break;
 	case IDCANCEL:
 		// Do something
