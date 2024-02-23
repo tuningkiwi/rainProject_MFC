@@ -1,5 +1,5 @@
 ﻿// CAffineDlg.cpp: 구현 파일
-//
+// 인태 Affine 
 
 #include "pch.h"
 #include "MFCApplication1.h"
