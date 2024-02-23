@@ -56,14 +56,16 @@ BOOL CBRIGHTNESSCTRL::OnInitDialog()
 
 	// 슬라이더 초기화
 	m_slider.SetRange(-100, 100); // 밝기 범위 설정
-	m_slider.SetPos(50); // 초기 밝기 값 설정
+	m_slider.SetPos(0); // 초기 밝기 값 설정
+	m_slider.SetTicFreq(10);
 
 	// 스핀 컨트롤 초기화
-	m_spin.SetRange(-100, 100); // 밝기 범위 설정
-	m_spin.SetPos(50); // 초기 밝기 값 설정
+	//m_spin.SetRange(-100, 100); // 밝기 범위 설정
+	//m_spin.SetPos(50); // 초기 밝기 값 설정
 
 	// 에디트 컨트롤 초기화
 	m_edit.SetWindowText(_T("50")); // 초기 밝기 값 설정
+	m_edit_val = 0; 
 
 	SetTimer(1, 80, NULL);
 	return TRUE; // 포커스 설정을 위한 기본값 반환
@@ -88,6 +90,7 @@ ON_BN_CLICKED(IDC_BUTTON3, &CBRIGHTNESSCTRL::OnBnClickedButton3)
 ON_WM_HSCROLL()
 ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, &CBRIGHTNESSCTRL::OnNMCustomdrawSlider1)
 //ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN1, &CBRIGHTNESSCTRL::OnDeltaposSpin1)
+ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN1, &CBRIGHTNESSCTRL::mspin_updown)
 END_MESSAGE_MAP()
 // CBRIGHTNESSCTRL 메시지 처리기
 
@@ -270,7 +273,7 @@ void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		int newValue = 0;
 		if (pScrollBar->GetDlgCtrlID() == IDC_SLIDER1) {
 			// 슬라이더에서 값 변경될 때
-			newValue = m_slider.GetPos(); // 슬라이더에서 값 가져오기
+			m_edit_val = m_slider.GetPos(); // 슬라이더에서 값 가져오기
 			
 			m_spin.SetPos(newValue); // 스핀 컨트롤에 값 설정
 			CString strValue;
@@ -278,14 +281,6 @@ void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			m_edit.SetWindowText(strValue); // 에디트 컨트롤에 값 설정
 			
 			
-		}
-		else if(pScrollBar->GetDlgCtrlID() == IDC_SPIN1){
-			// 스핀 컨트롤에서 값 변경될 때
-			newValue = m_spin.GetPos(); // 스핀 컨트롤에서 값 가져오기
-			m_slider.SetPos(newValue); // 슬라이더에 값 설정
-			CString strValue;
-			strValue.Format(_T("%d"), newValue);
-			m_edit.SetWindowText(strValue); // 에디트 컨트롤에 값 설정
 		}
 		
 		if ((myImg.channels() == 3))
@@ -338,28 +333,93 @@ void CBRIGHTNESSCTRL::OnNMCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
+//
+//void CBRIGHTNESSCTRL::OnDeltaposSpin1_DH(NMHDR* pNMHDR, LRESULT* pResult)
+//{
+//	
+//	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
+//
+//	// 스핀 컨트롤의 값이 변경될 때
+//	if (pNMUpDown->iDelta < 0) {
+//		m_edit_val +=10; 
+//	}
+//	else {
+//		m_edit_val -= 10;
+//	
+//	}
+//
+//	//m_spin.SetPos(m_edit_val); // 스핀 컨트롤에 새로운 값 설정
+//	m_slider.SetPos(m_edit_val); // 슬라이더에도 새로운 값 설정
+//	CString strValue;
+//	strValue.Format(_T("%d"), m_edit_val);
+//	m_edit.SetWindowText(strValue); // 에디트 컨트롤에도 새로운 값 설정
+//
+//	//pNMUpDown->iDelta *= 2;
+//
+//	//float m_ppos = m_spin.GetPos(); 
+//	//int newValue = m_spin.GetPos() + pNMUpDown->iDelta; // 현재 값에 변화량을 더하여 새로운 값 계산
+//	//
+//	//
+//	//newValue = max(min(newValue, 100), 0); // 값을 0에서 100 사이로 제한
+//	//
+//	//
+//	//m_spin.SetPos(newValue); // 스핀 컨트롤에 새로운 값 설정
+//	//m_slider.SetPos(newValue); // 슬라이더에도 새로운 값 설정
+//	//CString strValue;
+//	//strValue.Format(_T("%d"), newValue);
+//	//m_edit.SetWindowText(strValue); // 에디트 컨트롤에도 새로운 값 설정
+//
+//	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+//	*pResult = 0;
+//}
 
-void CBRIGHTNESSCTRL::OnDeltaposSpin1(NMHDR* pNMHDR, LRESULT* pResult)
+
+void CBRIGHTNESSCTRL::mspin_updown(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	
 	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	// 스핀 컨트롤의 값이 변경될 때
-	pNMUpDown->iDelta *= 2;
+		// 스핀 컨트롤의 값이 변경될 때
+	if (pNMUpDown->iDelta < 0) {//위로 증가 버튼눌렀을 때 iDelta 음수가 출력 
+		m_edit_val += 10;
+	}
+	else {//아래 버튼을 눌렀을 때 iDelta 양수가 출력된다 
+		m_edit_val -= 10;
 
-	float m_ppos = m_spin.GetPos(); 
-	int newValue = m_spin.GetPos() + pNMUpDown->iDelta; // 현재 값에 변화량을 더하여 새로운 값 계산
-	
-	
-	newValue = max(min(newValue, 100), 0); // 값을 0에서 100 사이로 제한
-	
-	
-	m_spin.SetPos(newValue); // 스핀 컨트롤에 새로운 값 설정
-	m_slider.SetPos(newValue); // 슬라이더에도 새로운 값 설정
+	}
+
+	//m_spin.SetPos(m_edit_val); // 스핀 컨트롤에 새로운 값 설정
+	m_slider.SetPos(m_edit_val); // 슬라이더에도 새로운 값 설정
 	CString strValue;
-	strValue.Format(_T("%d"), newValue);
+	strValue.Format(_T("%d"), m_edit_val);
 	m_edit.SetWindowText(strValue); // 에디트 컨트롤에도 새로운 값 설정
 
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if ((myImg.channels() == 3))
+	{
+		Mat tmpImg = myImg.clone();
+		cvtColor(tmpImg, tmpImg, COLOR_BGR2YCrCb);
+
+		std::vector<Mat> ycrcb_planes;
+		split(tmpImg, ycrcb_planes);
+
+		Mat adjustedImage;
+		ycrcb_planes[0] = ycrcb_planes[0] + m_edit_val;
+		merge(ycrcb_planes, adjustedImage);
+
+		cvtColor(adjustedImage, adjustedImage, COLOR_YCrCb2BGR);
+
+		// 이미지 표시
+		CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
+		DrawImage(adjustedImage, BitChangeImg);
+	}
+	else if (myImg.channels() == 1)
+	{
+		Mat adjustedImage = myImg + m_edit_val;
+
+		// 이미지 표시
+		CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
+		DrawImage(adjustedImage, BitChangeImg);
+	}
+
 	*pResult = 0;
 }

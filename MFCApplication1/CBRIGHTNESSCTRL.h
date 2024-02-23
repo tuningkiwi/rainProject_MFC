@@ -51,5 +51,7 @@ public:
 	CSpinButtonCtrl m_spin;
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnNMCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnDeltaposSpin1(NMHDR* pNMHDR, LRESULT* pResult);
+	//afx_msg void OnDeltaposSpin1_DH(NMHDR* pNMHDR, LRESULT* pResult);
+	int m_edit_val; 
+	afx_msg void mspin_updown(NMHDR* pNMHDR, LRESULT* pResult);
 };
