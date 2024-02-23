@@ -83,4 +83,8 @@ public:
 	CStatic m_pcView; // Picture Control 객체
 
 	UINT_PTR m_nFaceDetectionTimerID = 0;
+	
+	// 비디오 필터링 버튼
+	CButton videoFilterBtn;
+	afx_msg void OnBnClickedBtnVideoFilter();
 };

@@ -75,6 +75,7 @@ void CMFCApplication1Dlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_MERGE_FACE, mergeBtn);
 	DDX_Control(pDX, IDC_VIDEO_BTN, videoBtn);
 	DDX_Control(pDX, IDC_PC_VIEW, m_picture);
+	DDX_Control(pDX, IDC_BTN_VIDEO_FILTER, videoFilterBtn);
 }
 
 BEGIN_MESSAGE_MAP(CMFCApplication1Dlg, CDialogEx)
@@ -96,6 +97,7 @@ BEGIN_MESSAGE_MAP(CMFCApplication1Dlg, CDialogEx)
 	ON_WM_DRAWITEM()
 	ON_WM_DESTROY()
 	ON_WM_TIMER()
+	ON_BN_CLICKED(IDC_BTN_VIDEO_FILTER, &CMFCApplication1Dlg::OnBnClickedBtnVideoFilter)
 END_MESSAGE_MAP()
 
 
@@ -141,7 +143,8 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	GetDlgItem(IDC_PC_VIEW)->MoveWindow(0, 0, btnlocLeft, m_rectCurHist.bottom);
 
 	GetDlgItem(IDC_BUTTON2)->MoveWindow(btnlocLeft, 50, btnWidth, 60);
-	GetDlgItem(IDC_FILTER_BTN)->MoveWindow(btnlocLeft, 130, btnWidth, 60);
+	GetDlgItem(IDC_FILTER_BTN)->MoveWindow(btnlocLeft, 130, btnWidth/2-15, 60);
+	GetDlgItem(IDC_BTN_VIDEO_FILTER)->MoveWindow(btnlocLeft+(btnWidth / 2)-15, 130, btnWidth/2, 60);
 	GetDlgItem(IDC_COLOR_BTN)->MoveWindow(btnlocLeft, 210, btnWidth, 60);
 	GetDlgItem(IDC_AFFINE_BTN)->MoveWindow(btnlocLeft, 290, btnWidth, 60);
 	GetDlgItem(IDC_BUTY_BTN)->MoveWindow(btnlocLeft, 370, btnWidth, 60);
@@ -153,7 +156,7 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 
 	CDialogEx::SetBackgroundColor(0x004D3428, 1);//3B261B 2A1B0D
 	CFont font;
-	font.CreatePointFont(180, _T("함초롬돋움 확장 보통"));//함초롬돋움 확장 보통
+	font.CreatePointFont(160, _T("함초롬돋움 확장 보통"));//함초롬돋움 확장 보통
 	GetDlgItem(IDC_BUTTON2)->SetFont(&font);
 	GetDlgItem(IDC_FILTER_BTN)->SetFont(&font);
 	GetDlgItem(IDC_COLOR_BTN)->SetFont(&font);
@@ -164,6 +167,7 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	GetDlgItem(IDC_MERGE_FACE)->SetFont(&font);
 	GetDlgItem(IDOK)->SetFont(&font);
 	GetDlgItem(IDCANCEL)->SetFont(&font);
+	GetDlgItem(IDC_BTN_VIDEO_FILTER)->SetFont(&font);
 	font.Detach();//font 종료 꼭 해주기 메모리 할당 해제 
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
@@ -365,7 +369,7 @@ void CMFCApplication1Dlg::OnBnClickedButton2()
 		CT2CA pszString(path);
 		std::string strPath(pszString);
 
-		m_matImage = imread(strPath, IMREAD_UNCHANGED);//png파일의 경우 alpha채널도 가져옴
+		m_matImage = imread(strPath);//png파일의 경우 alpha채널도 가져옴
 
 		CreateBitmapInfo(m_matImage.cols, m_matImage.rows, m_matImage.channels() * 8);
 		DrawImage(m_matImage, m_pBitmapInfo);
@@ -393,8 +397,7 @@ void CMFCApplication1Dlg::OnSize(UINT nType, int cx, int cy)
 void CMFCApplication1Dlg::OnBnClickedFilterBtn()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	//CDialog filterDlg(IDD_DIALOG1);
-	CFilterDlg filterDlg(m_matImage, m_pBitmapInfo);
+	CFilterDlg filterDlg(m_matImage, m_pBitmapInfo, 0);
 
 	// Create and show the dialog box
 	INT_PTR nRet = -1;
@@ -417,6 +420,7 @@ void CMFCApplication1Dlg::OnBnClickedFilterBtn()
 		break;
 	case IDCANCEL:
 		// Do something
+		//MessageBox(L"취소되었습니다", L"알림", IDOK);
 		break;
 	default:
 		// Do something
@@ -552,6 +556,7 @@ void CMFCApplication1Dlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStru
 	switch (nIDCtl) {
 	case IDC_BUTTON2: case IDC_FILTER_BTN:	case IDC_COLOR_BTN:
 	case IDC_AFFINE_BTN: case IDC_BUTY_BTN:	case IDC_BRIGHTNESSCTRL_BTN:
+	case IDC_VIDEO_BTN: case IDC_MERGE_FACE: case IDC_BTN_VIDEO_FILTER:
 	case IDOK: case IDCANCEL:
 	{
 		if (lpDrawItemStruct->itemAction & 0x07) {
@@ -579,7 +584,7 @@ void CMFCApplication1Dlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStru
 		break;
 	}
 	case IDC_FILTER_BTN: {
-		p_dc->DrawText(L"필터링", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		p_dc->DrawText(L"사진필터", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 		break;
 	}
 	case IDC_COLOR_BTN: {
@@ -603,7 +608,16 @@ void CMFCApplication1Dlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStru
 		break;
 	}
 	case IDCANCEL: {
-		p_dc->DrawText(L"취소", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		p_dc->DrawText(L"종료", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}case IDC_VIDEO_BTN: {
+		p_dc->DrawText(L"동영상촬영", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	} case IDC_MERGE_FACE: {
+		p_dc->DrawText(L"합성", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}case IDC_BTN_VIDEO_FILTER:{
+		p_dc->DrawText(L"비디오필터", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 		break;
 	}
 	default: break;
@@ -829,6 +843,7 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 	}
 }
 
+//주석 추가 
 /*
 void CMFCApplication1Dlg::OnBnClickedMergeBtn()
 {
@@ -951,4 +966,38 @@ void CMFCApplication1Dlg::UpdateImageOnScreen()
 void CMFCApplication1Dlg::OnBnClickedMergeBtn()
 {
 	m_nFaceDetectionTimerID = SetTimer(2, 100, nullptr);
+}
+
+void CMFCApplication1Dlg::OnBnClickedBtnVideoFilter()
+{//비디오 필터링 출력 
+	// TODO: Add your control notification handler code here
+	CFilterDlg filterDlg(m_matImage, m_pBitmapInfo, 1);
+
+	// Create and show the dialog box
+	INT_PTR nRet = -1;
+	nRet = filterDlg.DoModal();
+
+	// Handle the return value from DoModal
+	switch (nRet)
+	{
+	case -1:
+		AfxMessageBox(_T("Dialog box could not be created!"));
+		break;
+	case IDABORT:
+		// Do something
+		break;
+	case IDOK:
+		// Do something
+		m_matImage = filterDlg.myImgAfterChange;
+		m_pBitmapInfo = filterDlg.myBmpInfoAfterChange;
+		DrawImage(m_matImage, m_pBitmapInfo);
+		break;
+	case IDCANCEL:
+		// Do something
+		MessageBox(L"취소되었습니다\n원본으로 돌아갑니다", L"알림", IDOK);
+		break;
+	default:
+		// Do something
+		break;
+	};
 }

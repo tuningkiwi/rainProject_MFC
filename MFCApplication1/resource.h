@@ -1,6 +1,6 @@
 ﻿//{{NO_DEPENDENCIES}}
-// Microsoft Visual C++에서 생성한 포함 파일입니다.
-// MFCApplication1.rc에서 사용되고 있습니다.
+// Microsoft Visual C++ generated include file.
+// Used by MFCApplication1.rc
 //
 #define IDM_ABOUTBOX                    0x0010
 #define IDD_ABOUTBOX                    100
@@ -83,6 +83,7 @@
 #define IDC_SLIDER_EDIT_V               1044
 #define IDC_SLIDER_NAME_V               1045
 #define IDC_BUTTON4                     1046
+#define IDC_BTN_VIDEO_FILTER            1046
 #define IDC_MERGE_FACE                  1047
 
 // Next default values for new objects
