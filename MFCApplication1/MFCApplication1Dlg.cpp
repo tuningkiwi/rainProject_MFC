@@ -73,6 +73,7 @@ void CMFCApplication1Dlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTY_BTN, ButyBtn);
 	DDX_Control(pDX, IDC_BRIGHTNESSCTRL_BTN, brightnessBtn);
 	DDX_Control(pDX, IDC_VIDEO_BTN, videoBtn);
+	DDX_Control(pDX, IDC_PC_VIEW, m_picture);
 }
 
 BEGIN_MESSAGE_MAP(CMFCApplication1Dlg, CDialogEx)
@@ -128,15 +129,16 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
-	capture = new VideoCapture(0);
+	// Assuming m_picture is a valid control associated with a resource ID
+	capture = new VideoCapture(0, CAP_DSHOW);
 	if (!capture->isOpened())
 	{
 		MessageBox(_T("웹캠을 열수 없습니다. \n"));
 	}
 
 	//웹캠 크기를  320x240으로 지정    
-	capture->set(CAP_PROP_FRAME_WIDTH, 320);
-	capture->set(CAP_PROP_FRAME_HEIGHT, 240);
+	capture->set(CAP_PROP_FRAME_WIDTH, 1280);
+	capture->set(CAP_PROP_FRAME_HEIGHT, 720);
 
 	SetTimer(1000, 30, NULL);
 	
@@ -570,7 +572,7 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 
 	//이곳에 OpenCV 함수들을 적용합니다.
 	//여기에서는 그레이스케일 이미지로 변환합니다.
-	cvtColor(mat_frame, mat_frame, COLOR_BGR2GRAY);
+	//cvtColor(mat_frame, mat_frame, COLOR_BGR2GRAY);
 
 	//화면에 보여주기 위한 처리입니다.
 	int bpp = 8 * mat_frame.elemSize();
@@ -603,9 +605,9 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 	}
 
 	RECT r;
-	//m_picture.GetClientRect(&r);
-	r.right = 200;
-	r.bottom = 200;
+	m_picture.GetClientRect(&r);
+	//r.right = 500;
+	//r.bottom = 500;
 	cv::Size winSize(r.right, r.bottom);
 
 	cimage_mfc.Create(winSize.width, winSize.height, 24);
