@@ -161,7 +161,7 @@ void CFilterDlg::OnBnClickedOk()
 	// TODO: Add your control notification handler code here
 	//메세지 박스 적용되었습니다 알림 넣기 
 	CDialogEx::OnOK();
-}
+} 
 
 
 //다이얼로그창에 사진 띄우기 
