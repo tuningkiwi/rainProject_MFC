@@ -218,6 +218,7 @@ void CAffineDlg::OnBnClickedButtonRr()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	ChangeImg = myImg.clone();
+
 	if (!currentRotatedImg.empty())
 	{
 		ChangeImg = currentRotatedImg;
@@ -225,10 +226,10 @@ void CAffineDlg::OnBnClickedButtonRr()
 	
 	// 이미지를 회전
 	cv::rotate(ChangeImg, currentRotatedImg, ROTATE_90_CLOCKWISE);
-
+	MakeBitmapInfo(&resultmyBitmapInfo, currentRotatedImg.cols, currentRotatedImg.rows, currentRotatedImg.channels() * 8);
 
 	// 화면에 회전된 이미지 표시
-	ReadImage(currentRotatedImg, myBitmapInfo);
+	ReadImage(currentRotatedImg, resultmyBitmapInfo);
 	resultImg = currentRotatedImg.clone();
 }
 
@@ -245,9 +246,10 @@ void CAffineDlg::OnBnClickedButtonLr()
 
 	// 이미지를 회전
 	cv::rotate(ChangeImg, currentRotatedImg, ROTATE_90_COUNTERCLOCKWISE);
+	MakeBitmapInfo(&resultmyBitmapInfo, currentRotatedImg.cols, currentRotatedImg.rows, currentRotatedImg.channels() * 8);
 
 	// 화면에 회전된 이미지 표시
-	ReadImage(currentRotatedImg, myBitmapInfo);
+	ReadImage(currentRotatedImg, resultmyBitmapInfo);
 	resultImg = currentRotatedImg.clone();
 }
 
