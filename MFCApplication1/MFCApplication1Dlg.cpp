@@ -297,6 +297,54 @@ void CMFCApplication1Dlg::DrawImage() {
 	StretchDIBits(dc.GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), 0, 0, m_matImage.cols, m_matImage.rows, m_matImage.data, m_pBitmapInfo, DIB_RGB_COLORS, SRCCOPY);
 }
 
+void CMFCApplication1Dlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {//이미지 그리기
+	KillTimer(1);
+
+	//필터창 크기
+	CRect wnd;
+	this->GetClientRect(&wnd); // 기본 사각형의 x,y 좌표설정이되고 =(0,0) 시작되는함수'GetClientRect' 함수에 
+	int wx = int(wnd.right * 5 / 6);
+	int wy = wnd.bottom;
+
+	//불러올 사진 cols 가져오기.
+	CClientDC dc(GetDlgItem(IDC_PC_VIEW));
+	CRect rect;// 이미지를 넣을 사각형 
+	if (requestImg.cols > wx) {
+		//cols: 1080 = rows : wid;
+		int resize_h = cvRound((wx * requestImg.rows) / requestImg.cols);
+		int resize_w = requestImg.cols; //width를 최대크기로 설정 
+		if (wy - resize_h < 0) { //width를 맞추니, height가 넘친다 
+			resize_w = wy * wx / resize_h;
+		}
+		int x = cvRound((wx - resize_w) / 2);
+		int y = cvRound((wy - resize_h) / 2);
+		GetDlgItem(IDC_PC_VIEW)->MoveWindow(x, y, resize_w, resize_h);
+	}
+	else {
+		int x = cvRound((wx - requestImg.cols) / 2);
+		int y = cvRound((wy - requestImg.rows) / 2);
+		GetDlgItem(IDC_PC_VIEW)->MoveWindow(x, y, requestImg.cols, requestImg.rows);
+		picLTRB.left = x; picLTRB.top = y;
+		picLTRB.right = x + requestImg.cols; picLTRB.bottom = y + requestImg.rows;
+	}
+
+
+	//GetClientRect(left, top, right, bottom ) 클라이언트 영역의 좌표
+	//함수가 성공하면 반환 값이 0이 아닙니다.
+	//불러올 이미지 사진에 따라 조정된 Picture Ctrl 크기 
+	GetDlgItem(IDC_PC_VIEW)->GetClientRect(&rect);
+
+	//픽셀을 삭제합니다. 이 모드는 해당 정보를 보존하지 않고 
+	SetStretchBltMode(dc.GetSafeHdc(), COLORONCOLOR);
+
+	//StretchDIBits 함수는 DIB, JPEG 또는 PNG 이미지의 픽셀 사각형에 
+	// 대한 색 데이터를 지정된 대상 사각형에 복사합니다.
+	//dc.GetSafeHdc(): 출력 디바이스 컨텍스트를 가져옵니다
+	// 함수가 성공하면 반환 값은 복사된 검사 줄의 수입니다. 이 값은 미러된 콘텐츠에 대해 음수일 수 있습니다.
+	StretchDIBits(dc.GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), 0, 0, requestImg.cols, requestImg.rows, requestImg.data, requestBmpInfo, DIB_RGB_COLORS, SRCCOPY);
+
+}
+
 
 void CMFCApplication1Dlg::OnBnClickedButton2()
 {
@@ -313,7 +361,7 @@ void CMFCApplication1Dlg::OnBnClickedButton2()
 		m_matImage = imread(strPath, IMREAD_UNCHANGED);//png파일의 경우 alpha채널도 가져옴
 
 		CreateBitmapInfo(m_matImage.cols, m_matImage.rows, m_matImage.channels() * 8);
-		DrawImage();
+		DrawImage(m_matImage, m_pBitmapInfo);
 	}
 }
 

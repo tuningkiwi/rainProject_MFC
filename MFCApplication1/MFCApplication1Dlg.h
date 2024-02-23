@@ -40,6 +40,8 @@ public:
 	BITMAPINFO* m_pBitmapInfo; // Bitmap 정보를 담고 있는 구조체.
 	void CreateBitmapInfo(int w, int h, int bpp);
 	void DrawImage();
+	void DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo);//이미지 그리기
+	CRect picLTRB;//윈도우 상에서 현재 사진의 위치 
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	// 필터링 조정 다이얼로그

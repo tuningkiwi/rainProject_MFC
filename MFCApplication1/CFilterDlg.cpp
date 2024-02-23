@@ -79,35 +79,42 @@ BOOL CFilterDlg::OnInitDialog()
 
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
 	MoveWindow(350, 140, 1280, 720);
-	embossFT.MoveWindow(1000, 40, 200, 45);
-	fogLB_FT.MoveWindow(1000, 105, 200, 20);
-	fogslider_FT.MoveWindow(1000, 125, 200, 20);
+
+	CRect wnd;
+	this->GetClientRect(&wnd); // 기본 사각형의 x,y 좌표설정이되고 =(0,0) 시작되는함수'GetClientRect' 함수에 
+	int btnLocX = int(wnd.right * 5 / 6);
+	int btnLocY = 40;
+	int bottom_btnLocY = wnd.bottom -40;
+
+	embossFT.MoveWindow(btnLocX, btnLocY, 200, 45); btnLocY += 45;//1000, 40, 200, 45
+	fogLB_FT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;//1000, 105, 200, 20
+	fogslider_FT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;
 	fogslider_FT.SetRange(0, 5);
 	fogslider_FT.SetTicFreq(1);
 	fogslider_FT.SetTic(5);
 	fogslider_FT.SetPos(0);
-	sharpLB_FT.MoveWindow(1000, 165, 200, 20);
-	sharpSliderFT.MoveWindow(1000, 185, 200, 20); 
+	sharpLB_FT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;
+	sharpSliderFT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 45;
 	sharpSliderFT.SetRange(0, 5);
 	sharpSliderFT.SetTicFreq(1);
 	sharpSliderFT.SetPos(0);
-	bilateralBtn_FT.MoveWindow(1000, 225, 200, 45);
-	noiseLB_FT.MoveWindow(1000, 285, 200, 20); 
-	noiseFT.MoveWindow(1000, 305, 200, 20);
+	bilateralBtn_FT.MoveWindow(btnLocX, btnLocY, 200, 45); btnLocY += 45;
+	noiseLB_FT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;
+	noiseFT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;
 	noiseFT.SetRange(0,100);
 	noiseFT.SetTicFreq(10);
 	noiseFT.SetPos(0);
-	partBlutBtn.MoveWindow(1000, 335, 200, 45);
-	pointLocFT.MoveWindow(1000, 390, 200, 20);
-	partBlurSlider.MoveWindow(1000, 410, 200, 20);
+	partBlutBtn.MoveWindow(btnLocX, btnLocY, 200, 45); btnLocY += 45;
+	pointLocFT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;
+	partBlurSlider.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;
 	partBlurSlider.SetRange(1, 5);
 	partBlurSlider.SetTicFreq(1);
 	partBlurSlider.SetPos(1);
 	blurRangeHalfWid = 1;
 
-	GetDlgItem(IDCANCEL)->MoveWindow(1000,720-100, 200, 45);	
-	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);
-	GetDlgItem(IDC_REVERT_FT)->MoveWindow(1000, 720 - 220, 200, 45);
+	GetDlgItem(IDCANCEL)->MoveWindow(btnLocX, bottom_btnLocY, 200, 45); bottom_btnLocY -= 55;
+	GetDlgItem(IDOK)->MoveWindow(btnLocX, bottom_btnLocY, 200, 45); bottom_btnLocY -= 55;
+	GetDlgItem(IDC_REVERT_FT)->MoveWindow(btnLocX, bottom_btnLocY, 200, 45);
 	partBlurModeOn = false;
 	//DrawImage(); dialog 호출시 oninitDiaog()뒤에 실행되는 메세지들에 의하여, 사진이 출력되지 않음 
 	SetTimer(1, 80, NULL);//100ms  사진 불러오기 위한 타이머 
@@ -162,26 +169,26 @@ void CFilterDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
 	KillTimer(1);
 
 	//필터창 크기
-	CRect rect;
-	this->GetClientRect(&rect); // 기본 사각형의 x,y 좌표설정이되고 =(0,0) 시작되는함수'GetClientRect' 함수에 
-	//CRect ftWnd(0,0,1280,720);// four-integers are left, top, right, and bottom
-	// picctrl 너비, 높이 조정 
-	int wx = int(rect.right * 5 / 6);
-	int wy = rect.bottom;
+	CRect wnd;
+	this->GetClientRect(&wnd); // 기본 사각형의 x,y 좌표설정이되고 =(0,0) 시작되는함수'GetClientRect' 함수에 
+	int wx = int(wnd.right * 5 / 6);
+	int wy = wnd.bottom;
 
 	//불러올 사진 cols 가져오기.
 	CClientDC dc(GetDlgItem(IDC_PC_FT)); 
-	//CRect rect;// 이미지를 넣을 사각형 
+	CRect rect;// 이미지를 넣을 사각형 
 	if (requestImg.cols > wx) {
 		//cols: 1080 = rows : wid;
 		int resize_h = cvRound((wx * requestImg.rows) / requestImg.cols);
+		int resize_w = wx; //width를 최대크기로 설정 
+		if (wy - resize_h < 0) { //width를 맞추니, height가 넘친다 
+			resize_w = wy * wx / resize_h;
+		}
+		int x = cvRound((wx - resize_w) / 2);
 		int y = cvRound((wy - resize_h) / 2);
-		//if (y < 0) { //구현예정. 
-		//	//float ratio =  m_matImage.rows / m_matImage.cols;
-		//	y = 0;
-		//	
-		//}
-		GetDlgItem(IDC_PC_FT)->MoveWindow(0, y, requestImg.cols, resize_h);
+		GetDlgItem(IDC_PC_FT)->MoveWindow(x, y, resize_w, resize_h);
+		picLTRB.left = x; picLTRB.top = y;
+		picLTRB.right = resize_w; picLTRB.bottom = resize_h;
 	}
 	else {
 		int x = cvRound((wx - requestImg.cols) / 2);
