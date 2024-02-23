@@ -235,7 +235,6 @@ void CAffineDlg::OnBnClickedReverseIt()
 	rotresultImg = myImg.clone();
 	resultImg = myImg.clone();
 	ChangeImg = myImg.clone();
-	SizeImg = myImg.clone();
 	SizeSlide.SetPos(1);
 }
 
@@ -246,6 +245,7 @@ void CAffineDlg::OnBnClickedButtonRr()
 	if (!resultImg.empty())
 	{
 		ChangeImg = resultImg.clone();
+		currentRotatedImg = resultImg.clone();
 	}
 	else
 	{
@@ -276,6 +276,7 @@ void CAffineDlg::OnBnClickedButtonLr()
 	if (!resultImg.empty())
 	{
 		ChangeImg = resultImg.clone();
+		currentRotatedImg = resultImg.clone();
 	}
 	else 
 	{
@@ -326,8 +327,8 @@ void CAffineDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		if (pos == 0)
 		{
 			// 이미지 크기 조정
-			resize(ChangeImg, SizeImg, Size(static_cast<int>(ChangeImg.cols * scaleFactor[pos]),
-				static_cast<int>(ChangeImg.rows * scaleFactor[pos])),
+			resize(ChangeImg, SizeImg, Size(static_cast<int>(myImg.cols * scaleFactor[pos]),
+				static_cast<int>(myImg.rows * scaleFactor[pos])),
 				INTER_LINEAR);
 
 			// 비트맵 정보 생성 및 이미지 출력
@@ -338,8 +339,8 @@ void CAffineDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		else if (pos == 1)
 		{
 			// 이미지 크기 조정
-			resize(ChangeImg, SizeImg, Size(static_cast<int>(ChangeImg.cols * scaleFactor[pos]),
-				static_cast<int>(ChangeImg.rows * scaleFactor[pos])),
+			resize(ChangeImg, SizeImg, Size(static_cast<int>(myImg.cols * scaleFactor[pos]),
+				static_cast<int>(myImg.rows * scaleFactor[pos])),
 				INTER_LINEAR);
 
 			// 비트맵 정보 생성 및 이미지 출력
@@ -350,8 +351,8 @@ void CAffineDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		else if (pos == 2)
 		{
 			// 이미지 크기 조정
-			resize(ChangeImg, SizeImg, Size(static_cast<int>(ChangeImg.cols * scaleFactor[pos]),
-				static_cast<int>(ChangeImg.rows * scaleFactor[pos])),
+			resize(ChangeImg, SizeImg, Size(static_cast<int>(myImg.cols * scaleFactor[pos]),
+				static_cast<int>(myImg.rows * scaleFactor[pos])),
 				INTER_LINEAR);
 
 			// 비트맵 정보 생성 및 이미지 출력
