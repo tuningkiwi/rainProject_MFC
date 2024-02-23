@@ -309,6 +309,8 @@ void CFilterDlg::OnBnClickedRevertFt()
 {
 	// TODO: Add your control notification handler code here
 	DrawImage(myImg, myBitmapInfo);
+	myImgAfterChange = myImg.clone();
+	myBmpInfoAfterChange = myBitmapInfo;
 	MessageBox(L"원본으로 돌아갑니다", L"알림",MB_OK);
 }
 
