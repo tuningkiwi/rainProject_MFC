@@ -166,7 +166,6 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	GetDlgItem(IDCANCEL)->SetFont(&font);
 	font.Detach();//font 종료 꼭 해주기 메모리 할당 해제 
 
-
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -353,7 +352,7 @@ void CMFCApplication1Dlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) 
 
 }
 
-
+//파일 열기 다이얼로그 
 void CMFCApplication1Dlg::OnBnClickedButton2()
 {
 	// TODO: Add your control notification handler code here
@@ -507,22 +506,41 @@ void CMFCApplication1Dlg::OnBnClickedBrightnessctrlBtn()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
 
-//경태 깃 분기 만들기 
-
+ 
+//파일 저장 버튼 
 void CMFCApplication1Dlg::OnBnClickedOk()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	std::time_t result = std::time(nullptr);
-	std::string name = std::ctime(&result);//마지막에 \n이 삽입됨
-	std::string newName = "";
-	for (int i = 0; i < name.size() - 1; i++) {
-		std::cout << i << ":" << name[i] << std::endl;
-		if (name[i] != 0x20 && name[i] != ':') {//공백문자 
-			newName += name[i];
-		}
+	//**************************************************//
+	// 지정한 resultRain폴더에 자동 저장 모드
+	// ************************************************// 
+	//std::time_t result = std::time(nullptr);
+	//std::string name = std::ctime(&result);//마지막에 \n이 삽입됨
+	//std::string newName = "";
+	//for (int i = 0; i < name.size() - 1; i++) {
+	//	std::cout << i << ":" << name[i] << std::endl;
+	//	if (name[i] != 0x20 && name[i] != ':') {//공백문자 
+	//		newName += name[i];
+	//	}
+	//}
+	//std::string filepath = "./rainResult/" + newName + ".bmp";
+	//imwrite(filepath, m_matImage);
+	
+	//szFilters is a text string that includes two file name filters:
+	//"*.my" for "MyType Files" and "*.*' for "All Files."
+	TCHAR szFilters[] = _T("MyType Files (*.jpg;*.png;*.bmp)|*.jpg;*.png;*.bmp|All Files (*.*)|*.*||");
+	CFileDialog fileDlg(FALSE, _T("jpg"), _T("*.jpg"), OFN_OVERWRITEPROMPT,szFilters);
+	if (fileDlg.DoModal() == IDOK)//파일다이얼로그에서 OK를 눌렀을 경우 
+	{
+		CString pathName = fileDlg.GetPathName();
+		string filepath = std::string(CT2CA(pathName));
+		imwrite(filepath, m_matImage);
+		MessageBox(L"저장되었습니다. \n프로그램을 종료합니다.", L"알림", MB_OK);
 	}
-	std::string filepath = "./rainResult/" + newName + ".bmp";
-	imwrite(filepath, m_matImage);
+	else {//저장하지 않고, 종료되었을 때
+		MessageBox(L"프로그램을 종료합니다.", L"알림", MB_OK);
+	}
+	
 	CDialogEx::OnOK();
 }
 //주석 추가 
