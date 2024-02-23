@@ -80,7 +80,7 @@ BOOL CFilterDlg::OnInitDialog()
 
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
 	MoveWindow(350, 140, 1280, 720);
-	MoveWindow(0,0, 1920, 1000);
+	//MoveWindow(0,0, 1920, 1000);
 
 	CRect wnd;
 	this->GetClientRect(&wnd); // 기본 사각형의 x,y 좌표설정이되고 =(0,0) 시작되는함수'GetClientRect' 함수에 
@@ -176,7 +176,7 @@ void CFilterDlg::OnBnClickedOk()
 
 //다이얼로그창에 사진 띄우기 
 void CFilterDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
-	KillTimer(1);
+	KillTimer(0);
 
 	//필터창 크기
 	CRect wnd;
@@ -240,12 +240,15 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 		// 자동 수행되는 메시지 함수에의해서 출력이 안되서 
 		//onInitDialog()에 타이머로 걸어놓음  
 		DrawImage(myImg, myBitmapInfo);//처음 로딩되는 이미지 
-		
-	}else if (nIDEvent==1) {
+		KillTimer(0);
+	}else if (nIDEvent==1) {//video capture 세팅 
 
-		int wid = 1280;
-		int hei = 720;
-		picCtrl_FT.MoveWindow(0, 0, wid, hei);
+		CRect wnd;
+		this->GetClientRect(&wnd); // 기본 사각형의 x,y 좌표설정이되고 =(0,0) 시작되는함수'GetClientRect' 함수에 
+		int wid = int(wnd.right * 5 / 6);
+		int hei = int(wnd.right*720/1280);
+		
+		picCtrl_FT.MoveWindow(0, 0, wid, hei);//픽쳐컨트롤 크기 조정 
 
 		// 웹캠 열기
 		capture = new VideoCapture(0, CAP_DSHOW);
@@ -259,13 +262,12 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 		capture->set(CAP_PROP_FRAME_WIDTH, wid);
 		capture->set(CAP_PROP_FRAME_HEIGHT, hei);
 
-		// 타이머 설정
+		SetTimer(2, 30, NULL);//본격 동영상 출력을 위한 프로세스로 넘어간다 
+		KillTimer(1);//카메라세팅 타이머 
 		
-		SetTimer(2, 30, NULL);
-		KillTimer(1);
-		
-	}else if (nIDEvent==2) {
+	}else if (nIDEvent==2) {//영상 출력 
 		capture->read(mat_frame);
+		myImg = mat_frame.clone();
 
 		//이곳에 OpenCV 함수들을 적용합니다.
 		//여기에서는 그레이스케일 이미지로 변환합니다.
@@ -311,6 +313,7 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 
 		//CreateBitmapInfo(BITMAPINFO * *btmInfo, int w, int h, int bpp)
 
+		//CreateBitmapInfo(&myBitmapInfo, myImg.cols, myImg.rows, myImg.channels() * 8);
 		BITMAPINFO* bitInfo = (BITMAPINFO*)malloc(sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD));
 		bitInfo->bmiHeader.biBitCount = bpp;
 		bitInfo->bmiHeader.biWidth = mat_temp.cols;
@@ -396,15 +399,18 @@ void CFilterDlg::OnDestroy()
 void CFilterDlg::OnBnClickedEmbossFt()//1채널 필터링 
 {
 	// TODO: Add your control notification handler code here
-	colorToGray();//color 사진의 경우 gray로 변경. 
+	if(colorToGray()==true){//color 사진의 경우 gray로 변경. 
 
-	float data[] = { -1,-1,0,-1,0,1,0,1,1 };
-	Mat emboss(3, 3, CV_32FC1, data);
+		float data[] = { -1,-1,0,-1,0,1,0,1,1 };
+		Mat emboss(3, 3, CV_32FC1, data);
 
-	Mat dst;
-	filter2D(myImgAfterChange, dst, -1, emboss, Point(-1, -1), 128);
-	myImgAfterChange = dst;
-	DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+		Mat dst;
+		filter2D(myImgAfterChange, dst, -1, emboss, Point(-1, -1), 128);
+		myImgAfterChange = dst;
+		DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+	}else{
+		MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널 3개 이미지만 처리합니다", L"알림", IDOK);
+	}
 }
 
 //컬러(채널3)를 그레이(채널1)로 변경 
@@ -412,7 +418,7 @@ BOOL CFilterDlg::colorToGray()
 {
 	// TODO: Add your implementation code here.
 	//현재 채널 정보를 확인해서 gray가 아닐 경우
-	if (myImg.channels() != 1) {
+	if (myImg.channels() >=3) {
 		cvtColor(myImg, myImgAfterChange, COLOR_BGR2GRAY);
 		CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
 		return true; 
@@ -473,7 +479,7 @@ void CFilterDlg::OnBnClickedRevertFt()
 void CFilterDlg::OnBnClickedCancel()
 {
 	// TODO: Add your control notification handler code here
-	KillTimer(2);
+	KillTimer(2);//비디오출력
 	CDialogEx::OnCancel();
 }
 
@@ -496,16 +502,18 @@ void CFilterDlg::OnBnClickedCancel()
 void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	// TODO: Add your message handler code here and/or call default
-	if (*pScrollBar == fogslider_FT) {
+	if (*pScrollBar == fogslider_FT) {//안개필터 
+		sharpSliderFT.SetPos(0);
 		int sigma = fogslider_FT.GetPos();
 		if (sigma != 0) {
 			GaussianBlur(myImg, myImgAfterChange, Size(), (double)sigma);
 			CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
 			DrawImage(myImgAfterChange, myBmpInfoAfterChange);
 		}
+		
 	}
-	else if (*pScrollBar == sharpSliderFT) {
-
+	else if (*pScrollBar == sharpSliderFT) {//샤프닝필터
+		fogslider_FT.SetPos(0);
 		int sigma = sharpSliderFT.GetPos();
 		if (sigma != 0) {
 			GaussianBlur(myImg, myImgAfterChange, Size(), (double)sigma);
@@ -515,17 +523,35 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
 			DrawImage(myImgAfterChange, myBmpInfoAfterChange);
 		}
+		
 	}
-	else if (*pScrollBar == noiseFT) {
-		colorToGray();//그레이스케일 이미지로 변환  
+	else if (*pScrollBar == noiseFT) {//노이즈필터
 		int stddev = noiseFT.GetPos();
-		Mat noise(myImgAfterChange.size(), CV_32SC1);
-		randn(noise, 0, stddev);
-
 		Mat dst;
-		add(myImgAfterChange, noise, dst, Mat(), CV_8U);
-		myImgAfterChange = dst;
-		DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+
+		//1채널 이미지, 변환 이미지 유. 
+		if(myImgAfterChange.data != NULL && myImgAfterChange.channels() <3){//그레이스케일 이미지로 변환  		
+//			colorToGray();
+			Mat noise(myImgAfterChange.size(), CV_32SC1);
+			randn(noise, 0, stddev);		
+			add(myImgAfterChange, noise, dst, Mat(), CV_8U);
+			myImgAfterChange = dst;
+			DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+		}else if(myImgAfterChange.data != NULL&& myImgAfterChange.channels()>=3){//3채널 이미지, 변환 이미지 유.  
+			Mat noise(myImgAfterChange.size(), CV_32SC3);
+			randn(noise, 0, stddev);
+			add(myImgAfterChange, noise, dst, Mat(),CV_8UC3);
+			myImgAfterChange = dst;
+			DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+		}
+		else {//3채널 이미지, 원본 이미지. 
+			Mat noise(myImg.size(), CV_32SC3);
+			randn(noise, 0, stddev);
+			add(myImg, noise, dst, Mat(), CV_8UC3);
+			myImgAfterChange = dst;
+			DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+		}
+		
 	}
 	else if (*pScrollBar == partBlurSlider) {
 		blurRangeHalfWid = partBlurSlider.GetPos();
@@ -538,11 +564,14 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 void CFilterDlg::OnBnClickedBilateralFt()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	colorToGray();//color 사진의 경우 gray로 변경.
-	Mat dst;
-	bilateralFilter(myImgAfterChange, dst, -1, 10, 5); // -1 sigmaSpace로부터 자동생성됨. 10: 색공간에서의 가우시안 표준 편차 5: 좌표 공간에서의 가우시안 표준편차 
-	myImgAfterChange = dst;
-	DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+	if(colorToGray()==true){//color 사진의 경우 gray로 변경.
+		Mat dst;
+		bilateralFilter(myImgAfterChange, dst, -1, 10, 5); // -1 sigmaSpace로부터 자동생성됨. 10: 색공간에서의 가우시안 표준 편차 5: 좌표 공간에서의 가우시안 표준편차 
+		myImgAfterChange = dst.clone();
+		DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+	}else{
+		MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널3개 이미지만 처리합니다", L"알림", IDOK);
+	}
 }
 
 
@@ -587,7 +616,11 @@ void CFilterDlg::OnMouseMove(UINT nFlags, CPoint point)
 void CFilterDlg::OnBnClickedPartblurFt()
 {
 	//// TODO: Add your control notification handler code here
-	partBlurModeOn = !partBlurModeOn;
+	if(myImgAfterChange.data !=NULL && myImgAfterChange.channels() <3 ){
+		MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널3개 이미지만 처리합니다", L"사용불가 알림", IDOK);
+	}else{
+		partBlurModeOn = !partBlurModeOn;
+	}
 	
 }
 
@@ -718,9 +751,10 @@ void CFilterDlg::OnLButtonDown(UINT nFlags, CPoint point)
 
 //블러 처리 : 컬러영상에 대한 / 흑백영상은 추후 구현 
 //평균값 마스크: 3x3 1/9 필터 
-void CFilterDlg::partBlurProc(CPoint point) {
+int CFilterDlg::partBlurProc(CPoint point) {
 	//1. 마우스 포인터 위치값으로, 이미지상의 실제 위치를 계산한다 
 	// picLTRB에는 마지막 draw 했을 때의 rect 정보가 담김
+	
 	CPoint locInImg;//본인 창에서의 이미지 위치 x= left, y =top 
 	locInImg.x = point.x - picLTRB.left;// 
 	locInImg.y = point.y - picLTRB.top;
@@ -780,7 +814,7 @@ void CFilterDlg::partBlurProc(CPoint point) {
 		}
 	}
 	CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
-	
+	return 1;
 }
 
 

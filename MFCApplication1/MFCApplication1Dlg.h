@@ -84,5 +84,7 @@ public:
 
 	UINT_PTR m_nFaceDetectionTimerID = 0;
 	
-	int filterWndOpenMode; //0은 사진 1은 동영상 
+	// 비디오 필터링 버튼
+	CButton videoFilterBtn;
+	afx_msg void OnBnClickedBtnVideoFilter();
 };

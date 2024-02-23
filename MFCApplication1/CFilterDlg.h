@@ -76,7 +76,7 @@ public:
 	void DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo);//이미지 그리기
 	void CreateBitmapInfo(BITMAPINFO** newInfo, int w, int h, int bpp);
 	BOOL colorToGray();//컬러영상 >> 그레이 영상으로 변환 
-	void partBlurProc(CPoint point);//부분 블러 처리 메소드 
+	int partBlurProc(CPoint point);//부분 블러 처리 메소드 
 	void CFilterDlg::videoPrint();//비디오 출력
 
 };
