@@ -148,8 +148,8 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	GetDlgItem(IDC_BRIGHTNESSCTRL_BTN)->MoveWindow(btnlocLeft, 450, btnWidth, 60);
 	GetDlgItem(IDC_VIDEO_BTN)->MoveWindow(btnlocLeft, 530, btnWidth, 60);
 	GetDlgItem(IDC_MERGE_FACE)->MoveWindow(btnlocLeft, 610, btnWidth, 60);
-	GetDlgItem(IDOK)->MoveWindow(btnlocLeft, m_rectCurHist.bottom - 280, btnWidth, 60);
-	GetDlgItem(IDCANCEL)->MoveWindow(btnlocLeft, m_rectCurHist.bottom - 200, btnWidth, 60);
+	GetDlgItem(IDOK)->MoveWindow(btnlocLeft, m_rectCurHist.bottom - 200, btnWidth, 60);
+	GetDlgItem(IDCANCEL)->MoveWindow(btnlocLeft, m_rectCurHist.bottom - 120, btnWidth, 60);
 
 	CDialogEx::SetBackgroundColor(0x004D3428, 1);//3B261B 2A1B0D
 	CFont font;
