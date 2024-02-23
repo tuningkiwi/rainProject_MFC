@@ -66,10 +66,10 @@ BOOL CAffineDlg::OnInitDialog()
 	
 	GetDlgItem(IDC_SIZE_TEXT)->MoveWindow(1000, 280, 200, 45);
 	SizeSlide.MoveWindow(1000, 320, 200, 45);
-	SizeSlide.SetRange(0, 10);
+	SizeSlide.SetRange(0, 2);
 	SizeSlide.SetTicFreq(1);
 	SizeSlide.SetTic(1);
-	SizeSlide.SetPos(5);
+	SizeSlide.SetPos(1);
 	
 
 	GetDlgItem(IDCANCEL)->MoveWindow(1000, 720 - 100, 200, 45);
@@ -211,13 +211,23 @@ void CAffineDlg::OnBnClickedReverseIt()
 	ReadImage(myImg, myBitmapInfo);
 	MessageBox(L"원본 이미지로 돌아갑니다", L"알림", MB_OK);
 	currentRotatedImg = myImg.clone();
+	resultImg = myImg.clone();
+	ChangeImg = myImg.clone();
+	SizeSlide.SetPos(1);
 }
 
 
 void CAffineDlg::OnBnClickedButtonRr()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	ChangeImg = myImg.clone();
+	if (!resultImg.empty())
+	{
+		ChangeImg = resultImg.clone();
+	}
+	else
+	{
+		ChangeImg = myImg.clone();
+	}
 
 	if (!currentRotatedImg.empty())
 	{
@@ -230,6 +240,8 @@ void CAffineDlg::OnBnClickedButtonRr()
 
 	// 화면에 회전된 이미지 표시
 	ReadImage(currentRotatedImg, resultmyBitmapInfo);
+	
+	rotresultImg = currentRotatedImg.clone();
 	resultImg = currentRotatedImg.clone();
 }
 
@@ -237,7 +249,15 @@ void CAffineDlg::OnBnClickedButtonRr()
 void CAffineDlg::OnBnClickedButtonLr()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	ChangeImg = myImg.clone();
+	
+	if (!resultImg.empty())
+	{
+		ChangeImg = resultImg.clone();
+	}
+	else 
+	{
+		ChangeImg = myImg.clone();
+	}
 
 	if (!currentRotatedImg.empty())
 	{
@@ -250,38 +270,72 @@ void CAffineDlg::OnBnClickedButtonLr()
 
 	// 화면에 회전된 이미지 표시
 	ReadImage(currentRotatedImg, resultmyBitmapInfo);
+	
+	rotresultImg = currentRotatedImg.clone();
 	resultImg = currentRotatedImg.clone();
 }
 
 
 void CAffineDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-	ChangeImg = myImg.clone();
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	if (!rotresultImg.empty())
+	{
+		ChangeImg = rotresultImg.clone();
+	}
+	else
+	{
+		ChangeImg = myImg.clone();
+	}
+
+	//ChangeImg = myImg.clone();
+
 	if (*pScrollBar == SizeSlide) 
 	{
 		// 슬라이더에서 변경된 위치 얻기
 		int pos = SizeSlide.GetPos();
-
-		// 슬라이더의 범위를 0부터 10으로 설정했으므로, 크기 조절 비율을 조정합니다. 5가 원본입니다
-		double originalSize = 5.0;
-		double sliderRange = 10.0;
-		double scaledPos = originalSize + (pos - 5) * (originalSize / sliderRange);
 		
+		// 각 슬라이더 위치에 대한 크기 조정값 정의
+		const double scaleFactor[] = { 0.4, 1, 1.4 }; // 순서대로 0, 1, 2에 해당
 
-		// 새로운 이미지 크기 계산
-		double ratio = scaledPos / originalSize;
-		int newWidth = static_cast<int>(ChangeImg.cols * ratio);
-		int newHeight = static_cast<int>(ChangeImg.rows * ratio);
+		// 유효한 슬라이더 위치 범위 확인
+		if (pos == 0)
+		{
+			// 이미지 크기 조정
+			resize(ChangeImg, SizeImg, Size(static_cast<int>(ChangeImg.cols * scaleFactor[pos]),
+				static_cast<int>(ChangeImg.rows * scaleFactor[pos])),
+				INTER_LINEAR);
 
-		// 이미지 크기 조절
-		resize(ChangeImg, SizeImg, Size(newWidth, newHeight), 0, 0, INTER_NEAREST);
+			// 비트맵 정보 생성 및 이미지 출력
+			MakeBitmapInfo(&resultmyBitmapInfo, SizeImg.cols, SizeImg.rows, SizeImg.channels() * 8);
+			ReadImage(SizeImg, resultmyBitmapInfo);
+			resultImg = SizeImg.clone();
+		}
+		else if (pos == 1)
+		{
+			// 이미지 크기 조정
+			resize(ChangeImg, SizeImg, Size(static_cast<int>(ChangeImg.cols * scaleFactor[pos]),
+				static_cast<int>(ChangeImg.rows * scaleFactor[pos])),
+				INTER_LINEAR);
 
-		// 변경된 이미지 출력
-		ReadImage(SizeImg, myBitmapInfo);
-		myImg = SizeImg.clone();
+			// 비트맵 정보 생성 및 이미지 출력
+			MakeBitmapInfo(&resultmyBitmapInfo, SizeImg.cols, SizeImg.rows, SizeImg.channels() * 8);
+			ReadImage(SizeImg, resultmyBitmapInfo);
+			resultImg = SizeImg.clone();
+		}
+		else if (pos == 2)
+		{
+			// 이미지 크기 조정
+			resize(ChangeImg, SizeImg, Size(static_cast<int>(ChangeImg.cols * scaleFactor[pos]),
+				static_cast<int>(ChangeImg.rows * scaleFactor[pos])),
+				INTER_LINEAR);
+
+			// 비트맵 정보 생성 및 이미지 출력
+			MakeBitmapInfo(&resultmyBitmapInfo, SizeImg.cols, SizeImg.rows, SizeImg.channels() * 8);
+			ReadImage(SizeImg, resultmyBitmapInfo);
+			resultImg = SizeImg.clone();
+		}
 	}
-
 	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
