@@ -273,16 +273,13 @@ void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		int newValue = 0;
 		if (pScrollBar->GetDlgCtrlID() == IDC_SLIDER1) {
 			// 슬라이더에서 값 변경될 때
-			m_edit_val = m_slider.GetPos(); // 슬라이더에서 값 가져오기
+			newValue = m_slider.GetPos(); // 슬라이더에서 값 가져오기
 			
 			m_spin.SetPos(newValue); // 스핀 컨트롤에 값 설정
 			CString strValue;
 			strValue.Format(_T("%d"), newValue);
 			m_edit.SetWindowText(strValue); // 에디트 컨트롤에 값 설정
 			
-			
-		}
-		
 		if ((myImg.channels() == 3))
 		{
 			Mat tmpImg = myImg.clone();
@@ -308,6 +305,8 @@ void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			// 이미지 표시
 			CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
 			DrawImage(adjustedImage, BitChangeImg);
+		}
+
 		}
 
 
