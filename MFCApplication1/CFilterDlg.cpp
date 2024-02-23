@@ -169,6 +169,7 @@ void CFilterDlg::OnBnClickedOk()
 {
 	// TODO: Add your control notification handler code here
 	//메세지 박스 적용되었습니다 알림 넣기 
+	KillTimer(2);
 	CDialogEx::OnOK();
 }
 
@@ -239,7 +240,7 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 		// 자동 수행되는 메시지 함수에의해서 출력이 안되서 
 		//onInitDialog()에 타이머로 걸어놓음  
 		DrawImage(myImg, myBitmapInfo);//처음 로딩되는 이미지 
-		CDialogEx::OnTimer(nIDEvent);	
+		
 	}else if (nIDEvent==1) {
 
 		int wid = 1280;
@@ -259,8 +260,11 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 		capture->set(CAP_PROP_FRAME_HEIGHT, hei);
 
 		// 타이머 설정
-		//SetTimer(1, 30, NULL);
-		//KillTimer(1);
+		
+		SetTimer(2, 30, NULL);
+		KillTimer(1);
+		
+	}else if (nIDEvent==2) {
 		capture->read(mat_frame);
 
 		//이곳에 OpenCV 함수들을 적용합니다.
@@ -372,11 +376,11 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 
 		cimage_mfc.ReleaseDC();
 		cimage_mfc.Destroy();
-		CDialogEx::OnTimer(nIDEvent);	
+		
 	}
 	
 	// Handle other timer events or call the base class
-	
+	CDialogEx::OnTimer(nIDEvent);	
 
 }
 
@@ -469,6 +473,7 @@ void CFilterDlg::OnBnClickedRevertFt()
 void CFilterDlg::OnBnClickedCancel()
 {
 	// TODO: Add your control notification handler code here
+	KillTimer(2);
 	CDialogEx::OnCancel();
 }
 
