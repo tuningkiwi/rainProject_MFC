@@ -70,5 +70,9 @@ public:
 	CStatic m_picture;
 	VideoCapture* capture;
 	Mat mat_frame;
+	Mat frame;
 	CImage cimage_mfc;
+
+	VideoCapture m_cap; // 카메라 캡처 객체
+	CStatic m_pcView; // Picture Control 객체
 };

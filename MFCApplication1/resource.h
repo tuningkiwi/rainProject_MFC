@@ -17,6 +17,7 @@
 #define IDD_DIAL                        136
 #define IDD_rotaion_it                  136
 #define IDD_Affine_it                   136
+#define IDD_VIDEO                       137
 #define IDC_BUTTON1                     1000
 #define IDC_FILTER_BTN                  1000
 #define IDC_BILATERAL_FT                1000
@@ -62,14 +63,15 @@
 #define IDC_STATIC7                     1030
 #define IDC_SLIDER2                     1031
 #define IDC_MERGE                       1032
+#define IDC_VIDEO_VIEW                  1033
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        137
+#define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1033
+#define _APS_NEXT_CONTROL_VALUE         1034
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -28,15 +28,15 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// 대화 상자 데이터입니다.
+	// 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
 
-// 구현입니다.
+	// 구현입니다.
 protected:
 	DECLARE_MESSAGE_MAP()
 };
@@ -130,6 +130,7 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 	// Assuming m_picture is a valid control associated with a resource ID
+	/*
 	capture = new VideoCapture(0, CAP_DSHOW);
 	if (!capture->isOpened())
 	{
@@ -141,7 +142,8 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	capture->set(CAP_PROP_FRAME_HEIGHT, 720);
 
 	SetTimer(1000, 30, NULL);
-	
+	*/
+
 	//현재 window 크기 출력
 	CRect m_rectCurHist;
 	this->GetWindowRect(m_rectCurHist);// right:창의 너비 bottm: 창의 높이 
@@ -156,8 +158,8 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	GetDlgItem(IDC_BUTY_BTN)->MoveWindow(btnlocLeft, 370, btnWidth, 60);
 	GetDlgItem(IDC_BRIGHTNESSCTRL_BTN)->MoveWindow(btnlocLeft, 450, btnWidth, 60);
 	GetDlgItem(IDC_VIDEO_BTN)->MoveWindow(btnlocLeft, 530, btnWidth, 60);
-	GetDlgItem(IDOK)->MoveWindow(btnlocLeft, m_rectCurHist.bottom -280, btnWidth, 60);
-	GetDlgItem(IDCANCEL)->MoveWindow(btnlocLeft, m_rectCurHist.bottom -200, btnWidth, 60);
+	GetDlgItem(IDOK)->MoveWindow(btnlocLeft, m_rectCurHist.bottom - 280, btnWidth, 60);
+	GetDlgItem(IDCANCEL)->MoveWindow(btnlocLeft, m_rectCurHist.bottom - 200, btnWidth, 60);
 
 	CDialogEx::SetBackgroundColor(0x004D3428, 1);//3B261B 2A1B0D
 	CFont font;
@@ -266,7 +268,7 @@ void CMFCApplication1Dlg::CreateBitmapInfo(int w, int h, int bpp) {
 			m_pBitmapInfo->bmiColors[i].rgbReserved = 0;
 		}
 	}
-	                                                                                                                          
+
 	m_pBitmapInfo->bmiHeader.biWidth = w;
 	m_pBitmapInfo->bmiHeader.biHeight = -h;//음수는 원본이 왼쪽 위 모서리에 있는 하향식 DIB입니다.
 }
@@ -275,11 +277,11 @@ void CMFCApplication1Dlg::CreateBitmapInfo(int w, int h, int bpp) {
 void CMFCApplication1Dlg::DrawImage() {
 	CRect m_rectCurWnd;
 	this->GetWindowRect(m_rectCurWnd);
-	int wx = int(m_rectCurWnd.right*5/6);
+	int wx = int(m_rectCurWnd.right * 5 / 6);
 	int wy = m_rectCurWnd.bottom;
-	
+
 	//불러올 사진 cols 가져오기.
-	
+
 	CClientDC dc(GetDlgItem(IDC_PC_VIEW));//IDC_PC_VIEW
 	CRect rect;// 이미지를 넣을 사각형 
 	if (m_matImage.cols > wx) {
@@ -298,13 +300,13 @@ void CMFCApplication1Dlg::DrawImage() {
 		int y = cvRound((wy - m_matImage.rows) / 2);
 		GetDlgItem(IDC_PC_VIEW)->MoveWindow(x, y, m_matImage.cols, m_matImage.rows);
 	}
-	
+
 	GetDlgItem(IDC_PC_VIEW)->GetClientRect(&rect);
 
 	//픽셀을 삭제합니다. 이 모드는 해당 정보를 보존하지 않고 
 	// 제거된 모든 픽셀 줄을 삭제합니다.
 	SetStretchBltMode(dc.GetSafeHdc(), COLORONCOLOR);
-	
+
 	//StretchDIBits 함수는 DIB, JPEG 또는 PNG 이미지의 픽셀 사각형에 
 	// 대한 색 데이터를 지정된 대상 사각형에 복사합니다.
 	//dc.GetSafeHdc(): 출력 디바이스 컨텍스트를 가져옵니다
@@ -373,7 +375,7 @@ void CMFCApplication1Dlg::OnBnClickedFilterBtn()
 		// Do something
 		m_matImage = filterDlg.myImgAfterChange;
 		m_pBitmapInfo = filterDlg.myBmpInfoAfterChange;
-		DrawImage(); 
+		DrawImage();
 		break;
 	case IDCANCEL:
 		// Do something
@@ -397,7 +399,7 @@ void CMFCApplication1Dlg::OnBnClickedAffineBtn()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	// 인태 주석 테스트
 	CAffineDlg affinedlg(m_matImage, m_pBitmapInfo);
-	
+
 	// Create and show the dialog box
 	INT_PTR nRet = -1;
 	nRet = affinedlg.DoModal();
@@ -459,7 +461,7 @@ void CMFCApplication1Dlg::OnBnClickedBrightnessctrlBtn()
 {
 	CBRIGHTNESSCTRL brightdlg(m_matImage, m_pBitmapInfo);
 	brightdlg.DoModal();
-	
+
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
 
@@ -471,7 +473,7 @@ void CMFCApplication1Dlg::OnBnClickedOk()
 	std::time_t result = std::time(nullptr);
 	std::string name = std::ctime(&result);//마지막에 \n이 삽입됨
 	std::string newName = "";
-	for (int i = 0; i < name.size()-1; i++) {
+	for (int i = 0; i < name.size() - 1; i++) {
 		std::cout << i << ":" << name[i] << std::endl;
 		if (name[i] != 0x20 && name[i] != ':') {//공백문자 
 			newName += name[i];
@@ -488,71 +490,87 @@ void CMFCApplication1Dlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStru
 	// TODO: Add your message handler code here and/or call default
 
 	switch (nIDCtl) {
-		case IDC_BUTTON2: case IDC_FILTER_BTN:	case IDC_COLOR_BTN:
-		case IDC_AFFINE_BTN: case IDC_BUTY_BTN:	case IDC_BRIGHTNESSCTRL_BTN:
-		case IDOK: case IDCANCEL:
-		{
-			if (lpDrawItemStruct->itemAction & 0x07) {
-				CDC* p_dc = CDC::FromHandle(lpDrawItemStruct->hDC);
-				if (lpDrawItemStruct->itemState & ODS_SELECTED) {//버튼 클릭시 
-					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71));//버튼의 색상
-					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105), RGB(60, 75, 105));//버튼 외곽선
-					p_dc->SetTextColor(RGB(140, 147, 161));
-				}
-				else {//기본 상태  //&lpDrawItemStruct->rcItem 버튼의 크기
-					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105));//버튼의 색상
-					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71), RGB(42, 52, 71));//버튼 외곽선
-					p_dc->SetTextColor(RGB(171, 182, 199));
-				}
-
-				p_dc->SetBkMode(TRANSPARENT);
+	case IDC_BUTTON2: case IDC_FILTER_BTN:	case IDC_COLOR_BTN:
+	case IDC_AFFINE_BTN: case IDC_BUTY_BTN:	case IDC_BRIGHTNESSCTRL_BTN:
+	case IDOK: case IDCANCEL:
+	{
+		if (lpDrawItemStruct->itemAction & 0x07) {
+			CDC* p_dc = CDC::FromHandle(lpDrawItemStruct->hDC);
+			if (lpDrawItemStruct->itemState & ODS_SELECTED) {//버튼 클릭시 
+				p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71));//버튼의 색상
+				p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105), RGB(60, 75, 105));//버튼 외곽선
+				p_dc->SetTextColor(RGB(140, 147, 161));
 			}
+			else {//기본 상태  //&lpDrawItemStruct->rcItem 버튼의 크기
+				p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105));//버튼의 색상
+				p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71), RGB(42, 52, 71));//버튼 외곽선
+				p_dc->SetTextColor(RGB(171, 182, 199));
+			}
+
+			p_dc->SetBkMode(TRANSPARENT);
 		}
-		default: break;
+	}
+	default: break;
 	}
 	CDC* p_dc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	switch (nIDCtl) {
-		case IDC_BUTTON2: {
-			p_dc->DrawText(L"사진불러오기", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			break;
-		}
-		case IDC_FILTER_BTN: {
-			p_dc->DrawText(L"필터링", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			break;
-		}
-		case IDC_COLOR_BTN: {
-			p_dc->DrawText(L"컬러링", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			break;
-		}
-		case IDC_AFFINE_BTN: {
-			p_dc->DrawText(L"어파인", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			break;
-		}
-		case IDC_BUTY_BTN: {
-			p_dc->DrawText(L"뷰티", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			break;
-		}
-		case IDC_BRIGHTNESSCTRL_BTN: {
-			p_dc->DrawText(L"밝기", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			break;
-		}
-		case IDOK: {
-			p_dc->DrawText(L"저장", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			break;
-		}
-		case IDCANCEL: {
-			p_dc->DrawText(L"취소", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			break;
-		}
-		default: break;
+	case IDC_BUTTON2: {
+		p_dc->DrawText(L"사진불러오기", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDC_FILTER_BTN: {
+		p_dc->DrawText(L"필터링", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDC_COLOR_BTN: {
+		p_dc->DrawText(L"컬러링", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDC_AFFINE_BTN: {
+		p_dc->DrawText(L"어파인", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDC_BUTY_BTN: {
+		p_dc->DrawText(L"뷰티", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDC_BRIGHTNESSCTRL_BTN: {
+		p_dc->DrawText(L"밝기", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDOK: {
+		p_dc->DrawText(L"저장", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDCANCEL: {
+		p_dc->DrawText(L"취소", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	default: break;
 	}
 
-//	CDialogEx::OnDrawItem(nIDCtl, lpDrawItemStruct);
+	//	CDialogEx::OnDrawItem(nIDCtl, lpDrawItemStruct);
 }
 
 void CMFCApplication1Dlg::OnBnClickedVideoBtn()
 {
-	
+	// 웹캠 열기
+	capture = new VideoCapture(0, CAP_DSHOW);
+	if (!capture->isOpened())
+	{
+		MessageBox(_T("웹캠을 열 수 없습니다."));
+		return;
+	}
+
+	// 웹캠 크기 설정
+	capture->set(CAP_PROP_FRAME_WIDTH, 1280);
+	capture->set(CAP_PROP_FRAME_HEIGHT, 720);
+
+	// 타이머 설정
+	SetTimer(1, 30, NULL);
+
+	// 버튼 비활성화
+	GetDlgItem(IDC_VIDEO_BTN)->EnableWindow(FALSE);
 }
 
 void CMFCApplication1Dlg::OnDestroy()
@@ -567,7 +585,7 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 
-    //mat_frame가 입력 이미지입니다.
+	//mat_frame가 입력 이미지입니다.
 	capture->read(mat_frame);
 
 	//이곳에 OpenCV 함수들을 적용합니다.
