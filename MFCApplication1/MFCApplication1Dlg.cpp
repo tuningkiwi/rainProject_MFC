@@ -166,6 +166,8 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	GetDlgItem(IDCANCEL)->SetFont(&font);
 	font.Detach();//font 종료 꼭 해주기 메모리 할당 해제 
 
+	filterWndMode = 0;//0은 사진 1은 동영상  
+
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -393,8 +395,7 @@ void CMFCApplication1Dlg::OnSize(UINT nType, int cx, int cy)
 void CMFCApplication1Dlg::OnBnClickedFilterBtn()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	//CDialog filterDlg(IDD_DIALOG1);
-	CFilterDlg filterDlg(m_matImage, m_pBitmapInfo);
+	CFilterDlg filterDlg(m_matImage, m_pBitmapInfo, 0);
 
 	// Create and show the dialog box
 	INT_PTR nRet = -1;
@@ -417,6 +418,7 @@ void CMFCApplication1Dlg::OnBnClickedFilterBtn()
 		break;
 	case IDCANCEL:
 		// Do something
+		MessageBox(L"취소되었습니다\n원본으로 돌아갑니다", L"알림", IDOK);
 		break;
 	default:
 		// Do something

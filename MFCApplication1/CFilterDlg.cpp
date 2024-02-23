@@ -17,11 +17,12 @@ CFilterDlg::CFilterDlg()
 
 }
 
-CFilterDlg::CFilterDlg(Mat Img, BITMAPINFO* bitmapInfo)
+CFilterDlg::CFilterDlg(Mat Img, BITMAPINFO* bitmapInfo, int fileMode)
 	: CDialogEx(IDD_DIALOG1)
 {
 	myImg = Img; // 이미지 매트릭스 정보 가져오기 
-	myBitmapInfo = bitmapInfo; 
+	myBitmapInfo = bitmapInfo;
+	myfileMode = fileMode;
 }
 
 CFilterDlg::~CFilterDlg()

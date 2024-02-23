@@ -83,4 +83,6 @@ public:
 	CStatic m_pcView; // Picture Control 객체
 
 	UINT_PTR m_nFaceDetectionTimerID = 0;
+	
+	int filterWndOpenMode; //0은 사진 1은 동영상 
 };
