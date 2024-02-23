@@ -31,6 +31,7 @@ public:
 	void CreateBitmapInfo(BITMAPINFO** newInfo, int w, int h, int bpp);
 
 	Mat myImg;// 이미지 정보를 담고 있는 객체.
+	Mat myOriginalImg;  // 원본 이미지를 저장하는 변수 추가
 	BITMAPINFO* myBitmapInfo; // Bitmap 정보를 담고 있는 구조체.
 	CStatic picCtrl_FT;
 	Mat myImgAfterChange;
@@ -44,6 +45,7 @@ public:
 	afx_msg void OnBnClickedRevertFt();
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnBnClickedDetect();
+	afx_msg void OnBnClickedMerge();
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 };
 

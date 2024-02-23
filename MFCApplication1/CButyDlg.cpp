@@ -5,9 +5,12 @@
 #include "MFCApplication1.h"
 #include "afxdialogex.h"
 #include "CButyDlg.h"
+
 #include "opencv2/objdetect.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgproc.hpp"
+#include <Gdiplus.h>
+#pragma comment(lib, "gdiplus.lib")
 
 // CButyDlg 대화 상자
 
@@ -45,6 +48,7 @@ BEGIN_MESSAGE_MAP(CButyDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_REVERT_FT, &CButyDlg::OnBnClickedRevertFt)
 	ON_BN_CLICKED(IDCANCEL, &CButyDlg::OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_DETECT, &CButyDlg::OnBnClickedDetect)
+	ON_BN_CLICKED(IDC_MERGE, &CButyDlg::OnBnClickedMerge)
 	ON_WM_HSCROLL()
 END_MESSAGE_MAP()
 
@@ -61,6 +65,7 @@ BOOL CButyDlg::OnInitDialog()
 	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);
 	GetDlgItem(IDC_REVERT_FT)->MoveWindow(1000, 720 - 220, 200, 45);
 	GetDlgItem(IDC_DETECT)->MoveWindow(1000, 720 - 280, 200, 45);
+	GetDlgItem(IDC_MERGE)->MoveWindow(1000, 720 - 400, 200, 45);
 
 	// Slider control 초기화
 	CSliderCtrl* pSlider = static_cast<CSliderCtrl*>(GetDlgItem(IDC_SLIDER_EYE));
@@ -208,10 +213,9 @@ void CButyDlg::CreateBitmapInfo(BITMAPINFO** btmInfo, int w, int h, int bpp) {
 void CButyDlg::OnBnClickedRevertFt()
 {
 	// TODO: Add your control notification handler code here
+	myImg = myOriginalImg.clone();
 	DrawImage(myImg, myBitmapInfo);
 	MessageBox(L"원본으로 돌아갑니다", L"알림", MB_OK);
-
-	Invalidate();
 }
 
 //필터 창을 종료하고, 부모창 사진에는 변경이 안되어 있어야함. 
@@ -229,6 +233,9 @@ void CButyDlg::OnBnClickedDetect()
 		Mat grayImage;
 		cvtColor(myImg, grayImage, COLOR_BGR2GRAY);
 
+		// Copy the current image to myOriginalImg (assuming myOriginalImg is initialized)
+		myOriginalImg = myImg.clone();
+
 		// Load pre-trained eye cascade classifier
 		CascadeClassifier eyeCascade;
 		eyeCascade.load("C:\\opencv\\build\\etc\\haarcascades\\haarcascade_eye.xml");
@@ -243,10 +250,6 @@ void CButyDlg::OnBnClickedDetect()
 			Point eyeCenter(eyes[i].x + eyes[i].width / 2, eyes[i].y + eyes[i].height / 2);
 			int radius = cvRound(eyeRadius);
 			circle(myImg, eyeCenter, radius, Scalar(0, 255, 0), 2);
-
-			Mat eyeROI = myImg(eyes[i]);
-			resize(eyeROI, eyeROI, Size(eyeROI.cols * eyeRadius, eyeROI.rows * eyeRadius));
-			eyeROI.copyTo(myImg(eyes[i]));
 		}
 
 		// Redraw the image with eye detection
@@ -271,4 +274,53 @@ void CButyDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	}
 
 	CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
+}
+
+void CButyDlg::OnBnClickedMerge()
+{
+	try
+	{
+		// Convert the Mat image to grayscale for face detection
+		Mat grayImage;
+		cvtColor(myImg, grayImage, COLOR_BGR2GRAY);
+
+		// Load pre-trained face cascade classifier
+		CascadeClassifier faceCascade;
+		faceCascade.load("C:\\opencv\\build\\etc\\haarcascades\\haarcascade_frontalface_default.xml");
+
+		// Load the image to be overlaid (headpin.jpg)
+		Mat overlayImage = imread("C:\\Users\\EMBEDDED\\source\\repos\\intel1\\cpp\\images\\STAR01.jpg");
+
+		// Detect faces in the image
+		std::vector<Rect> faces;
+		faceCascade.detectMultiScale(grayImage, faces, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(30, 30));
+
+		// Loop over detected faces
+		for (size_t i = 0; i < faces.size(); i++)
+		{
+			Point faceCenter(faces[i].x + faces[i].width / 2, faces[i].y + faces[i].height / 2);
+			int radius = cvRound(faces[i].width / 2.0);
+
+			// Draw the green circle
+			circle(myImg, faceCenter, radius, Scalar(0, 255, 0), 2);
+
+			// Define the region of interest (ROI) where the overlay will be applied
+			Rect roiRect(faceCenter.x - radius, faces[i].y, 2 * radius, radius);
+			Mat roi = myImg(roiRect);
+
+			// Resize overlay image to match the ROI size
+			resize(overlayImage, overlayImage, roi.size());
+
+			// Blend the overlay image with the ROI using addWeighted
+			addWeighted(roi, 0.2, overlayImage, 1.0, 0.0, roi);
+		}
+
+		// Redraw the image with face detection and overlay
+		DrawImage(myImg, myBitmapInfo);
+	}
+	catch (const Exception& ex)
+	{
+		// Handle the exception (e.g., display an error message)
+		AfxMessageBox(CString("Error during face detection: ") + ex.what());
+	}
 }

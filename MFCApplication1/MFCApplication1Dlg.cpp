@@ -28,15 +28,15 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// 대화 상자 데이터입니다.
+	// 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
 
-// 구현입니다.
+	// 구현입니다.
 protected:
 	DECLARE_MESSAGE_MAP()
 };
@@ -72,6 +72,8 @@ void CMFCApplication1Dlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_AFFINE_BTN, cropAffinBtn);
 	DDX_Control(pDX, IDC_BUTY_BTN, ButyBtn);
 	DDX_Control(pDX, IDC_BRIGHTNESSCTRL_BTN, brightnessBtn);
+	DDX_Control(pDX, IDC_VIDEO_BTN, videoBtn);
+	DDX_Control(pDX, IDC_PC_VIEW, m_picture);
 }
 
 BEGIN_MESSAGE_MAP(CMFCApplication1Dlg, CDialogEx)
@@ -87,8 +89,11 @@ BEGIN_MESSAGE_MAP(CMFCApplication1Dlg, CDialogEx)
 	ON_BN_CLICKED(IDC_AFFINE_BTN, &CMFCApplication1Dlg::OnBnClickedAffineBtn)
 	ON_BN_CLICKED(IDC_BUTY_BTN, &CMFCApplication1Dlg::OnBnClickedButyBtn)
 	ON_BN_CLICKED(IDC_BRIGHTNESSCTRL_BTN, &CMFCApplication1Dlg::OnBnClickedBrightnessctrlBtn)
+	ON_BN_CLICKED(IDC_VIDEO_BTN, &CMFCApplication1Dlg::OnBnClickedVideoBtn)
 	ON_BN_CLICKED(IDOK, &CMFCApplication1Dlg::OnBnClickedOk)
 	ON_WM_DRAWITEM()
+	ON_WM_DESTROY()
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 
@@ -124,6 +129,21 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+	// Assuming m_picture is a valid control associated with a resource ID
+	/*
+	capture = new VideoCapture(0, CAP_DSHOW);
+	if (!capture->isOpened())
+	{
+		MessageBox(_T("웹캠을 열수 없습니다. \n"));
+	}
+
+	//웹캠 크기를  320x240으로 지정    
+	capture->set(CAP_PROP_FRAME_WIDTH, 1280);
+	capture->set(CAP_PROP_FRAME_HEIGHT, 720);
+
+	SetTimer(1000, 30, NULL);
+	*/
+
 	//현재 window 크기 출력
 	CRect m_rectCurHist;
 	this->GetWindowRect(m_rectCurHist);// right:창의 너비 bottm: 창의 높이 
@@ -137,8 +157,9 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	GetDlgItem(IDC_AFFINE_BTN)->MoveWindow(btnlocLeft, 290, btnWidth, 60);
 	GetDlgItem(IDC_BUTY_BTN)->MoveWindow(btnlocLeft, 370, btnWidth, 60);
 	GetDlgItem(IDC_BRIGHTNESSCTRL_BTN)->MoveWindow(btnlocLeft, 450, btnWidth, 60);
-	GetDlgItem(IDOK)->MoveWindow(btnlocLeft, m_rectCurHist.bottom -280, btnWidth, 60);
-	GetDlgItem(IDCANCEL)->MoveWindow(btnlocLeft, m_rectCurHist.bottom -200, btnWidth, 60);
+	GetDlgItem(IDC_VIDEO_BTN)->MoveWindow(btnlocLeft, 530, btnWidth, 60);
+	GetDlgItem(IDOK)->MoveWindow(btnlocLeft, m_rectCurHist.bottom - 280, btnWidth, 60);
+	GetDlgItem(IDCANCEL)->MoveWindow(btnlocLeft, m_rectCurHist.bottom - 200, btnWidth, 60);
 
 	CDialogEx::SetBackgroundColor(0x004D3428, 1);//3B261B 2A1B0D
 	CFont font;
@@ -149,6 +170,7 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	GetDlgItem(IDC_AFFINE_BTN)->SetFont(&font);
 	GetDlgItem(IDC_BUTY_BTN)->SetFont(&font);
 	GetDlgItem(IDC_BRIGHTNESSCTRL_BTN)->SetFont(&font);
+	GetDlgItem(IDC_VIDEO_BTN)->SetFont(&font);
 	GetDlgItem(IDOK)->SetFont(&font);
 	GetDlgItem(IDCANCEL)->SetFont(&font);
 	font.Detach();//font 종료 꼭 해주기 메모리 할당 해제 
@@ -213,9 +235,6 @@ HCURSOR CMFCApplication1Dlg::OnQueryDragIcon()
 }
 
 
-
-
-
 //BITMAP 정보 구조체 데이터 생성 
 void CMFCApplication1Dlg::CreateBitmapInfo(int w, int h, int bpp) {
 	if (m_pBitmapInfo != NULL) //기존 비트맵 정보 초기화 
@@ -249,7 +268,7 @@ void CMFCApplication1Dlg::CreateBitmapInfo(int w, int h, int bpp) {
 			m_pBitmapInfo->bmiColors[i].rgbReserved = 0;
 		}
 	}
-	                                                                                                                          
+
 	m_pBitmapInfo->bmiHeader.biWidth = w;
 	m_pBitmapInfo->bmiHeader.biHeight = -h;//음수는 원본이 왼쪽 위 모서리에 있는 하향식 DIB입니다.
 }
@@ -258,11 +277,11 @@ void CMFCApplication1Dlg::CreateBitmapInfo(int w, int h, int bpp) {
 void CMFCApplication1Dlg::DrawImage() {
 	CRect m_rectCurWnd;
 	this->GetWindowRect(m_rectCurWnd);
-	int wx = int(m_rectCurWnd.right*5/6);
+	int wx = int(m_rectCurWnd.right * 5 / 6);
 	int wy = m_rectCurWnd.bottom;
-	
+
 	//불러올 사진 cols 가져오기.
-	
+
 	CClientDC dc(GetDlgItem(IDC_PC_VIEW));//IDC_PC_VIEW
 	CRect rect;// 이미지를 넣을 사각형 
 	if (m_matImage.cols > wx) {
@@ -282,14 +301,12 @@ void CMFCApplication1Dlg::DrawImage() {
 		GetDlgItem(IDC_PC_VIEW)->MoveWindow(x, y, m_matImage.cols, m_matImage.rows);
 	}
 
-
-	
 	GetDlgItem(IDC_PC_VIEW)->GetClientRect(&rect);
 
 	//픽셀을 삭제합니다. 이 모드는 해당 정보를 보존하지 않고 
 	// 제거된 모든 픽셀 줄을 삭제합니다.
 	SetStretchBltMode(dc.GetSafeHdc(), COLORONCOLOR);
-	
+
 	//StretchDIBits 함수는 DIB, JPEG 또는 PNG 이미지의 픽셀 사각형에 
 	// 대한 색 데이터를 지정된 대상 사각형에 복사합니다.
 	//dc.GetSafeHdc(): 출력 디바이스 컨텍스트를 가져옵니다
@@ -406,7 +423,7 @@ void CMFCApplication1Dlg::OnBnClickedFilterBtn()
 		// Do something
 		m_matImage = filterDlg.myImgAfterChange;
 		m_pBitmapInfo = filterDlg.myBmpInfoAfterChange;
-		DrawImage(); 
+		DrawImage();
 		break;
 	case IDCANCEL:
 		// Do something
@@ -430,7 +447,7 @@ void CMFCApplication1Dlg::OnBnClickedAffineBtn()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	// 인태 주석 테스트
 	CAffineDlg affinedlg(m_matImage, m_pBitmapInfo);
-	
+
 	// Create and show the dialog box
 	INT_PTR nRet = -1;
 	nRet = affinedlg.DoModal();
@@ -492,7 +509,7 @@ void CMFCApplication1Dlg::OnBnClickedBrightnessctrlBtn()
 {
 	CBRIGHTNESSCTRL brightdlg(m_matImage, m_pBitmapInfo);
 	brightdlg.DoModal();
-	
+
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
 
@@ -504,7 +521,7 @@ void CMFCApplication1Dlg::OnBnClickedOk()
 	std::time_t result = std::time(nullptr);
 	std::string name = std::ctime(&result);//마지막에 \n이 삽입됨
 	std::string newName = "";
-	for (int i = 0; i < name.size()-1; i++) {
+	for (int i = 0; i < name.size() - 1; i++) {
 		std::cout << i << ":" << name[i] << std::endl;
 		if (name[i] != 0x20 && name[i] != ':') {//공백문자 
 			newName += name[i];
@@ -521,64 +538,211 @@ void CMFCApplication1Dlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStru
 	// TODO: Add your message handler code here and/or call default
 
 	switch (nIDCtl) {
-		case IDC_BUTTON2: case IDC_FILTER_BTN:	case IDC_COLOR_BTN:
-		case IDC_AFFINE_BTN: case IDC_BUTY_BTN:	case IDC_BRIGHTNESSCTRL_BTN:
-		case IDOK: case IDCANCEL:
-		{
-			if (lpDrawItemStruct->itemAction & 0x07) {
-				CDC* p_dc = CDC::FromHandle(lpDrawItemStruct->hDC);
-				if (lpDrawItemStruct->itemState & ODS_SELECTED) {//버튼 클릭시 
-					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71));//버튼의 색상
-					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105), RGB(60, 75, 105));//버튼 외곽선
-					p_dc->SetTextColor(RGB(140, 147, 161));
-				}
-				else {//기본 상태  //&lpDrawItemStruct->rcItem 버튼의 크기
-					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105));//버튼의 색상
-					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71), RGB(42, 52, 71));//버튼 외곽선
-					p_dc->SetTextColor(RGB(171, 182, 199));
-				}
-
-				p_dc->SetBkMode(TRANSPARENT);
+	case IDC_BUTTON2: case IDC_FILTER_BTN:	case IDC_COLOR_BTN:
+	case IDC_AFFINE_BTN: case IDC_BUTY_BTN:	case IDC_BRIGHTNESSCTRL_BTN:
+	case IDOK: case IDCANCEL:
+	{
+		if (lpDrawItemStruct->itemAction & 0x07) {
+			CDC* p_dc = CDC::FromHandle(lpDrawItemStruct->hDC);
+			if (lpDrawItemStruct->itemState & ODS_SELECTED) {//버튼 클릭시 
+				p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71));//버튼의 색상
+				p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105), RGB(60, 75, 105));//버튼 외곽선
+				p_dc->SetTextColor(RGB(140, 147, 161));
 			}
+			else {//기본 상태  //&lpDrawItemStruct->rcItem 버튼의 크기
+				p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(60, 75, 105));//버튼의 색상
+				p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(42, 52, 71), RGB(42, 52, 71));//버튼 외곽선
+				p_dc->SetTextColor(RGB(171, 182, 199));
+			}
+
+			p_dc->SetBkMode(TRANSPARENT);
 		}
-		default: break;
+	}
+	default: break;
 	}
 	CDC* p_dc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	switch (nIDCtl) {
-		case IDC_BUTTON2: {
-			p_dc->DrawText(L"사진불러오기", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			break;
-		}
-		case IDC_FILTER_BTN: {
-			p_dc->DrawText(L"필터링", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			break;
-		}
-		case IDC_COLOR_BTN: {
-			p_dc->DrawText(L"컬러링", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			break;
-		}
-		case IDC_AFFINE_BTN: {
-			p_dc->DrawText(L"어파인", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			break;
-		}
-		case IDC_BUTY_BTN: {
-			p_dc->DrawText(L"뷰티", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			break;
-		}
-		case IDC_BRIGHTNESSCTRL_BTN: {
-			p_dc->DrawText(L"밝기", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			break;
-		}
-		case IDOK: {
-			p_dc->DrawText(L"저장", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			break;
-		}
-		case IDCANCEL: {
-			p_dc->DrawText(L"취소", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-			break;
-		}
-		default: break;
+	case IDC_BUTTON2: {
+		p_dc->DrawText(L"사진불러오기", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDC_FILTER_BTN: {
+		p_dc->DrawText(L"필터링", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDC_COLOR_BTN: {
+		p_dc->DrawText(L"컬러링", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDC_AFFINE_BTN: {
+		p_dc->DrawText(L"어파인", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDC_BUTY_BTN: {
+		p_dc->DrawText(L"뷰티", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDC_BRIGHTNESSCTRL_BTN: {
+		p_dc->DrawText(L"밝기", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDOK: {
+		p_dc->DrawText(L"저장", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDCANCEL: {
+		p_dc->DrawText(L"취소", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	default: break;
 	}
 
-//	CDialogEx::OnDrawItem(nIDCtl, lpDrawItemStruct);
+	//	CDialogEx::OnDrawItem(nIDCtl, lpDrawItemStruct);
+}
+
+void CMFCApplication1Dlg::OnBnClickedVideoBtn()
+{
+	// 웹캠 열기
+	capture = new VideoCapture(0, CAP_DSHOW);
+	if (!capture->isOpened())
+	{
+		MessageBox(_T("웹캠을 열 수 없습니다."));
+		return;
+	}
+
+	// 웹캠 크기 설정
+	capture->set(CAP_PROP_FRAME_WIDTH, 1280);
+	capture->set(CAP_PROP_FRAME_HEIGHT, 720);
+
+	// 타이머 설정
+	SetTimer(1, 30, NULL);
+
+	// 버튼 비활성화
+	GetDlgItem(IDC_VIDEO_BTN)->EnableWindow(FALSE);
+}
+
+void CMFCApplication1Dlg::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+
+	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
+}
+
+
+void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+
+	//mat_frame가 입력 이미지입니다.
+	capture->read(mat_frame);
+
+	//이곳에 OpenCV 함수들을 적용합니다.
+	//여기에서는 그레이스케일 이미지로 변환합니다.
+	//cvtColor(mat_frame, mat_frame, COLOR_BGR2GRAY);
+
+	//화면에 보여주기 위한 처리입니다.
+	int bpp = 8 * mat_frame.elemSize();
+	assert((bpp == 8 || bpp == 24 || bpp == 32));
+
+	int padding = 0;
+	//32 bit image is always DWORD aligned because each pixel requires 4 bytes
+	if (bpp < 32)
+		padding = 4 - (mat_frame.cols % 4);
+
+	if (padding == 4)
+		padding = 0;
+
+	int border = 0;
+	//32 bit image is always DWORD aligned because each pixel requires 4 bytes
+	if (bpp < 32)
+	{
+		border = 4 - (mat_frame.cols % 4);
+	}
+
+	Mat mat_temp;
+	if (border > 0 || mat_frame.isContinuous() == false)
+	{
+		// Adding needed columns on the right (max 3 px)
+		cv::copyMakeBorder(mat_frame, mat_temp, 0, 0, 0, border, cv::BORDER_CONSTANT, 0);
+	}
+	else
+	{
+		mat_temp = mat_frame;
+	}
+
+	RECT r;
+	m_picture.GetClientRect(&r);
+	//r.right = 500;
+	//r.bottom = 500;
+	cv::Size winSize(r.right, r.bottom);
+
+	cimage_mfc.Create(winSize.width, winSize.height, 24);
+
+	BITMAPINFO* bitInfo = (BITMAPINFO*)malloc(sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD));
+	bitInfo->bmiHeader.biBitCount = bpp;
+	bitInfo->bmiHeader.biWidth = mat_temp.cols;
+	bitInfo->bmiHeader.biHeight = -mat_temp.rows;
+	bitInfo->bmiHeader.biPlanes = 1;
+	bitInfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	bitInfo->bmiHeader.biCompression = BI_RGB;
+	bitInfo->bmiHeader.biClrImportant = 0;
+	bitInfo->bmiHeader.biClrUsed = 0;
+	bitInfo->bmiHeader.biSizeImage = 0;
+	bitInfo->bmiHeader.biXPelsPerMeter = 0;
+	bitInfo->bmiHeader.biYPelsPerMeter = 0;
+
+	//그레이스케일 인경우 팔레트가 필요
+	if (bpp == 8)
+	{
+		RGBQUAD* palette = bitInfo->bmiColors;
+		for (int i = 0; i < 256; i++)
+		{
+			palette[i].rgbBlue = palette[i].rgbGreen = palette[i].rgbRed = (BYTE)i;
+			palette[i].rgbReserved = 0;
+		}
+	}
+
+	// Image is bigger or smaller than into destination rectangle
+	// we use stretch in full rect
+
+	if (mat_temp.cols == winSize.width && mat_temp.rows == winSize.height)
+	{
+		// source and destination have same size
+		// transfer memory block
+		// NOTE: the padding border will be shown here. Anyway it will be max 3px width
+
+		SetDIBitsToDevice(cimage_mfc.GetDC(),
+			//destination rectangle
+			0, 0, winSize.width, winSize.height,
+			0, 0, 0, mat_temp.rows,
+			mat_temp.data, bitInfo, DIB_RGB_COLORS);
+	}
+	else
+	{
+		// destination rectangle
+		int destx = 0, desty = 0;
+		int destw = winSize.width;
+		int desth = winSize.height;
+
+		// rectangle defined on source bitmap
+		// using imgWidth instead of mat_temp.cols will ignore the padding border
+		int imgx = 0, imgy = 0;
+		int imgWidth = mat_temp.cols - border;
+		int imgHeight = mat_temp.rows;
+
+		StretchDIBits(cimage_mfc.GetDC(),
+			destx, desty, destw, desth,
+			imgx, imgy, imgWidth, imgHeight,
+			mat_temp.data, bitInfo, DIB_RGB_COLORS, SRCCOPY);
+	}
+
+	HDC dc = ::GetDC(m_picture.m_hWnd);
+	cimage_mfc.BitBlt(dc, 0, 0);
+
+	::ReleaseDC(m_picture.m_hWnd, dc);
+
+	cimage_mfc.ReleaseDC();
+	cimage_mfc.Destroy();
+
+	CDialogEx::OnTimer(nIDEvent);
 }

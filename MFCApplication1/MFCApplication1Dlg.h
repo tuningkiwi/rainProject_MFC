@@ -57,9 +57,24 @@ public:
 	CButton cropAffinBtn;
 	// 밝기 및 명암비 조절 다이얼로그
 	CButton brightnessBtn;
+	// 동영상 촬영 다이얼로그
+	CButton videoBtn;
+
 	afx_msg void OnBnClickedColorBtn();
 	afx_msg void OnBnClickedAffineBtn();
 	afx_msg void OnBnClickedBrightnessctrlBtn();
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct);
+	afx_msg void OnBnClickedVideoBtn();
+	afx_msg void OnDestroy();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+
+	CStatic m_picture;
+	VideoCapture* capture;
+	Mat mat_frame;
+	Mat frame;
+	CImage cimage_mfc;
+
+	VideoCapture m_cap; // 카메라 캡처 객체
+	CStatic m_pcView; // Picture Control 객체
 };

@@ -192,6 +192,7 @@
     <ClInclude Include="CBRIGHTNESSCTRL.h" />
     <ClInclude Include="CButyDlg.h" />
     <ClInclude Include="CFilterDlg.h" />
+    <ClInclude Include="CVideoDlg.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="MFCApplication1.h" />
     <ClInclude Include="MFCApplication1Dlg.h" />
@@ -206,6 +207,7 @@
     <ClCompile Include="CBRIGHTNESSCTRL.cpp" />
     <ClCompile Include="CButyDlg.cpp" />
     <ClCompile Include="CFilterDlg.cpp" />
+    <ClCompile Include="CVideoDlg.cpp" />
     <ClCompile Include="MFCApplication1.cpp" />
     <ClCompile Include="MFCApplication1Dlg.cpp" />
     <ClCompile Include="pch.cpp">
