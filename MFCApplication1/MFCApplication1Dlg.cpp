@@ -602,6 +602,8 @@ void CMFCApplication1Dlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStru
 
 void CMFCApplication1Dlg::OnBnClickedVideoBtn()
 {
+	GetDlgItem(IDC_PC_VIEW)->MoveWindow(0,0,1280,720);
+	
 	// 웹캠 열기
 	capture = new VideoCapture(0, CAP_DSHOW);
 	if (!capture->isOpened())
