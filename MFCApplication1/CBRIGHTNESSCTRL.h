@@ -46,4 +46,10 @@ public:
 // virtual HRESULT get_accChild(VARIANT varChild, IDispatch** ppdispChild);
 	
 	afx_msg void OnBnClickedButton3();
+	CSliderCtrl m_slider;
+	CEdit m_edit;
+	CSpinButtonCtrl m_spin;
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnNMCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnDeltaposSpin1(NMHDR* pNMHDR, LRESULT* pResult);
 };

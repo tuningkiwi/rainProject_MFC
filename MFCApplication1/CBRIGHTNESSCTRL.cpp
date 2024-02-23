@@ -6,6 +6,7 @@
 #include "afxdialogex.h"
 #include "CBRIGHTNESSCTRL.h"
 #include "opencv2/opencv.hpp"
+#include <iostream>
 using namespace cv;
 
 // CBRIGHTNESSCTRL 대화 상자
@@ -42,7 +43,7 @@ BOOL CBRIGHTNESSCTRL::OnInitDialog()
 	GetDlgItem(IDC_EDIT2)->MoveWindow(1150, 284, 20, 20);
 
 	GetDlgItem(IDC_SPIN1)->MoveWindow(1170, 161, 20, 20);
-	GetDlgItem(IDC_EDIT1)->MoveWindow(1150, 161, 20, 20);
+	GetDlgItem(IDC_EDIT1)->MoveWindow(1150, 161, 40, 20);
 
 	GetDlgItem(IDC_SLIDER1)->MoveWindow(960, 160, 180, 45);
 	GetDlgItem(IDC_SLIDER2)->MoveWindow(960, 280, 180, 45);
@@ -52,6 +53,18 @@ BOOL CBRIGHTNESSCTRL::OnInitDialog()
 
 	GetDlgItem(IDC_BUTTON2)->MoveWindow(980, 370 ,75,40); 
 	GetDlgItem(IDC_BUTTON3)->MoveWindow(1100, 370, 75, 40); 
+
+	// 슬라이더 초기화
+	m_slider.SetRange(-100, 100); // 밝기 범위 설정
+	m_slider.SetPos(50); // 초기 밝기 값 설정
+
+	// 스핀 컨트롤 초기화
+	m_spin.SetRange(-100, 100); // 밝기 범위 설정
+	m_spin.SetPos(50); // 초기 밝기 값 설정
+
+	// 에디트 컨트롤 초기화
+	m_edit.SetWindowText(_T("50")); // 초기 밝기 값 설정
+
 	SetTimer(1, 80, NULL);
 	return TRUE; // 포커스 설정을 위한 기본값 반환
 }
@@ -59,8 +72,11 @@ void CBRIGHTNESSCTRL::DoDataExchange(CDataExchange* pDX)
 {
 
 	CDialogEx::DoDataExchange(pDX);
-	
 
+
+	DDX_Control(pDX, IDC_SLIDER1, m_slider);
+	DDX_Control(pDX, IDC_EDIT1, m_edit);
+	DDX_Control(pDX, IDC_SPIN1, m_spin);
 }
 
 
@@ -69,6 +85,9 @@ BEGIN_MESSAGE_MAP(CBRIGHTNESSCTRL, CDialogEx)
 ON_WM_TIMER()
 ON_BN_CLICKED(IDC_BUTTON2, &CBRIGHTNESSCTRL::OnBnClickedButton2)
 ON_BN_CLICKED(IDC_BUTTON3, &CBRIGHTNESSCTRL::OnBnClickedButton3)
+ON_WM_HSCROLL()
+ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, &CBRIGHTNESSCTRL::OnNMCustomdrawSlider1)
+ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN1, &CBRIGHTNESSCTRL::OnDeltaposSpin1)
 END_MESSAGE_MAP()
 // CBRIGHTNESSCTRL 메시지 처리기
 
@@ -208,14 +227,14 @@ BOOL CBRIGHTNESSCTRL::colorToGray()
 		CreateBitmapInfo(&BitChangeImg, myImg.cols, myImg.rows, 8); // 흑백 이미지로 변환되었으므로 채널 수는 1이므로 8로 설정
 
 		// 성공 메시지 출력
-		CString successMessage = _T("이미지가 성공적으로 흑백으로 변환되었습니다.");
+		CString successMessage = _T("성공적으로 흑백모드으로 변환되었습니다.");
 		MessageBox(successMessage, _T("성공"), MB_OK | MB_ICONINFORMATION);
 		return true;
 	}
 	else
 	{
 		// 에러 메시지 출력
-		CString errorMessage = _T("이미지는 이미 흑백 이미지입니다.");
+		CString errorMessage = _T("이미 흑백모드 이미지입니다.");
 		MessageBox(errorMessage, _T("에러"), MB_OK | MB_ICONERROR);
 		return false;
 	}
@@ -229,18 +248,118 @@ BOOL CBRIGHTNESSCTRL::GrayToColor()
 		myImg = backupImg.clone();
 
 		// 이미지 정보 업데이트
-		CreateBitmapInfo(&BitChangeImg2, myImg.cols, myImg.rows, 8); // 칼라 이미지로 변환되었으므로 채널 수는 3이므로 24로 설정
+		CreateBitmapInfo(&BitChangeImg2, myImg.cols, myImg.rows,myImg.channels() *8); // 칼라 이미지로 변환되었으므로 채널 수는 3이므로 24로 설정
 
 		// 성공 메시지 출력
-		CString successMessage = _T("이미지가 성공적으로 칼라로 변환되었습니다.");
+		CString successMessage = _T("성공적으로 컬러모드로 변환되었습니다.");
 		MessageBox(successMessage, _T("성공"), MB_OK | MB_ICONINFORMATION);
 		return true;
 	}
 	else
 	{
 		// 에러 메시지 출력
-		CString errorMessage = _T("이미지는 이미 컬러 이미지입니다.");
+		CString errorMessage = _T("이미 컬러 이미지입니다.");
 		MessageBox(errorMessage, _T("에러"), MB_OK | MB_ICONERROR);
 		return false;
 	}
+}
+
+void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	
+		int newValue = 0;
+		if (pScrollBar->GetDlgCtrlID() == IDC_SLIDER1) {
+			// 슬라이더에서 값 변경될 때
+			newValue = m_slider.GetPos(); // 슬라이더에서 값 가져오기
+			
+			m_spin.SetPos(newValue); // 스핀 컨트롤에 값 설정
+			CString strValue;
+			strValue.Format(_T("%d"), newValue);
+			m_edit.SetWindowText(strValue); // 에디트 컨트롤에 값 설정
+			
+			
+		}
+		else if(pScrollBar->GetDlgCtrlID() == IDC_SPIN1){
+			// 스핀 컨트롤에서 값 변경될 때
+			newValue = m_spin.GetPos(); // 스핀 컨트롤에서 값 가져오기
+			m_slider.SetPos(newValue); // 슬라이더에 값 설정
+			CString strValue;
+			strValue.Format(_T("%d"), newValue);
+			m_edit.SetWindowText(strValue); // 에디트 컨트롤에 값 설정
+		}
+		
+		if ((myImg.channels() == 3))
+		{
+			Mat tmpImg = myImg.clone();
+			cvtColor(tmpImg, tmpImg, COLOR_BGR2YCrCb);
+
+			std::vector<Mat> ycrcb_planes;
+			split(tmpImg, ycrcb_planes);
+
+			Mat adjustedImage;
+			ycrcb_planes[0] = ycrcb_planes[0] + newValue;
+			merge(ycrcb_planes, adjustedImage);
+
+			cvtColor(adjustedImage, adjustedImage, COLOR_YCrCb2BGR);
+
+			// 이미지 표시
+			CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
+			DrawImage(adjustedImage, BitChangeImg);
+		}
+		else if (myImg.channels() == 1)
+		{
+			Mat adjustedImage = myImg + newValue;
+
+			// 이미지 표시
+			CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
+			DrawImage(adjustedImage, BitChangeImg);
+		}
+
+
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+
+	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
+}
+
+
+void CBRIGHTNESSCTRL::OnNMCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+
+	// 슬라이더의 값이 변경될 때
+	int newValue = m_slider.GetPos(); // 슬라이더의 현재 값 가져오기
+	m_spin.SetPos(newValue); // 스핀 컨트롤에도 값 설정
+	CString strValue;
+	strValue.Format(_T("%d"), newValue);
+	m_edit.SetWindowText(strValue); // 에디트 컨트롤에도 값 설정
+
+	*pResult = 0;
+}
+
+
+void CBRIGHTNESSCTRL::OnDeltaposSpin1(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	
+	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
+
+	// 스핀 컨트롤의 값이 변경될 때
+	pNMUpDown->iDelta *= 2;
+
+	float m_ppos = m_spin.GetPos(); 
+	int newValue = m_spin.GetPos() + pNMUpDown->iDelta; // 현재 값에 변화량을 더하여 새로운 값 계산
+	
+	
+	newValue = max(min(newValue, 100), 0); // 값을 0에서 100 사이로 제한
+	
+	
+	m_spin.SetPos(newValue); // 스핀 컨트롤에 새로운 값 설정
+	m_slider.SetPos(newValue); // 슬라이더에도 새로운 값 설정
+	CString strValue;
+	strValue.Format(_T("%d"), newValue);
+	m_edit.SetWindowText(strValue); // 에디트 컨트롤에도 새로운 값 설정
+
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	*pResult = 0;
 }
