@@ -136,7 +136,6 @@ void CAffineDlg::ReadImage(Mat originImg, BITMAPINFO* originBmpInfo)
 		picLTRB.right = x + originImg.cols; picLTRB.bottom = y + originImg.rows;
 	}
 
-
 	//GetClientRect(left, top, right, bottom ) 클라이언트 영역의 좌표
 	//함수가 성공하면 반환 값이 0이 아닙니다.
 	//불러올 이미지 사진에 따라 조정된 Picture Ctrl 크기 
