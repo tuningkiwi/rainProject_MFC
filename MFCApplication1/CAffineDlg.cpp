@@ -1,5 +1,5 @@
 ﻿// CAffineDlg.cpp: 구현 파일
-//
+// 인태 Affine 
 
 #include "pch.h"
 #include "MFCApplication1.h"
@@ -48,7 +48,8 @@ BEGIN_MESSAGE_MAP(CAffineDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_RR, &CAffineDlg::OnBnClickedButtonRr)
 	ON_BN_CLICKED(IDC_BUTTON_LR, &CAffineDlg::OnBnClickedButtonLr)
 	ON_WM_HSCROLL()
-
+	ON_WM_ERASEBKGND()
+	ON_WM_DRAWITEM()
 END_MESSAGE_MAP()
 
 
@@ -61,60 +62,79 @@ BOOL CAffineDlg::OnInitDialog()
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
 
 	MoveWindow(350, 140, 1280, 720);
-	rotationR.MoveWindow(1000, 120, 200, 45);
-	rotationL.MoveWindow(1000, 200, 200, 45);
+
+	CRect wnd;
+	this->GetClientRect(&wnd); // 기본 사각형의 x,y 좌표설정이되고 =(0,0) 시작되는함수'GetClientRect' 함수에 
+	int btnLocX = int(wnd.right * 5 / 6);
+	int btnLocY = 40;
+
+	rotationR.MoveWindow(btnLocX, 120, 200, 45);
+	rotationL.MoveWindow(btnLocX, 200, 200, 45);
 	
-	GetDlgItem(IDC_SIZE_TEXT)->MoveWindow(1000, 280, 200, 45);
-	SizeSlide.MoveWindow(1000, 320, 200, 45);
+	GetDlgItem(IDC_SIZE_TEXT)->MoveWindow(btnLocX, 280, 200, 20);
+	SizeSlide.MoveWindow(btnLocX, 320, 200, 20);
 	SizeSlide.SetRange(0, 2);
 	SizeSlide.SetTicFreq(1);
 	SizeSlide.SetTic(1);
 	SizeSlide.SetPos(1);
-	
 
-	GetDlgItem(IDCANCEL)->MoveWindow(1000, 720 - 100, 200, 45);
-	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);
-	GetDlgItem(IDC_REVERSE_IT)->MoveWindow(1000, 720 - 220, 200, 45);
+	GetDlgItem(IDCANCEL)->MoveWindow(btnLocX, 720 - 160, 200, 45);
+	GetDlgItem(IDOK)->MoveWindow(btnLocX, 720 - 220, 200, 45);
+	GetDlgItem(IDC_REVERSE_IT)->MoveWindow(btnLocX, 720 - 280, 200, 45);
 	
 	SetTimer(1, 80, NULL);//100ms  사진 불러오기 위한 타이머 
 
+	CFont font;
+	font.CreatePointFont(140, _T("함초롬돋움 확장 보통"));
+	rotationR.SetFont(&font);
+	rotationL.SetFont(&font);
+	GetDlgItem(IDC_SIZE_TEXT)->SetFont(&font);
+	GetDlgItem(IDOK)->SetFont(&font);
+	GetDlgItem(IDCANCEL)->SetFont(&font);
+	GetDlgItem(IDC_REVERSE_IT)->SetFont(&font);
+	font.Detach();//font 종료 꼭 해주기 메모리 할당 해제
 
 	return TRUE;  // return TRUE unless you set the focus to a control
-	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
+	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다. 
 }
 
 void CAffineDlg::ReadImage(Mat originImg, BITMAPINFO* originBmpInfo)
 {
 	KillTimer(1);
+	
+	//필터창 크기
+	CRect wnd;
+	this->GetClientRect(&wnd); // 기본 사각형의 x,y 좌표설정이되고 =(0,0) 시작되는함수'GetClientRect' 함수에 
 
-	CRect rect;
-	this->GetClientRect(&rect);
-
-	int wx = int(rect.right * 5 / 6);
-	int wy = rect.bottom;
+	int wx = int(wnd.right * 5 / 6);
+	int wy = wnd.bottom;
 
 	//불러올 사진 cols 가져오기.
 	CClientDC dc(GetDlgItem(IDC_PC_IT));
-	//CRect rect;// 이미지를 넣을 사각형 
+	CRect rect;// 이미지를 넣을 사각형 
 	if (originImg.cols > wx) 
 	{
 		//cols: 1080 = rows : wid;
 		int resize_h = cvRound((wx * originImg.rows) / originImg.cols);
+		int resize_w = wx; //width를 최대크기로 설정 
+		if (wy - resize_h < 0) { //width를 맞추니, height가 넘친다 
+			resize_w = wy * wx / resize_h;
+		}
+		int x = cvRound((wx - resize_w) / 2);
 		int y = cvRound((wy - resize_h) / 2);
-		//if (y < 0) { //구현예정. 
-		//	//float ratio =  m_matImage.rows / m_matImage.cols;
-		//	y = 0;
-		//	
-		//}
-		GetDlgItem(IDC_PC_IT)->MoveWindow(0, y, originImg.cols, resize_h);
+		GetDlgItem(IDC_PC_IT)->MoveWindow(x, y, resize_w, resize_h);
+		picLTRB.left = x; picLTRB.top = y;
+		picLTRB.right = resize_w; picLTRB.bottom = resize_h;
+
 	}
 	else 
 	{
 		int x = cvRound((wx - originImg.cols) / 2);
 		int y = cvRound((wy - originImg.rows) / 2);
 		GetDlgItem(IDC_PC_IT)->MoveWindow(x, y, originImg.cols, originImg.rows);
+		picLTRB.left = x; picLTRB.top = y;
+		picLTRB.right = x + originImg.cols; picLTRB.bottom = y + originImg.rows;
 	}
-
 
 	//GetClientRect(left, top, right, bottom ) 클라이언트 영역의 좌표
 	//함수가 성공하면 반환 값이 0이 아닙니다.
@@ -137,9 +157,10 @@ void CAffineDlg::OnTimer(UINT_PTR nIDEvent)
 	switch (nIDEvent) {
 	case 1:
 		ReadImage(myImg, myBitmapInfo);//처음 로딩되는 이미지 
+		break;
 
 	}
-	KillTimer(1);//처음 필터창을 켰을때, 사진을 띄우기 위한 용도라 바로 kill 
+	//KillTimer(1);//처음 필터창을 켰을때, 사진을 띄우기 위한 용도라 바로 kill 
 	CDialogEx::OnTimer(nIDEvent);
 }
 
@@ -211,6 +232,7 @@ void CAffineDlg::OnBnClickedReverseIt()
 	ReadImage(myImg, myBitmapInfo);
 	MessageBox(L"원본 이미지로 돌아갑니다", L"알림", MB_OK);
 	currentRotatedImg = myImg.clone();
+	rotresultImg = myImg.clone();
 	resultImg = myImg.clone();
 	ChangeImg = myImg.clone();
 	SizeSlide.SetPos(1);
@@ -223,6 +245,7 @@ void CAffineDlg::OnBnClickedButtonRr()
 	if (!resultImg.empty())
 	{
 		ChangeImg = resultImg.clone();
+		currentRotatedImg = resultImg.clone();
 	}
 	else
 	{
@@ -253,6 +276,7 @@ void CAffineDlg::OnBnClickedButtonLr()
 	if (!resultImg.empty())
 	{
 		ChangeImg = resultImg.clone();
+		currentRotatedImg = resultImg.clone();
 	}
 	else 
 	{
@@ -303,8 +327,8 @@ void CAffineDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		if (pos == 0)
 		{
 			// 이미지 크기 조정
-			resize(ChangeImg, SizeImg, Size(static_cast<int>(ChangeImg.cols * scaleFactor[pos]),
-				static_cast<int>(ChangeImg.rows * scaleFactor[pos])),
+			resize(ChangeImg, SizeImg, Size(static_cast<int>(myImg.cols * scaleFactor[pos]),
+				static_cast<int>(myImg.rows * scaleFactor[pos])),
 				INTER_LINEAR);
 
 			// 비트맵 정보 생성 및 이미지 출력
@@ -315,8 +339,8 @@ void CAffineDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		else if (pos == 1)
 		{
 			// 이미지 크기 조정
-			resize(ChangeImg, SizeImg, Size(static_cast<int>(ChangeImg.cols * scaleFactor[pos]),
-				static_cast<int>(ChangeImg.rows * scaleFactor[pos])),
+			resize(ChangeImg, SizeImg, Size(static_cast<int>(myImg.cols * scaleFactor[pos]),
+				static_cast<int>(myImg.rows * scaleFactor[pos])),
 				INTER_LINEAR);
 
 			// 비트맵 정보 생성 및 이미지 출력
@@ -327,8 +351,8 @@ void CAffineDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		else if (pos == 2)
 		{
 			// 이미지 크기 조정
-			resize(ChangeImg, SizeImg, Size(static_cast<int>(ChangeImg.cols * scaleFactor[pos]),
-				static_cast<int>(ChangeImg.rows * scaleFactor[pos])),
+			resize(ChangeImg, SizeImg, Size(static_cast<int>(myImg.cols * scaleFactor[pos]),
+				static_cast<int>(myImg.rows * scaleFactor[pos])),
 				INTER_LINEAR);
 
 			// 비트맵 정보 생성 및 이미지 출력
@@ -342,3 +366,75 @@ void CAffineDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 // 주석 테스트 
 
+
+BOOL CAffineDlg::OnEraseBkgnd(CDC* pDC)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+
+	CRect rect;
+	GetClientRect(rect);
+	pDC->FillSolidRect(rect, RGB(181, 214, 146));
+
+	//return CDialogEx::OnEraseBkgnd(pDC);
+	return TRUE;
+}
+
+
+void CAffineDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	
+	switch (nIDCtl)
+	{
+		case IDCANCEL: case IDOK: case IDC_REVERSE_IT:
+		case IDC_BUTTON_RR: case IDC_BUTTON_LR:	
+		{
+			if (lpDrawItemStruct->itemAction & 0x07) 
+			{
+				CDC* p_dc = CDC::FromHandle(lpDrawItemStruct->hDC);
+				if (lpDrawItemStruct->itemState & ODS_SELECTED)
+				{//버튼 클릭시 
+					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(255, 0, 0));//버튼의 색상
+					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(255, 255, 0), RGB(255, 255, 0));//버튼 외곽선
+					p_dc->SetTextColor(RGB(0, 0, 0));
+				}
+				else
+				{//버튼이 눌리지 않은 상태일 때 
+					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(255, 192, 203)); // 다른 배경색 설정 예시 (흰색)
+					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(135, 206, 235), RGB(135, 206, 235));//버튼 외곽선 (검은색)
+					p_dc->SetTextColor(RGB(0, 0, 0)); // 텍스트 색상 (검은색)
+				}
+				p_dc->SetBkMode(TRANSPARENT);
+			}
+			break;
+		}
+		default: break;
+	}
+	CDC* p_dc = CDC::FromHandle(lpDrawItemStruct->hDC);
+	switch (nIDCtl)
+	{
+	case IDC_BUTTON_RR: {
+		p_dc->DrawText(L"시계방향 회전", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDC_BUTTON_LR: {
+		p_dc->DrawText(L"반시계방향 회전", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDC_REVERSE_IT: {
+		p_dc->DrawText(L"되돌리기", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDOK: {
+		p_dc->DrawText(L"적용", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	case IDCANCEL: {
+		p_dc->DrawText(L"취소", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
+	default:
+		break;
+	}
+	//CDialogEx::OnDrawItem(nIDCtl, lpDrawItemStruct);
+}

@@ -41,6 +41,7 @@ public:
 	CButton rotationR;
 	CButton rotationL;
 	CSliderCtrl SizeSlide;
+	CRect picLTRB;//윈도우 상에서 현재 사진의 위치 
 	void MakeBitmapInfo(BITMAPINFO** newInfo, int w, int h, int bpp);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnDestroy();
@@ -51,4 +52,7 @@ public:
 	afx_msg void OnBnClickedButtonLr();
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	//afx_msg void ResizeImage(int newSize);
-}; 
+	CBrush m_backBrush;
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct);
+};
