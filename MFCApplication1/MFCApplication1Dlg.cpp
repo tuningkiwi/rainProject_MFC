@@ -398,7 +398,7 @@ void CMFCApplication1Dlg::OnBnClickedAffineBtn()
 		break;
 	case IDOK:
 		// Do something
-		m_matImage = AffineDlg.myImg;
+		m_matImage = AffineDlg.resultImg;
 		m_pBitmapInfo = AffineDlg.myBitmapInfo;
 		DrawImage();
 		break;

@@ -32,6 +32,7 @@ public:
 	Mat currentRotatedImg; // 회전된 이미지를 저장하기 위한 변수 
 	Mat SizeImg;
 	Mat ChangeImg; // Affine 이미지 정보를 담기위한 원본에 원본 이미지 
+	Mat resultImg; // 부모창에 띄울 최종 변환 이미지 
 	BITMAPINFO* myBitmapInfo; // Bitmap 정보를 담고 있는 구조체.
 	void ReadImage(Mat originImg, BITMAPINFO* originBmpInfo);
 	CStatic picCtrl_IT;
