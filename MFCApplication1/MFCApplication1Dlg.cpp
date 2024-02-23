@@ -72,6 +72,7 @@ void CMFCApplication1Dlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_AFFINE_BTN, cropAffinBtn);
 	DDX_Control(pDX, IDC_BUTY_BTN, ButyBtn);
 	DDX_Control(pDX, IDC_BRIGHTNESSCTRL_BTN, brightnessBtn);
+	DDX_Control(pDX, IDC_MERGE_FACE, mergeBtn);
 	DDX_Control(pDX, IDC_VIDEO_BTN, videoBtn);
 	DDX_Control(pDX, IDC_PC_VIEW, m_picture);
 }
@@ -90,6 +91,7 @@ BEGIN_MESSAGE_MAP(CMFCApplication1Dlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTY_BTN, &CMFCApplication1Dlg::OnBnClickedButyBtn)
 	ON_BN_CLICKED(IDC_BRIGHTNESSCTRL_BTN, &CMFCApplication1Dlg::OnBnClickedBrightnessctrlBtn)
 	ON_BN_CLICKED(IDC_VIDEO_BTN, &CMFCApplication1Dlg::OnBnClickedVideoBtn)
+	ON_BN_CLICKED(IDC_MERGE_FACE, &CMFCApplication1Dlg::OnBnClickedMergeBtn)
 	ON_BN_CLICKED(IDOK, &CMFCApplication1Dlg::OnBnClickedOk)
 	ON_WM_DRAWITEM()
 	ON_WM_DESTROY()
@@ -130,19 +132,6 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 	// Assuming m_picture is a valid control associated with a resource ID
-	/*
-	capture = new VideoCapture(0, CAP_DSHOW);
-	if (!capture->isOpened())
-	{
-		MessageBox(_T("웹캠을 열수 없습니다. \n"));
-	}
-
-	//웹캠 크기를  320x240으로 지정    
-	capture->set(CAP_PROP_FRAME_WIDTH, 1280);
-	capture->set(CAP_PROP_FRAME_HEIGHT, 720);
-
-	SetTimer(1000, 30, NULL);
-	*/
 
 	//현재 window 크기 출력
 	CRect m_rectCurHist;
@@ -158,6 +147,7 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	GetDlgItem(IDC_BUTY_BTN)->MoveWindow(btnlocLeft, 370, btnWidth, 60);
 	GetDlgItem(IDC_BRIGHTNESSCTRL_BTN)->MoveWindow(btnlocLeft, 450, btnWidth, 60);
 	GetDlgItem(IDC_VIDEO_BTN)->MoveWindow(btnlocLeft, 530, btnWidth, 60);
+	GetDlgItem(IDC_MERGE_FACE)->MoveWindow(btnlocLeft, 610, btnWidth, 60);
 	GetDlgItem(IDOK)->MoveWindow(btnlocLeft, m_rectCurHist.bottom - 280, btnWidth, 60);
 	GetDlgItem(IDCANCEL)->MoveWindow(btnlocLeft, m_rectCurHist.bottom - 200, btnWidth, 60);
 
@@ -171,6 +161,7 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	GetDlgItem(IDC_BUTY_BTN)->SetFont(&font);
 	GetDlgItem(IDC_BRIGHTNESSCTRL_BTN)->SetFont(&font);
 	GetDlgItem(IDC_VIDEO_BTN)->SetFont(&font);
+	GetDlgItem(IDC_MERGE_FACE)->SetFont(&font);
 	GetDlgItem(IDOK)->SetFont(&font);
 	GetDlgItem(IDCANCEL)->SetFont(&font);
 	font.Detach();//font 종료 꼭 해주기 메모리 할당 해제 
@@ -602,7 +593,7 @@ void CMFCApplication1Dlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStru
 
 void CMFCApplication1Dlg::OnBnClickedVideoBtn()
 {
-	GetDlgItem(IDC_PC_VIEW)->MoveWindow(0,0,1280,720);
+	GetDlgItem(IDC_PC_VIEW)->MoveWindow(100,100,1280,720);
 	
 	// 웹캠 열기
 	capture = new VideoCapture(0, CAP_DSHOW);
@@ -633,38 +624,256 @@ void CMFCApplication1Dlg::OnDestroy()
 
 void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 {
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-
-	//mat_frame가 입력 이미지입니다.
-	capture->read(mat_frame);
-
-	//이곳에 OpenCV 함수들을 적용합니다.
-	//여기에서는 그레이스케일 이미지로 변환합니다.
-	//cvtColor(mat_frame, mat_frame, COLOR_BGR2GRAY);
-
-	//화면에 보여주기 위한 처리입니다.
-	int bpp = 8 * mat_frame.elemSize();
-	assert((bpp == 8 || bpp == 24 || bpp == 32));
-
-	int padding = 0;
-	//32 bit image is always DWORD aligned because each pixel requires 4 bytes
-	if (bpp < 32)
-		padding = 4 - (mat_frame.cols % 4);
-
-	if (padding == 4)
-		padding = 0;
-
-	int border = 0;
-	//32 bit image is always DWORD aligned because each pixel requires 4 bytes
-	if (bpp < 32)
+	if (nIDEvent == 1)
 	{
-		border = 4 - (mat_frame.cols % 4);
+		//mat_frame가 입력 이미지입니다.
+		capture->read(mat_frame);
+
+		//이곳에 OpenCV 함수들을 적용합니다.
+		//여기에서는 그레이스케일 이미지로 변환합니다.
+		//cvtColor(mat_frame, mat_frame, COLOR_BGR2GRAY);
+
+		//화면에 보여주기 위한 처리입니다.
+		int bpp = 8 * mat_frame.elemSize();
+		assert((bpp == 8 || bpp == 24 || bpp == 32));
+
+		int padding = 0;
+		//32 bit image is always DWORD aligned because each pixel requires 4 bytes
+		if (bpp < 32)
+			padding = 4 - (mat_frame.cols % 4);
+
+		if (padding == 4)
+			padding = 0;
+
+		int border = 0;
+		//32 bit image is always DWORD aligned because each pixel requires 4 bytes
+		if (bpp < 32)
+		{
+			border = 4 - (mat_frame.cols % 4);
+		}
+
+		Mat mat_temp;
+		if (border > 0 || mat_frame.isContinuous() == false)
+		{
+			// Adding needed columns on the right (max 3 px)
+			cv::copyMakeBorder(mat_frame, mat_temp, 0, 0, 0, border, cv::BORDER_CONSTANT, 0);
+		}
+		else
+		{
+			mat_temp = mat_frame;
+		}
+
+		RECT r;
+		m_picture.GetClientRect(&r);
+		//r.right = 500;
+		//r.bottom = 500;
+		cv::Size winSize(r.right, r.bottom);
+
+		cimage_mfc.Create(winSize.width, winSize.height, 24);
+
+		BITMAPINFO* bitInfo = (BITMAPINFO*)malloc(sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD));
+		bitInfo->bmiHeader.biBitCount = bpp;
+		bitInfo->bmiHeader.biWidth = mat_temp.cols;
+		bitInfo->bmiHeader.biHeight = -mat_temp.rows;
+		bitInfo->bmiHeader.biPlanes = 1;
+		bitInfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+		bitInfo->bmiHeader.biCompression = BI_RGB;
+		bitInfo->bmiHeader.biClrImportant = 0;
+		bitInfo->bmiHeader.biClrUsed = 0;
+		bitInfo->bmiHeader.biSizeImage = 0;
+		bitInfo->bmiHeader.biXPelsPerMeter = 0;
+		bitInfo->bmiHeader.biYPelsPerMeter = 0;
+
+		//그레이스케일 인경우 팔레트가 필요
+		if (bpp == 8)
+		{
+			RGBQUAD* palette = bitInfo->bmiColors;
+			for (int i = 0; i < 256; i++)
+			{
+				palette[i].rgbBlue = palette[i].rgbGreen = palette[i].rgbRed = (BYTE)i;
+				palette[i].rgbReserved = 0;
+			}
+		}
+
+		// Image is bigger or smaller than into destination rectangle
+		// we use stretch in full rect
+
+		if (mat_temp.cols == winSize.width && mat_temp.rows == winSize.height)
+		{
+			// source and destination have same size
+			// transfer memory block
+			// NOTE: the padding border will be shown here. Anyway it will be max 3px width
+
+			SetDIBitsToDevice(cimage_mfc.GetDC(),
+				//destination rectangle
+				0, 0, winSize.width, winSize.height,
+				0, 0, 0, mat_temp.rows,
+				mat_temp.data, bitInfo, DIB_RGB_COLORS);
+		}
+		else
+		{
+			// destination rectangle
+			int destx = 0, desty = 0;
+			int destw = winSize.width;
+			int desth = winSize.height;
+
+			// rectangle defined on source bitmap
+			// using imgWidth instead of mat_temp.cols will ignore the padding border
+			int imgx = 0, imgy = 0;
+			int imgWidth = mat_temp.cols - border;
+			int imgHeight = mat_temp.rows;
+
+			StretchDIBits(cimage_mfc.GetDC(),
+				destx, desty, destw, desth,
+				imgx, imgy, imgWidth, imgHeight,
+				mat_temp.data, bitInfo, DIB_RGB_COLORS, SRCCOPY);
+		}
+
+		HDC dc = ::GetDC(m_picture.m_hWnd);
+		cimage_mfc.BitBlt(dc, 0, 0);
+
+		::ReleaseDC(m_picture.m_hWnd, dc);
+
+		cimage_mfc.ReleaseDC();
+		cimage_mfc.Destroy();
+
+		CDialogEx::OnTimer(nIDEvent);
+	}
+	
+	if (nIDEvent == 2)
+	{
+		// Pictual Control에서 이미지 가져오기
+		CWnd* pWnd = GetDlgItem(IDC_PC_VIEW);
+		CDC* pDC = pWnd->GetDC();
+
+		CRect rect;
+		pWnd->GetClientRect(rect);
+
+		// Pictual Control 크기에 맞는 Mat 생성
+		cv::Mat mat_frame(rect.Height(), rect.Width(), CV_8UC3);
+
+		// Pictual Control에서 이미지를 Mat으로 복사
+		BITMAPINFO bitmapInfo;
+		memset(&bitmapInfo, 0, sizeof(bitmapInfo));
+		bitmapInfo.bmiHeader.biSize = sizeof(bitmapInfo.bmiHeader);
+		bitmapInfo.bmiHeader.biWidth = rect.Width();
+		bitmapInfo.bmiHeader.biHeight = -rect.Height(); // Minus for top-down DIB
+		bitmapInfo.bmiHeader.biPlanes = 1;
+		bitmapInfo.bmiHeader.biBitCount = 24; // Assuming 24-bit RGB
+
+		::GetDIBits(pDC->GetSafeHdc(), (HBITMAP)pWnd->SendMessage(WM_GETOBJECT, 0, OBJ_BITMAP), 0,
+			rect.Height(), mat_frame.data, &bitmapInfo, DIB_RGB_COLORS);
+
+		// Load the face cascade
+		cv::CascadeClassifier faceCascade;
+		//if (!faceCascade.load("C:\\opencv\\build\\etc\\haarcascades\\haarcascade_frontalface_default.xml"))
+		if (!faceCascade.load("C:\\opencv\\build\\etc\\haarcascades\\haarcascade_eye.xml"))
+		{
+			MessageBox(_T("얼굴 감지 모델을 불러올 수 없습니다."));
+			pWnd->ReleaseDC(pDC);
+			return;
+		}
+
+		// Convert the Mat to grayscale for face detection
+		cv::Mat grayFrame;
+		cv::cvtColor(mat_frame, grayFrame, cv::COLOR_BGR2GRAY);
+		cv::equalizeHist(grayFrame, grayFrame);
+
+		// Detect faces
+		std::vector<cv::Rect> faces;
+		faceCascade.detectMultiScale(grayFrame, faces, 1.1, 5, 0 | cv::CASCADE_SCALE_IMAGE, cv::Size(30, 30));
+
+		// Show the number of detected faces
+		CString msg;
+		msg.Format(_T("Detected %d faces."), faces.size());
+		MessageBox(msg);
+
+		// Draw green circles around detected faces
+		for (const auto& face : faces)
+		{
+			cv::Point center(face.x + face.width / 2, face.y + face.height / 2);
+			cv::ellipse(mat_frame, center, cv::Size(face.width / 2, face.height / 2), 0, 0, 360, cv::Scalar(0, 255, 0), 2);
+		}
+		MessageBox(_T("Green circles drawn."));
+
+		// 이미지를 Pictual Control에 갱신
+		StretchDIBits(pDC->GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), 0, 0, rect.Width(), rect.Height(), mat_frame.data, &bitmapInfo, DIB_RGB_COLORS, SRCCOPY);
+
+		pWnd->ReleaseDC(pDC);
+	}
+	else
+	{
+		// Handle other timer events or call the base class
+		CDialogEx::OnTimer(nIDEvent);
+	}
+}
+
+/*
+void CMFCApplication1Dlg::OnBnClickedMergeBtn()
+{
+	// Pictual Control에서 이미지 가져오기
+	CWnd* pWnd = GetDlgItem(IDC_PC_VIEW);
+	CDC* pDC = pWnd->GetDC();
+
+	CRect rect;
+	pWnd->GetClientRect(rect);
+
+	// Pictual Control 크기에 맞는 Mat 생성
+	cv::Mat mat_frame(rect.Height(), rect.Width(), CV_8UC3);
+
+	// 이미지 합성할 이미지 읽어오기
+	cv::Mat imageToOverlay = cv::imread("C:\\Users\\EMBEDDED\\source\\repos\\intel1\\cpp\\images\\headpin.jpg");
+	if (imageToOverlay.empty())
+	{
+		MessageBox(_T("이미지를 불러올 수 없습니다."));
+		pWnd->ReleaseDC(pDC);
+		return;
 	}
 
-	Mat mat_temp;
+	BITMAPINFO bitmapInfo;
+	memset(&bitmapInfo, 0, sizeof(bitmapInfo));
+	bitmapInfo.bmiHeader.biSize = sizeof(bitmapInfo.bmiHeader);
+	bitmapInfo.bmiHeader.biWidth = rect.Width();
+	bitmapInfo.bmiHeader.biHeight = -rect.Height(); // Minus for top-down DIB
+	bitmapInfo.bmiHeader.biPlanes = 1;
+	bitmapInfo.bmiHeader.biBitCount = 24; // Assuming 24-bit RGB
+
+	// Loop for continuous merging
+	const int numIterations = 100; // Set the desired number of iterations
+	for (int i = 0; i < numIterations; ++i)
+	{
+		// Pictual Control에서 이미지를 Mat으로 복사
+		::GetDIBits(pDC->GetSafeHdc(), (HBITMAP)pWnd->SendMessage(WM_GETOBJECT, 0, OBJ_BITMAP), 0,
+			rect.Height(), mat_frame.data, &bitmapInfo, DIB_RGB_COLORS);
+
+		// 이미지 크기 조정 (맞추기)
+		cv::resize(imageToOverlay, imageToOverlay, mat_frame.size());
+
+		// 이미지 합성
+		cv::addWeighted(mat_frame, 1.0, imageToOverlay, 0.5, 0.0, mat_frame);
+
+		// 이미지를 Pictual Control에 갱신
+		StretchDIBits(pDC->GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), 0, 0, rect.Width(), rect.Height(), mat_frame.data, &bitmapInfo, DIB_RGB_COLORS, SRCCOPY);
+
+		// Add a delay (milliseconds) between iterations
+		Sleep(100); // Adjust the delay as needed
+	}
+
+	pWnd->ReleaseDC(pDC);
+	UpdateImageOnScreen();
+}
+
+void CMFCApplication1Dlg::UpdateImageOnScreen()
+{
+	// Calculate padding and border
+	int bpp = 8 * mat_frame.elemSize();
+	int padding = (bpp == 32) ? 0 : (4 - (mat_frame.cols % 4)) % 4;
+	int border = (bpp == 32) ? 0 : (4 - (mat_frame.cols % 4)) % 4;
+
+	// Create a temporary matrix with padding if needed
+	cv::Mat mat_temp;
 	if (border > 0 || mat_frame.isContinuous() == false)
 	{
-		// Adding needed columns on the right (max 3 px)
 		cv::copyMakeBorder(mat_frame, mat_temp, 0, 0, 0, border, cv::BORDER_CONSTANT, 0);
 	}
 	else
@@ -672,79 +881,53 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 		mat_temp = mat_frame;
 	}
 
+	// Get the client rect for Pictual Control
 	RECT r;
 	m_picture.GetClientRect(&r);
-	//r.right = 500;
-	//r.bottom = 500;
 	cv::Size winSize(r.right, r.bottom);
 
+	// Create a CImage container
+	CImage cimage_mfc;
 	cimage_mfc.Create(winSize.width, winSize.height, 24);
 
-	BITMAPINFO* bitInfo = (BITMAPINFO*)malloc(sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD));
-	bitInfo->bmiHeader.biBitCount = bpp;
-	bitInfo->bmiHeader.biWidth = mat_temp.cols;
-	bitInfo->bmiHeader.biHeight = -mat_temp.rows;
-	bitInfo->bmiHeader.biPlanes = 1;
-	bitInfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-	bitInfo->bmiHeader.biCompression = BI_RGB;
-	bitInfo->bmiHeader.biClrImportant = 0;
-	bitInfo->bmiHeader.biClrUsed = 0;
-	bitInfo->bmiHeader.biSizeImage = 0;
-	bitInfo->bmiHeader.biXPelsPerMeter = 0;
-	bitInfo->bmiHeader.biYPelsPerMeter = 0;
+	// Create BITMAPINFO structure
+	BITMAPINFO bitmapInfo;
+	memset(&bitmapInfo, 0, sizeof(BITMAPINFO));
+	bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	bitmapInfo.bmiHeader.biWidth = mat_temp.cols;
+	bitmapInfo.bmiHeader.biHeight = -mat_temp.rows;
+	bitmapInfo.bmiHeader.biPlanes = 1;
+	bitmapInfo.bmiHeader.biBitCount = bpp;
+	bitmapInfo.bmiHeader.biCompression = BI_RGB;
 
-	//그레이스케일 인경우 팔레트가 필요
-	if (bpp == 8)
-	{
-		RGBQUAD* palette = bitInfo->bmiColors;
-		for (int i = 0; i < 256; i++)
-		{
-			palette[i].rgbBlue = palette[i].rgbGreen = palette[i].rgbRed = (BYTE)i;
-			palette[i].rgbReserved = 0;
-		}
-	}
+	// Get DC and create compatible DC
+	CClientDC dc(this);
+	CDC memDC;
+	memDC.CreateCompatibleDC(&dc);
 
-	// Image is bigger or smaller than into destination rectangle
-	// we use stretch in full rect
+	// Create a bitmap compatible with the DC
+	CBitmap bitmap;
+	bitmap.CreateCompatibleBitmap(&dc, mat_temp.cols, mat_temp.rows);
 
-	if (mat_temp.cols == winSize.width && mat_temp.rows == winSize.height)
-	{
-		// source and destination have same size
-		// transfer memory block
-		// NOTE: the padding border will be shown here. Anyway it will be max 3px width
+	// Select the bitmap into the memory DC
+	CBitmap* pOldBitmap = memDC.SelectObject(&bitmap);
 
-		SetDIBitsToDevice(cimage_mfc.GetDC(),
-			//destination rectangle
-			0, 0, winSize.width, winSize.height,
-			0, 0, 0, mat_temp.rows,
-			mat_temp.data, bitInfo, DIB_RGB_COLORS);
-	}
-	else
-	{
-		// destination rectangle
-		int destx = 0, desty = 0;
-		int destw = winSize.width;
-		int desth = winSize.height;
+	// Copy the Mat data to the DC
+	int height = -mat_temp.rows; // negative height to ensure top-down drawing
+	memDC.SetStretchBltMode(COLORONCOLOR);
+	StretchDIBits(memDC.GetSafeHdc(), 0, 0, mat_temp.cols, mat_temp.rows, 0, 0, mat_temp.cols, mat_temp.rows, mat_temp.data, &bitmapInfo, DIB_RGB_COLORS, SRCCOPY);
 
-		// rectangle defined on source bitmap
-		// using imgWidth instead of mat_temp.cols will ignore the padding border
-		int imgx = 0, imgy = 0;
-		int imgWidth = mat_temp.cols - border;
-		int imgHeight = mat_temp.rows;
+	// Copy the memory DC to the screen DC
+	dc.BitBlt(0, 0, mat_temp.cols, mat_temp.rows, &memDC, 0, 0, SRCCOPY);
 
-		StretchDIBits(cimage_mfc.GetDC(),
-			destx, desty, destw, desth,
-			imgx, imgy, imgWidth, imgHeight,
-			mat_temp.data, bitInfo, DIB_RGB_COLORS, SRCCOPY);
-	}
+	// Cleanup
+	memDC.SelectObject(pOldBitmap);
+	bitmap.DeleteObject();
+	memDC.DeleteDC();
+}
+*/
 
-	HDC dc = ::GetDC(m_picture.m_hWnd);
-	cimage_mfc.BitBlt(dc, 0, 0);
-
-	::ReleaseDC(m_picture.m_hWnd, dc);
-
-	cimage_mfc.ReleaseDC();
-	cimage_mfc.Destroy();
-
-	CDialogEx::OnTimer(nIDEvent);
+void CMFCApplication1Dlg::OnBnClickedMergeBtn()
+{
+	m_nFaceDetectionTimerID = SetTimer(2, 100, nullptr);
 }
