@@ -829,6 +829,7 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 	}
 }
 
+//주석 추가 
 /*
 void CMFCApplication1Dlg::OnBnClickedMergeBtn()
 {
