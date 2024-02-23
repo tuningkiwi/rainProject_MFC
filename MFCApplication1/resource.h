@@ -1,6 +1,6 @@
 ﻿//{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by MFCApplication1.rc
+// Microsoft Visual C++에서 생성한 포함 파일입니다.
+// MFCApplication1.rc에서 사용되고 있습니다.
 //
 #define IDM_ABOUTBOX                    0x0010
 #define IDD_ABOUTBOX                    100
@@ -30,6 +30,8 @@
 #define IDC_EMBOSS_FT                   1004
 #define IDC_OBJECTDETECTION_BTN         1005
 #define IDC_BUTY_BTN                    1005
+#define IDC_MFCCOLORBUTTON_BTN          1005
+#define IDC_MFCCOLORBUTTON_COLOR        1005
 #define IDC_BRIGHTNESSCTRL_BTN          1006
 #define IDC_SLIDER_GAUSSIAN_FT          1006
 #define IDC_SLIDER_FOG_FT               1006
@@ -39,10 +41,12 @@
 #define IDC_SHARP_SLIDER_FT             1009
 #define IDC_SLIDER_EYE                  1009
 #define IDC_SIZE_SLIDER                 1009
+#define IDC_SLIDER_H                    1009
 #define IDC_PC_FT                       1010
 #define IDC_REVERT_FT                   1011
 #define IDC_NOISELB_FT                  1012
 #define IDC_SLIDER_NOISE_FT             1013
+#define IDC_SLIDER_S                    1013
 #define IDC_BACK                        1014
 #define IDC_L                           1016
 #define IDC_LUMINANCE_BTN               1016
@@ -68,14 +72,24 @@
 #define IDC_SLIDER_PARTBLUR             1034
 #define IDC_MERGE                       1035
 #define IDC_VIDEO_VIEW                  1036
+#define IDC_STATIC_COLOR                1037
+#define IDC_SLIDER_EDIT_H               1038
+#define IDC_COLOR_EDIT                  1039
+#define IDC_SLIDER_NAME_H               1040
+#define IDC_SLIDER_EDIT_S               1041
+#define IDC_SLIDER_NAME_S               1042
+#define IDC_SLIDER_V                    1043
+#define IDC_EDIT5                       1044
+#define IDC_SLIDER_EDIT_V               1044
+#define IDC_SLIDER_NAME_V               1045
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        139
+#define _APS_NEXT_RESOURCE_VALUE        138
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1037
+#define _APS_NEXT_CONTROL_VALUE         1046
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -34,9 +34,18 @@ void CColorControls::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_IMAGE_CONTROL, m_imageControl);
-	//  DDX_Control(pDX, IDC_LUMINANCE_BTN, m_luminance_btn);
-}
 
+	DDX_Control(pDX, IDC_MFCCOLORBUTTON_COLOR, m_mfcColorBtn);
+	DDX_Control(pDX, IDC_STATIC_COLOR, m_staticColor);
+
+	DDX_Control(pDX, IDC_SLIDER_H, m_slider_h);
+	DDX_Control(pDX, IDC_SLIDER_EDIT_H, m_slider_edit_h);
+	DDX_Control(pDX, IDC_COLOR_EDIT, m_color_edit);
+	DDX_Control(pDX, IDC_SLIDER_S, m_slider_s);
+	DDX_Control(pDX, IDC_SLIDER_EDIT_S, m_slider_edit_s);
+	DDX_Control(pDX, IDC_SLIDER_V, m_slider_v);
+	DDX_Control(pDX, IDC_SLIDER_EDIT_V, m_slider_edit_v);
+}
 
 BEGIN_MESSAGE_MAP(CColorControls, CDialogEx)
 	ON_WM_DESTROY()
@@ -46,12 +55,13 @@ BEGIN_MESSAGE_MAP(CColorControls, CDialogEx)
 	ON_BN_CLICKED(IDOK, &CColorControls::OnBnClickedOk)
 	ON_BN_CLICKED(IDCANCEL, &CColorControls::OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_BACK, &CColorControls::OnBnClickedBack)
-	ON_BN_CLICKED(IDC_LUMINANCE_BTN, &CColorControls::OnBnClickedLuminanceBtn)
-
-//	ON_WM_PAINT()
+	
+	//ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_WM_CTLCOLOR()
+	ON_BN_CLICKED(IDC_MFCCOLORBUTTON_COLOR, &CColorControls::OnBnClickedMfccolorbuttonColor)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_H, &CColorControls::OnNMCustomdrawSliderH)
 END_MESSAGE_MAP()
-
 
 // CColorControls 메시지 처리기
 
@@ -66,12 +76,41 @@ BOOL CColorControls::OnInitDialog()
 	GetDlgItem(IDCANCEL)->MoveWindow(1000, 720 - 100, 200, 45);
 	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);
 	GetDlgItem(IDC_BACK)->MoveWindow(1000, 720 - 220, 200, 45);
-	GetDlgItem(IDC_LUMINANCE_BTN)->MoveWindow(1000, 50, 200, 45);
+	
+	GetDlgItem(IDC_MFCCOLORBUTTON_COLOR)->MoveWindow(1000, 100, 200, 30); //색 편집창
+	GetDlgItem(IDC_STATIC_COLOR)->MoveWindow(1000, 50, 70, 40);
+	GetDlgItem(IDC_COLOR_EDIT)->MoveWindow(1080, 50, 120, 40); //RGB값
 
+	GetDlgItem(IDC_SLIDER_H)->MoveWindow(1000, 180, 200, 30); //슬라이더H
+	GetDlgItem(IDC_SLIDER_EDIT_H)->MoveWindow(1140, 220, 50, 30);
+	GetDlgItem(IDC_SLIDER_NAME_H)->MoveWindow(1000, 220, 120, 30);
+
+	GetDlgItem(IDC_SLIDER_S)->MoveWindow(1000, 280, 200, 30); //슬라이더S
+	GetDlgItem(IDC_SLIDER_EDIT_S)->MoveWindow(1140, 320, 50, 30);
+	GetDlgItem(IDC_SLIDER_NAME_S)->MoveWindow(1000, 320, 120, 30);
+
+	GetDlgItem(IDC_SLIDER_V)->MoveWindow(1000, 380, 200, 30); //슬라이더V
+	GetDlgItem(IDC_SLIDER_EDIT_V)->MoveWindow(1140, 420, 50, 30);
+	GetDlgItem(IDC_SLIDER_NAME_V)->MoveWindow(1000, 420, 120, 30);
 
 	//DrawImage(); dialog 호출시 oninitDiaog()뒤에 실행되는 메세지들에 의하여, 사진이 출력되지 않음 
 	SetTimer(1, 80, NULL);//100ms  사진 불러오기 위한 타이머 
 
+	m_mfcColorBtn.SetColor(RGB(255, 255, 255));//색 편집창 기본값
+	m_brushColor.CreateSolidBrush(m_mfcColorBtn.GetColor());
+
+	m_slider_h.SetRange(0, 100);	
+	m_slider_h.SetPos(50);
+	m_slider_h.SetTicFreq(10);
+
+	m_slider_s.SetRange(0, 100);
+	m_slider_s.SetPos(50);
+	m_slider_s.SetTicFreq(10);
+
+	m_slider_v.SetRange(0, 100);
+	m_slider_v.SetPos(50);
+	m_slider_v.SetTicFreq(10);
+		
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
@@ -107,6 +146,11 @@ void CColorControls::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
 		GetDlgItem(IDC_IMAGE_CONTROL)->MoveWindow(x, y, requestImg.cols, requestImg.rows);
 	}
 
+	//CPaintDC dc1(GetDlgItem(IDC_LUMINANCE_BTN)); // device context for painting
+	//CRect rect1;
+	//GetDlgItem(IDC_LUMINANCE_BTN)->GetWindowRect(&rect1);
+	//ScreenToClient(&rect1);
+	//dc1.FillSolidRect(rect1, m_selectedColor);
 
 	//GetClientRect(left, top, right, bottom ) 클라이언트 영역의 좌표
 	//함수가 성공하면 반환 값이 0이 아닙니다.
@@ -130,14 +174,81 @@ void CColorControls::OnDestroy()
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 }
 
-
 void CColorControls::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+		
+	if (*pScrollBar == m_slider_h) {
+        int hueShift = m_slider_h.GetPos() - 50; // 색조의 변화량 계산
+
+        if (hueShift != 0) {
+            // 이미지를 HSV 색 공간으로 변환
+            Mat hsvImage;
+            cvtColor(myImg, hsvImage, COLOR_BGR2HSV);
+
+            // HSV 이미지의 H 채널에 색조를 적용
+            for (int i = 0; i < hsvImage.rows; ++i) {
+                for (int j = 0; j < hsvImage.cols; ++j) {
+                    hsvImage.at<Vec3b>(i, j)[0] += hueShift; // H 채널에 색조 변환
+                    // 색조가 0~180 범위 내에 있도록 보정
+                    if (hsvImage.at<Vec3b>(i, j)[0] < 0)
+                        hsvImage.at<Vec3b>(i, j)[0] += 180;
+                    else if (hsvImage.at<Vec3b>(i, j)[0] >= 180)
+                        hsvImage.at<Vec3b>(i, j)[0] -= 180;
+                }
+            }
+
+            // HSV 이미지를 다시 BGR 색 공간으로 변환
+            cvtColor(hsvImage, myImgAfterChange, COLOR_HSV2BGR);
+
+            // 비트맵 정보 생성 및 이미지 출력
+            CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
+            DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+        }
+	}
+	else if (*pScrollBar == m_slider_s) {
+		int hueShift = m_slider_s.GetPos() - 50; // 색조의 변화량 계산
+
+		if (hueShift != 0) {
+			// 이미지를 HSV 색 공간으로 변환
+			Mat hsvImage;
+			cvtColor(myImg, hsvImage, COLOR_BGR2HSV);
+
+			// HSV 이미지의 S 채널에 채도를 적용
+			for (int i = 0; i < hsvImage.rows; ++i) {
+				for (int j = 0; j < hsvImage.cols; ++j) {
+					hsvImage.at<Vec3b>(i, j)[1] += hueShift; // S 채널에 채도 변환
+					// 채도가 0~255 범위 내에 있도록 보정
+					if (hsvImage.at<Vec3b>(i, j)[1] < 0)
+						hsvImage.at<Vec3b>(i, j)[1] = 0;
+					else if (hsvImage.at<Vec3b>(i, j)[1] > 255)
+						hsvImage.at<Vec3b>(i, j)[1] = 255;
+				}
+			}
+
+			// HSV 이미지를 다시 BGR 색 공간으로 변환
+			cvtColor(hsvImage, myImgAfterChange, COLOR_HSV2BGR);
+
+			// 비트맵 정보 생성 및 이미지 출력
+			CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
+			DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+		}
+	}
+	else if (*pScrollBar == m_slider_v) {
+		int brightnessChange = m_slider_v.GetPos() - 50; // 밝기의 변화량 계산
+
+		if (brightnessChange != 0) {
+			// 이미지 밝기 조절
+			Mat adjustedImage;
+			myImg.convertTo(adjustedImage, -1, 1, brightnessChange);
+
+			// 이미지 출력
+			DrawImage(adjustedImage, myBmpInfoAfterChange);
+		}
+	}
 
 	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
-
 
 void CColorControls::OnTimer(UINT_PTR nIDEvent)
 {
@@ -207,63 +318,73 @@ void CColorControls::OnBnClickedBack()
 	MessageBox(L"원본으로 돌아갑니다", L"알림", MB_OK);
 }
 
-
-void CColorControls::OnBnClickedLuminanceBtn()
-{
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	CColorDialog dlg(RGB(255, 0, 0), CC_FULLOPEN, this);
-	
-	if (dlg.DoModal() == IDOK) {
-
-		COLORREF color = dlg.GetColor();
-
-		TRACE(_T("RGB value of the selected color - red = %u, ")
-			_T("green = %u, blue = %u\n"),
-			GetRValue(color), GetGValue(color), GetBValue(color));
-
-	}
-	 
-	//CClientDC dc(this);
-	//typedef struct UserPaletteData
-	//{
-	//	LOGPALETTE log_palette;
-	//	PALETTEENTRY entry[256 - 1]; //log_palette에서 초과되는 색상 값을 저장
-
-	//}UPD;
-
-	//UPD upd;
-	//upd.log_palette.palVersion = 0x300; //팔레트 버전
-	//upd.log_palette.palNumEntries = (WORD)256;//팔레트 수
-
-	////dc에 연결된 256개의 색상을 가져온다
-	//if (!::GetSystemPaletteEntries(dc, 0, 256, upd.log_palette.palPalEntry)) {
-	//	memset(upd.log_palette.palPalEntry, 0, sizeof(PALETTEENTRY) * 256);
-	//}
-
-	////가져온 색상으로 팔레트를 생성
-	//m_stock_palette.CreatePalette(NULL);
-
-	////m_colorPicker.SetPalette(palette);
-
-	//m_luminance_btn.SetType(CMFCColorPickerCtrl::LUMINANCE);
-	//m_luminance_btn.SetPalette(&m_stock_palette);
-	//m_luminance_btn.SetColor(RGB(0, 255, 0));
-
-	//COLORREF color = m_luminance_btn.GetColor(); 
-}
-
-
 //void CColorControls::OnPaint()
 //{
-	//CPaintDC dc(this); // device context for painting
-	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
-	// 그리기 메시지에 대해서는 CDialogEx::OnPaint()을(를) 호출하지 마십시오.
+//	CPaintDC dc(this); // device context for painting
+//	
+//
+//	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
+//	// 그리기 메시지에 대해서는 CDialogEx::OnPaint()을(를) 호출하지 마십시오.
 //}
-
 
 HCURSOR CColorControls::OnQueryDragIcon()
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 
 	return CDialogEx::OnQueryDragIcon();
+}
+
+HBRUSH CColorControls::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	// TODO:  여기서 DC의 특성을 변경합니다.
+	if (nCtlColor == CTLCOLOR_STATIC && pWnd->GetDlgCtrlID() == IDC_STATIC_COLOR)
+		hbr = m_brushColor;
+	// TODO:  기본값이 적당하지 않으면 다른 브러시를 반환합니다.
+	return hbr;
+}
+
+void CColorControls::OnBnClickedMfccolorbuttonColor()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	m_brushColor.DeleteObject();
+	m_brushColor.CreateSolidBrush(m_mfcColorBtn.GetColor());
+	m_staticColor.Invalidate();
+	m_staticColor.UpdateWindow();
+		
+	// Color Button Control의 현재 색상을 가져옵니다.
+	COLORREF color = m_mfcColorBtn.GetColor();
+
+	// RGB 값을 얻어옵니다.
+	int red = GetRValue(color);
+	int green = GetGValue(color);
+	int blue = GetBValue(color);
+
+	// RGB 값을 텍스트로 변환합니다.
+	CString strRGB;
+	strRGB.Format(_T("%d, %d, %d"), red, green, blue);
+	SetDlgItemText(IDC_COLOR_EDIT, strRGB);
+}
+
+void CColorControls::UpdateSliderValue(int sliderID, int editID) {
+	CSliderCtrl* slider = (CSliderCtrl*)GetDlgItem(sliderID);
+	CStatic* edit = (CStatic*)GetDlgItem(editID);
+
+	int pos = slider->GetPos();
+	CString str;
+	str.Format(L"%d", pos);
+	edit->SetWindowTextW(str);
+}
+
+void CColorControls::OnNMCustomdrawSliderH(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+		
+	UpdateSliderValue(IDC_SLIDER_H, IDC_SLIDER_EDIT_H);
+	UpdateSliderValue(IDC_SLIDER_S, IDC_SLIDER_EDIT_S);
+	UpdateSliderValue(IDC_SLIDER_V, IDC_SLIDER_EDIT_V);
+
+	*pResult = 0;
 }
