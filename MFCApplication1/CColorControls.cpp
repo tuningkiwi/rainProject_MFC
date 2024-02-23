@@ -37,10 +37,10 @@ void CColorControls::DoDataExchange(CDataExchange* pDX)
 
 	DDX_Control(pDX, IDC_MFCCOLORBUTTON_COLOR, m_mfcColorBtn);
 	DDX_Control(pDX, IDC_STATIC_COLOR, m_staticColor);
+	DDX_Control(pDX, IDC_COLOR_EDIT, m_color_edit);
 
 	DDX_Control(pDX, IDC_SLIDER_H, m_slider_h);
-	DDX_Control(pDX, IDC_SLIDER_EDIT_H, m_slider_edit_h);
-	DDX_Control(pDX, IDC_COLOR_EDIT, m_color_edit);
+	DDX_Control(pDX, IDC_SLIDER_EDIT_H, m_slider_edit_h);	
 	DDX_Control(pDX, IDC_SLIDER_S, m_slider_s);
 	DDX_Control(pDX, IDC_SLIDER_EDIT_S, m_slider_edit_s);
 	DDX_Control(pDX, IDC_SLIDER_V, m_slider_v);
@@ -60,7 +60,11 @@ BEGIN_MESSAGE_MAP(CColorControls, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_WM_CTLCOLOR()
 	ON_BN_CLICKED(IDC_MFCCOLORBUTTON_COLOR, &CColorControls::OnBnClickedMfccolorbuttonColor)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_H, &CColorControls::OnNMCustomdrawSliderH)
+	//ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_H, &CColorControls::OnNMCustomdrawSliderH)// EDIT 출력 실행력 낮음
+	
+	ON_WM_LBUTTONDOWN()	
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
 END_MESSAGE_MAP()
 
 // CColorControls 메시지 처리기
@@ -101,15 +105,15 @@ BOOL CColorControls::OnInitDialog()
 
 	m_slider_h.SetRange(0, 100);	
 	m_slider_h.SetPos(50);
-	m_slider_h.SetTicFreq(10);
+	//m_slider_h.SetTicFreq(10);
 
 	m_slider_s.SetRange(0, 100);
 	m_slider_s.SetPos(50);
-	m_slider_s.SetTicFreq(10);
+	//m_slider_s.SetTicFreq(10);
 
 	m_slider_v.SetRange(0, 100);
 	m_slider_v.SetPos(50);
-	m_slider_v.SetTicFreq(10);
+	//m_slider_v.SetTicFreq(10);
 		
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
@@ -174,6 +178,20 @@ void CColorControls::OnDestroy()
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 }
 
+//슬라이더 조정값 출력
+void CColorControls::UpdateSliderValue(int sliderID, int editID)
+{
+	CSliderCtrl* slider = (CSliderCtrl*)GetDlgItem(sliderID);
+	CEdit* edit = (CEdit*)GetDlgItem(editID);
+
+	int pos = slider->GetPos();
+	CString str;
+
+	str.Format(L"%d", pos);
+	edit->SetWindowTextW(str);
+}
+
+//해당 슬라이더 성분값으로 이미지 변환
 void CColorControls::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
@@ -246,6 +264,12 @@ void CColorControls::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			DrawImage(adjustedImage, myBmpInfoAfterChange);
 		}
 	}
+	if (*pScrollBar == m_slider_h || *pScrollBar == m_slider_s || *pScrollBar == m_slider_v) {
+		// 각 슬라이더에 대한 이벤트 처리
+		UpdateSliderValue(IDC_SLIDER_H, IDC_SLIDER_EDIT_H);
+		UpdateSliderValue(IDC_SLIDER_S, IDC_SLIDER_EDIT_S);
+		UpdateSliderValue(IDC_SLIDER_V, IDC_SLIDER_EDIT_V);
+	}
 
 	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
@@ -258,7 +282,7 @@ void CColorControls::OnTimer(UINT_PTR nIDEvent)
 		DrawImage(myImg, myBitmapInfo);//처음 로딩되는 이미지 
 
 	}
-	KillTimer(1);//처음 필터창을 켰을때, 사진을 띄우기 위한 용도라 바로 kill 
+	KillTimer(1);//처음 창을 켰을때, 사진을 띄우기 위한 용도라 바로 kill 
 	//CDialogEx::OnTimer(nIDEvent);
 }
 
@@ -315,6 +339,8 @@ void CColorControls::OnBnClickedBack()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	DrawImage(myImg, myBitmapInfo);
+	myImgAfterChange = myImg.clone();
+	myBmpInfoAfterChange = myBitmapInfo;
 	MessageBox(L"원본으로 돌아갑니다", L"알림", MB_OK);
 }
 
@@ -334,6 +360,7 @@ HCURSOR CColorControls::OnQueryDragIcon()
 	return CDialogEx::OnQueryDragIcon();
 }
 
+//색 편집창 지정색으로 블록컬러 변경
 HBRUSH CColorControls::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
@@ -345,6 +372,7 @@ HBRUSH CColorControls::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	return hbr;
 }
 
+//색 편집창 지정색 RGB값 출력
 void CColorControls::OnBnClickedMfccolorbuttonColor()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
@@ -352,7 +380,7 @@ void CColorControls::OnBnClickedMfccolorbuttonColor()
 	m_brushColor.CreateSolidBrush(m_mfcColorBtn.GetColor());
 	m_staticColor.Invalidate();
 	m_staticColor.UpdateWindow();
-		
+
 	// Color Button Control의 현재 색상을 가져옵니다.
 	COLORREF color = m_mfcColorBtn.GetColor();
 
@@ -361,30 +389,104 @@ void CColorControls::OnBnClickedMfccolorbuttonColor()
 	int green = GetGValue(color);
 	int blue = GetBValue(color);
 
+	// 선택한 색상을 변수에 저장합니다.
+	m_selectedColor = Vec3b(blue, green, red);
+
 	// RGB 값을 텍스트로 변환합니다.
 	CString strRGB;
 	strRGB.Format(_T("%d, %d, %d"), red, green, blue);
 	SetDlgItemText(IDC_COLOR_EDIT, strRGB);
 }
 
-void CColorControls::UpdateSliderValue(int sliderID, int editID) {
-	CSliderCtrl* slider = (CSliderCtrl*)GetDlgItem(sliderID);
-	CStatic* edit = (CStatic*)GetDlgItem(editID);
-
-	int pos = slider->GetPos();
-	CString str;
-	str.Format(L"%d", pos);
-	edit->SetWindowTextW(str);
-}
-
-void CColorControls::OnNMCustomdrawSliderH(NMHDR* pNMHDR, LRESULT* pResult)
+void CColorControls::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-		
-	UpdateSliderValue(IDC_SLIDER_H, IDC_SLIDER_EDIT_H);
-	UpdateSliderValue(IDC_SLIDER_S, IDC_SLIDER_EDIT_S);
-	UpdateSliderValue(IDC_SLIDER_V, IDC_SLIDER_EDIT_V);
+	// 마우스 왼쪽 버튼을 누른 상태를 기록합니다.
+	m_bDragging = true;
 
-	*pResult = 0;
+	// 드래그 영역의 시작점을 저장합니다.
+	m_ptDragStart = point;
+
+	// 부모 클래스의 마우스 왼쪽 버튼을 누른 이벤트 처리 함수를 호출합니다.
+	CDialogEx::OnLButtonDown(nFlags, point);
 }
+
+void CColorControls::OnMouseMove(UINT nFlags, CPoint point)
+{
+	// 만약 드래그 중이라면
+	if (m_bDragging)
+	{
+		// 마우스 이동 중인 지점을 저장합니다.
+		m_ptDragEnd = point;
+
+		// 드래그 중인 영역을 화면에 그립니다.
+		CDC* pDC = GetDC();
+		CPen pen(PS_SOLID, 10, RGB(255, 0, 0)); // 빨간색 펜 생성
+		CPen* pOldPen = pDC->SelectObject(&pen);
+		pDC->SetROP2(R2_NOTXORPEN); // XOR 모드로 설정하여 반전된 효과를 만듭니다.
+		pDC->Rectangle(m_ptDragStart.x, m_ptDragStart.y, m_ptDragEnd.x, m_ptDragEnd.y); // 사각형을 그립니다.
+		pDC->SelectObject(pOldPen); // 이전 펜으로 복원합니다.
+		ReleaseDC(pDC);
+	}
+
+	// 부모 클래스의 마우스 이동 이벤트 처리 함수를 호출합니다.
+	CDialogEx::OnMouseMove(nFlags, point);
+}
+
+void CColorControls::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	// 마우스 왼쪽 버튼을 놓은 상태를 기록합니다.
+	m_bDragging = false;
+
+	// 드래그 중인 영역을 화면에서 지웁니다.
+	CDC* pDC = GetDC();
+	pDC->SelectStockObject(WHITE_PEN); // 흰색 펜을 선택하여 지우기 작업을 수행합니다.
+	pDC->SetROP2(R2_COPYPEN); // XOR 모드를 해제합니다.
+	pDC->Rectangle(m_ptDragStart.x, m_ptDragStart.y, m_ptDragEnd.x, m_ptDragEnd.y); // 이전에 그렸던 사각형을 다시 그려서 지웁니다.
+	ReleaseDC(pDC);
+
+	// 선택한 색상을 드래그한 영역에 적용합니다.
+	ApplyColorToDraggedRegion(m_ptDragStart, m_ptDragEnd);
+
+	// 부모 클래스의 마우스 왼쪽 버튼을 놓은 이벤트 처리 함수를 호출합니다.
+	CDialogEx::OnLButtonUp(nFlags, point);
+}
+
+// 드래그한 영역에 선택한 색상을 적용하는 함수
+void CColorControls::ApplyColorToDraggedRegion(CPoint startPoint, CPoint endPoint)
+{
+	// 이미지의 너비와 높이를 가져옵니다.
+	int imageWidth = myImg.cols;
+	int imageHeight = myImg.rows;
+
+	// 드래그한 영역의 시작점과 끝점을 정렬합니다.
+	int startX = min(startPoint.x, endPoint.x);
+	int endX = max(startPoint.x, endPoint.x);
+	int startY = min(startPoint.y, endPoint.y);
+	int endY = max(startPoint.y, endPoint.y);
+
+	// 선택한 색상을 이미지의 드래그한 영역에 적용합니다.
+	for (int y = startY; y < endY; ++y)
+	{
+		for (int x = startX; x < endX; ++x)
+		{
+			// 드래그한 영역의 각 픽셀에 선택한 색상을 적용합니다.
+			myImg.at<Vec3b>(y, x) = m_selectedColor;
+		}
+	}
+
+	// 변경된 이미지를 화면에 출력합니다.
+	CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
+	DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+}
+
+//void CColorControls::OnNMCustomdrawSliderH(NMHDR* pNMHDR, LRESULT* pResult)
+//{
+//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+//	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+//		
+//	UpdateSliderValue(IDC_SLIDER_H, IDC_SLIDER_EDIT_H);
+//	UpdateSliderValue(IDC_SLIDER_S, IDC_SLIDER_EDIT_S);
+//	UpdateSliderValue(IDC_SLIDER_V, IDC_SLIDER_EDIT_V);
+//
+//	*pResult = 0;
+//}

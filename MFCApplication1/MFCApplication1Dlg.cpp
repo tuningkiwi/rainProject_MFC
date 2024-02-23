@@ -437,8 +437,34 @@ void CMFCApplication1Dlg::OnBnClickedFilterBtn()
 //유진: 색상 추출 및 관련 기능 
 void CMFCApplication1Dlg::OnBnClickedColorBtn()
 {
-	CColorControls dlg(m_matImage, m_pBitmapInfo);
-	dlg.DoModal();
+	CColorControls colordlg(m_matImage, m_pBitmapInfo);
+	
+	// Create and show the dialog box
+	INT_PTR nRet = -1;
+	nRet = colordlg.DoModal();
+
+	// Handle the return value from DoModal
+	switch (nRet)
+	{
+	case -1:
+		AfxMessageBox(_T("Dialog box could not be created!"));
+		break;
+	case IDABORT:
+		// Do something
+		break;
+	case IDOK:
+		// Do something
+		m_matImage = colordlg.myImgAfterChange;
+		m_pBitmapInfo = colordlg.myBmpInfoAfterChange;
+		DrawImage();
+		break;
+	case IDCANCEL:
+		// Do something
+		break;
+	default:
+		// Do something
+		break;
+	};
 }
 
 //인태: 자르기 및 어파인 변형 
