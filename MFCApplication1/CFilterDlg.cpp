@@ -572,12 +572,12 @@ void CFilterDlg::partBlurProc(CPoint point) {
 	int range = blurRangeHalfWid*50;
 	blurArea.left = locInImg.x - range; blurArea.top = locInImg.y - range;
 	blurArea.right = locInImg.x + range; blurArea.bottom = locInImg.y + range;
-	if (blurArea.left < 1) { blurArea.left = 1; }
-	if(blurArea.top <1) { blurArea.top = 1; }
+	if (blurArea.left < 0) { blurArea.left = 0; }
+	if(blurArea.top <0) { blurArea.top = 0; }
 	if (blurArea.right > picLTRB.right- picLTRB.left) { 
-		blurArea.right = picLTRB.right - picLTRB.left; }
+		blurArea.right = picLTRB.right - picLTRB.left-1; }
 	if (blurArea.bottom > picLTRB.bottom - picLTRB.top) {
-		blurArea.bottom = picLTRB.bottom - picLTRB.top;	}
+		blurArea.bottom = picLTRB.bottom - picLTRB.top-1;	}
 
 	Mat src;
 	if (myImgAfterChange.data == NULL) {//아무것도 저장되어 있지 않는 상태 
