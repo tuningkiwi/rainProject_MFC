@@ -235,6 +235,7 @@ void CAffineDlg::OnBnClickedReverseIt()
 	rotresultImg = myImg.clone();
 	resultImg = myImg.clone();
 	ChangeImg = myImg.clone();
+	SizeImg = myImg.clone();
 	SizeSlide.SetPos(1);
 }
 
@@ -376,11 +377,6 @@ BOOL CAffineDlg::OnEraseBkgnd(CDC* pDC)
 	//return CDialogEx::OnEraseBkgnd(pDC);
 	return TRUE;
 }
-
-
-
-
-
 
 
 void CAffineDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
