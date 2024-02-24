@@ -81,8 +81,8 @@ public:
 	BITMAPINFO* CreateBitmapInfo( int w, int h, int bpp);
 	Mat colorToGray();//컬러영상 >> 그레이 영상으로 변환 
 	int partBlurProc(CPoint point);//부분 블러 처리 메소드 
-	void CFilterDlg::videoPrint();//비디오 출력
-
+	void videoPrint();//비디오 출력
+	int fogFilter(int);//안개 필터 수행 
+	int cntScroll; //스크롤을 조정하니, 2번 들어가서 수행하는 것을 막기 위해서. 
 };
 
-//백업용 코드 저장소 커밋 확인 

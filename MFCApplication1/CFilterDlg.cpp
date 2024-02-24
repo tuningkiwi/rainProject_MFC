@@ -17,6 +17,7 @@ CFilterDlg::CFilterDlg()
 
 }
 
+// #생성자
 CFilterDlg::CFilterDlg(Mat Img, BITMAPINFO* bitmapInfo, int fileMode)
 	: CDialogEx(IDD_DIALOG1)
 {
@@ -145,6 +146,8 @@ BOOL CFilterDlg::OnInitDialog()
 	GetDlgItem(IDC_REVERT_FT)->SetFont(&font);
 	font.Detach();//font 종료 꼭 해주기 메모리 할당 해제 
 	
+	cntScroll = 0;
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
@@ -479,16 +482,22 @@ BITMAPINFO* CFilterDlg::CreateBitmapInfo(int w, int h, int bpp) {
 	}
 }
 
-//되돌리기 기능 (원본 이미지로 돌아감) 
+//#되돌리기함수 기능 (원본 이미지로 돌아감) 
 void CFilterDlg::OnBnClickedRevertFt()
 {
 	// TODO: Add your control notification handler code here
-	bmpHistory.pop_back(); bmpInfoHistory.pop_back();
-	DrawImage(bmpHistory.back(), bmpInfoHistory.back());
-	// DrawImage(myImg, myBitmapInfo);
-	// myImgAfterChange = myImg.clone();
-	// myBmpInfoAfterChange = myBitmapInfo;
-	MessageBox(L"이전으로 돌아갑니다", L"알림",MB_OK);
+	if(bmpHistory.size()>1){
+		bmpHistory.pop_back(); bmpInfoHistory.pop_back();
+		
+		DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+		partBlurSlider.SetPos(1);
+		fogslider_FT.SetPos(0);
+		sharpSliderFT.SetPos(0);
+		noiseFT.SetPos(0);
+		MessageBox(L"이전으로 돌아갑니다", L"알림",MB_OK);
+	}else{
+		MessageBox(L"더이상 되돌아갈 이미지가 없고\n원본이미지만 남았습니다", L"알림",MB_OK);
+	}
 }
 
 //필터 창을 종료하고, 부모창 사진에는 변경이 안되어 있어야함. 
@@ -513,33 +522,38 @@ void CFilterDlg::OnBnClickedCancel()
 //}
 
 
-//트랙바 조절에 따른 처리 기능 
+//스크롤 트랙바 조절에 따른 처리 기능 
 //각 필터의 강도 조절 
 void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	// TODO: Add your message handler code here and/or call default
 	if (*pScrollBar == fogslider_FT) {//안개필터 
-		sharpSliderFT.SetPos(0);
 		int sigma = fogslider_FT.GetPos();
-		if (sigma != 0) {
-			GaussianBlur(myImg, myImgAfterChange, Size(), (double)sigma);
-			//CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
-			DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+		cntScroll++;
+		if(sigma ==0 || cntScroll==2){
+			cntScroll = 0;
+			return;
 		}
-		
+		sharpSliderFT.SetPos(0);
+		int ret = fogFilter(sigma); 
+		if(ret != 1){
+			//안개필터 적용 안됨. 
+			MessageBox(L"안개필터적용 에러", L"알림", IDOK);	
+		}
 	}
 	else if (*pScrollBar == sharpSliderFT) {//샤프닝필터
-		fogslider_FT.SetPos(0);
 		int sigma = sharpSliderFT.GetPos();
-		if (sigma != 0) {
-			GaussianBlur(myImg, myImgAfterChange, Size(), (double)sigma);
-			float alpha = 1.f;
-			Mat dst = (1 + alpha) * myImg - alpha * myImgAfterChange;
-			myImgAfterChange = dst;
-			//CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
-			DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+		if(sigma ==0){
+			return;
 		}
-		
+		fogslider_FT.SetPos(0);//상반된 필터인 안개필터는 0으로 세팅 
+		GaussianBlur(myImg, myImgAfterChange, Size(), (double)sigma);
+		float alpha = 1.f;
+		Mat dst = (1 + alpha) * myImg - alpha * myImgAfterChange;
+		myImgAfterChange = dst;
+		//CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
+		DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+
 	}
 	else if (*pScrollBar == noiseFT) {//노이즈필터
 		int stddev = noiseFT.GetPos();
@@ -573,7 +587,7 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		blurRangeHalfWid = partBlurSlider.GetPos();
 	}
 
-	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
+	//CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
 //양방향필터 
@@ -769,7 +783,7 @@ void CFilterDlg::OnLButtonDown(UINT nFlags, CPoint point)
 }
 
 
-//부분블러 처리 : 컬러영상에 대한 / 흑백영상은 추후 구현 
+//부분블러함수 처리 : 컬러영상에 대한 / 흑백영상은 추후 구현 
 //평균값 마스크: 3x3 1/9 필터 
 int CFilterDlg::partBlurProc(CPoint point) {
 	//1. 마우스 포인터 위치값으로, 이미지상의 실제 위치를 계산한다 
@@ -839,6 +853,19 @@ int CFilterDlg::partBlurProc(CPoint point) {
 	return 1;
 }
 
+
+//#fog #안개필터함수 
+int CFilterDlg::fogFilter(int sigma){
+	sharpSliderFT.SetPos(0);
+
+	Mat dst; 
+	GaussianBlur(bmpHistory.back(), dst, Size(), (double)sigma);
+	bmpHistory.push_back(dst);
+	BITMAPINFO* dstinfo = bmpInfoHistory.back();
+	bmpInfoHistory.push_back(dstinfo);
+	DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+	return 1;
+}
 
 //void CFilterDlg::OnStnClickedStaticPointloc()
 //{
