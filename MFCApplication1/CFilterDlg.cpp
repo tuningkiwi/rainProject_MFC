@@ -198,10 +198,12 @@ void CFilterDlg::OnBnClickedOk()
 //#드로우이미지 다이얼로그창blurLoc에 사진 띄우기 
 void CFilterDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
 	KillTimer(0);//0사진타이머 
-
+	
 	//현재 불러올 이미지에 대한 picture contorl 크기 조정  
 	CRect rect = pictureControlSizeSet();
 
+	//부모창에서 정상 출력되지만, 자식 창에서 문제가 생김. 
+	 
 	//GetClientRect(left, top, right, bottom ) 클라이언트 영역의 좌표
 	//함수가 성공하면 반환 값이 0이 아닙니다.
 	//불러올 이미지 사진에 따라 조정된 Picture Ctrl 크기 
