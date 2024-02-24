@@ -283,7 +283,7 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 			case SHARPVM: sharpFilter(level); break;
 			case NOISEVM: noiseFilter(level); break;
 			case EMBOSSVM: embossFilter(); break;
-			//case FOGVM: fogFilter(level); break;
+			case BILATERALVM: bilateralFilter_my(); break;
 			//case FOGVM: fogFilter(level); break;
 		}
 		
@@ -496,7 +496,9 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			cntScroll = 0;
 			return;
 		}
+		partBlurSlider.SetPos(1);
 		sharpSliderFT.SetPos(0);
+		noiseFT.SetPos(0);
 		if(myfileMode==0){//사진모드
 			int ret = fogFilter(sigma); 
 			if(ret != 1){
@@ -516,7 +518,9 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			cntScroll = 0;
 			return;
 		}
+		partBlurSlider.SetPos(1);
 		fogslider_FT.SetPos(0);
+		noiseFT.SetPos(0);
 		if (myfileMode == 0) {//사진모드
 			int ret = sharpFilter(sigma);
 			if (ret != 1) {
@@ -536,12 +540,15 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			cntScroll = 0;
 			return;
 		}
+		partBlurSlider.SetPos(1);
+		fogslider_FT.SetPos(0);
+		sharpSliderFT.SetPos(0);
 		if (myfileMode == 0) {//사진모드
 
 			int ret = noiseFilter(stddev);
 			if (ret < 1) {
 				//샤프닝필터 적용 안됨. 
-				MessageBox(L"안개필터적용 에러", L"알림", IDOK);
+				MessageBox(L"노이즈필터적용 에러", L"알림", IDOK);
 			}
 		}
 		else {//비디오모드
@@ -556,24 +563,26 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	//CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
-//양방향필터 
+//양방향필터버튼
 void CFilterDlg::OnBnClickedBilateralFt()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (bmpHistory.back().channels() >=3) {
-
-		Mat src = colorToGray();
-		Mat dst;
-		bilateralFilter(src, dst, -1, 10, 5); // -1 sigmaSpace로부터 자동생성됨. 10: 색공간에서의 가우시안 표준 편차 5: 좌표 공간에서의 가우시안 표준편차 
-		
-		bmpHistory.push_back(dst);
-		BITMAPINFO* bmpinfo = CreateBitmapInfo(bmpHistory.back().cols, bmpHistory.back().rows, bmpHistory.back().channels() * 8);
-		bmpInfoHistory.push_back(bmpinfo);
-		if(myfileMode==0){//사진 모드 
-			DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+	if (myfileMode == 0) {//사진 모드 )
+		if (bmpHistory.back().channels() >= 3) {
+			bilateralFilter_my();
 		}
-	}else{
-		MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널3개 이미지만 처리합니다", L"알림", IDOK);
+		else {
+			MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널3개 이미지만 처리합니다", L"알림", IDOK);
+		}
+	}
+	else {//비디오 모드
+		if (bmpHistory.back().channels() >= 3) {
+			videoMode[0] = BILATERALVM;
+		}
+		else {
+			MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널3개 이미지만 처리합니다", L"알림", IDOK);
+		}
+		
 	}
 }
 
@@ -903,6 +912,21 @@ int CFilterDlg::embossFilter() {
 
 	Mat dst;
 	filter2D(src, dst, -1, emboss, Point(-1, -1), 128);
+
+	bmpHistory.push_back(dst);
+	BITMAPINFO* bmpinfo = CreateBitmapInfo(bmpHistory.back().cols, bmpHistory.back().rows, bmpHistory.back().channels() * 8);
+	bmpInfoHistory.push_back(bmpinfo);
+	if (myfileMode == 0) {//사진 모드 
+		DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+	}
+	return 1;
+}
+
+//양방향필터함수
+int CFilterDlg::bilateralFilter_my() {
+	Mat src = colorToGray();
+	Mat dst;
+	bilateralFilter(src, dst, -1, 10, 5); // -1 sigmaSpace로부터 자동생성됨. 10: 색공간에서의 가우시안 표준 편차 5: 좌표 공간에서의 가우시안 표준편차 
 
 	bmpHistory.push_back(dst);
 	BITMAPINFO* bmpinfo = CreateBitmapInfo(bmpHistory.back().cols, bmpHistory.back().rows, bmpHistory.back().channels() * 8);
