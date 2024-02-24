@@ -543,17 +543,17 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	}
 	else if (*pScrollBar == sharpSliderFT) {//샤프닝필터
 		int sigma = sharpSliderFT.GetPos();
-		if(sigma ==0){
+		cntScroll++;
+		if(sigma ==0 || cntScroll==2){
+			cntScroll = 0;
 			return;
 		}
-		fogslider_FT.SetPos(0);//상반된 필터인 안개필터는 0으로 세팅 
-		GaussianBlur(myImg, myImgAfterChange, Size(), (double)sigma);
-		float alpha = 1.f;
-		Mat dst = (1 + alpha) * myImg - alpha * myImgAfterChange;
-		myImgAfterChange = dst;
-		//CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
-		DrawImage(myImgAfterChange, myBmpInfoAfterChange);
-
+		fogslider_FT.SetPos(0);
+		int ret = sharpFilter(sigma); 
+		if(ret != 1){
+			//샤프닝필터 적용 안됨. 
+			MessageBox(L"안개필터적용 에러", L"알림", IDOK);	
+		}
 	}
 	else if (*pScrollBar == noiseFT) {//노이즈필터
 		int stddev = noiseFT.GetPos();
@@ -867,6 +867,20 @@ int CFilterDlg::fogFilter(int sigma){
 	return 1;
 }
 
+//#샤프 #샤프닝필터함수
+int CFilterDlg::sharpFilter(int sigma){
+	fogslider_FT.SetPos(0);
+
+	Mat tmp;
+	GaussianBlur(bmpHistory.back(), tmp, Size(), (double)sigma);
+	float alpha = 1.f;
+	Mat dst = (1 + alpha) * bmpHistory.back() - alpha * tmp;
+	bmpHistory.push_back(dst);
+	BITMAPINFO* dstinfo = bmpInfoHistory.back();
+	bmpInfoHistory.push_back(dstinfo);
+	DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+	return 1; 
+}
 //void CFilterDlg::OnStnClickedStaticPointloc()
 //{
 //	// TODO: Add your control notification handler code here
