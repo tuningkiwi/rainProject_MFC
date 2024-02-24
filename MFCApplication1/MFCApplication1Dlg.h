@@ -87,4 +87,5 @@ public:
 	// 비디오 필터링 버튼
 	CButton videoFilterBtn;
 	afx_msg void OnBnClickedBtnVideoFilter();
+	int mode;
 };

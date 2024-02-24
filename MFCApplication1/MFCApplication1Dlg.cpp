@@ -169,7 +169,7 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	GetDlgItem(IDCANCEL)->SetFont(&font);
 	GetDlgItem(IDC_BTN_VIDEO_FILTER)->SetFont(&font);
 	font.Detach();//font 종료 꼭 해주기 메모리 할당 해제 
-
+	mode = 0; //사진 모드 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -357,7 +357,7 @@ void CMFCApplication1Dlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) 
 
 }
 
-//파일 열기 다이얼로그 
+//파일열기 다이얼로그 
 void CMFCApplication1Dlg::OnBnClickedButton2()
 {
 	// TODO: Add your control notification handler code here
@@ -373,7 +373,13 @@ void CMFCApplication1Dlg::OnBnClickedButton2()
 		m_matImage = imread(strPath);//png파일의 경우 alpha채널도 가져옴
 
 		CreateBitmapInfo(m_matImage.cols, m_matImage.rows, m_matImage.channels() * 8);
-		DrawImage(m_matImage, m_pBitmapInfo);
+		if (mode == 0) {
+			SetTimer(1, 30, NULL);
+		}
+		else {
+			DrawImage(m_matImage, m_pBitmapInfo);
+		}
+		
 	}
 }
 
@@ -663,7 +669,14 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 	if (nIDEvent == 1)
 	{
 		//mat_frame가 입력 이미지입니다.
-		capture->read(mat_frame);
+		Mat mat_frame;
+		if (mode == 0) {
+			mat_frame = m_matImage; 
+		}
+		else {
+			capture->read(mat_frame);
+		}
+		
 
 		//이곳에 OpenCV 함수들을 적용합니다.
 		//여기에서는 그레이스케일 이미지로 변환합니다.
