@@ -1,4 +1,4 @@
-﻿// CButyDlg.cpp: 구현 파일
+﻿﻿// CButyDlg.cpp: 구현 파일
 //
 
 #include "pch.h"
@@ -78,9 +78,6 @@ BOOL CButyDlg::OnInitDialog()
 		pSlider->MoveWindow(1000, 720 - 280 - 55, 200, 45);  // 적절한 수치로 설정
 	}
 
-	// 초록색 원의 초기 크기를 50으로 설정
-	eyeRadius = 50;
-
 	//DrawImage(); dialog 호출시 oninitDiaog()뒤에 실행되는 메세지들에 의하여, 사진이 출력되지 않음 
 	SetTimer(1, 80, NULL);//100ms  사진 불러오기 위한 타이머 
 
@@ -99,6 +96,7 @@ void CButyDlg::OnBnClickedOk()
 
 
 //다이얼로그창에 사진 띄우기 
+/*
 void CButyDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
 	KillTimer(1);
 
@@ -145,6 +143,49 @@ void CButyDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
 	// 함수가 성공하면 반환 값은 복사된 검사 줄의 수입니다. 이 값은 미러된 콘텐츠에 대해 음수일 수 있습니다.
 	StretchDIBits(dc.GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), 0, 0, requestImg.cols, requestImg.rows, requestImg.data, requestBmpInfo, DIB_RGB_COLORS, SRCCOPY);
 }
+*/
+
+void CButyDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
+	KillTimer(1);
+
+	// 현재 다이얼로그의 크기 가져오기
+	CRect rect;
+	this->GetClientRect(&rect);
+
+	// 원본 이미지 크기와 다이얼로그 크기 비교
+	bool isImageLarger = (requestImg.cols > rect.Width()) || (requestImg.rows > rect.Height());
+
+	// 이미지의 비율 계산
+	double imgAspectRatio = static_cast<double>(requestImg.cols) / requestImg.rows;
+	int displayedWidth = requestImg.cols;
+	int displayedHeight = requestImg.rows;
+
+	// 이미지가 다이얼로그 창보다 큰 경우에만 크기 조절
+	if (isImageLarger) {
+		displayedHeight = rect.Height() * 4 / 5;
+		displayedWidth = cvRound(displayedHeight * imgAspectRatio);
+
+		// 이미지의 너비가 다이얼로그 너비보다 큰 경우에만 크기 조절
+		if (displayedWidth > rect.Width()) {
+			displayedWidth = rect.Width() * 5 / 6;
+			displayedHeight = cvRound(displayedWidth / imgAspectRatio);
+		}
+	}
+
+	// 이미지가 화면 중앙에 위치하도록 계산
+	int x = (rect.Width() - displayedWidth) * 1 / 6;  // 다이얼로그 가로의 5/6에 해당하는 부분 중간에 위치
+	int y = (rect.Height() - displayedHeight) * 3 / 5;  // 다이얼로그 세로의 5/6에 해당하는 부분 중간에 위치
+
+	// Picture Control 위치 및 크기 조정
+	GetDlgItem(IDC_PC_FT)->MoveWindow(x, y, displayedWidth, displayedHeight);
+
+	// 화면에 이미지 그리기
+	CClientDC dc(GetDlgItem(IDC_PC_FT));
+	SetStretchBltMode(dc.GetSafeHdc(), COLORONCOLOR);
+	StretchDIBits(dc.GetSafeHdc(), 0, 0, displayedWidth, displayedHeight, 0, 0, requestImg.cols, requestImg.rows, requestImg.data, requestBmpInfo, DIB_RGB_COLORS, SRCCOPY);
+}
+
+
 
 
 void CButyDlg::OnTimer(UINT_PTR nIDEvent)
@@ -229,12 +270,12 @@ void CButyDlg::OnBnClickedDetect()
 {
 	try
 	{
+		// Copy the current image to myOriginalImg (assuming myOriginalImg is initialized)
+		myOriginalImg = myImg.clone();
+
 		// Convert the Mat image to grayscale for eye detection
 		Mat grayImage;
 		cvtColor(myImg, grayImage, COLOR_BGR2GRAY);
-
-		// Copy the current image to myOriginalImg (assuming myOriginalImg is initialized)
-		myOriginalImg = myImg.clone();
 
 		// Load pre-trained eye cascade classifier
 		CascadeClassifier eyeCascade;
@@ -244,12 +285,10 @@ void CButyDlg::OnBnClickedDetect()
 		std::vector<Rect> eyes;
 		eyeCascade.detectMultiScale(grayImage, eyes, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(30, 30));
 
-		// Loop over detected eyes
+		// Loop over detected eyes and draw rectangles
 		for (size_t i = 0; i < eyes.size(); i++)
 		{
-			Point eyeCenter(eyes[i].x + eyes[i].width / 2, eyes[i].y + eyes[i].height / 2);
-			int radius = cvRound(eyeRadius);
-			circle(myImg, eyeCenter, radius, Scalar(0, 255, 0), 2);
+			rectangle(myImg, eyes[i], Scalar(0, 255, 0), 2);
 		}
 
 		// Redraw the image with eye detection
@@ -280,39 +319,68 @@ void CButyDlg::OnBnClickedMerge()
 {
 	try
 	{
+		// Copy the current image to myOriginalImg (assuming myOriginalImg is initialized)
+		myOriginalImg = myImg.clone();
+
 		// Convert the Mat image to grayscale for face detection
 		Mat grayImage;
 		cvtColor(myImg, grayImage, COLOR_BGR2GRAY);
 
 		// Load pre-trained face cascade classifier
 		CascadeClassifier faceCascade;
-		faceCascade.load("C:\\opencv\\build\\etc\\haarcascades\\haarcascade_frontalface_default.xml");
+		if (!faceCascade.load("C:\\opencv\\build\\etc\\haarcascades\\haarcascade_frontalface_default.xml"))
+		{
+			AfxMessageBox(_T("Error loading face cascade classifier."));
+			return;
+		}
 
-		// Load the image to be overlaid (headpin.jpg)
-		Mat overlayImage = imread("C:\\Users\\EMBEDDED\\source\\repos\\intel1\\cpp\\images\\STAR01.jpg");
-
-		// Detect faces in the image
+		//Detect faces in the image
 		std::vector<Rect> faces;
 		faceCascade.detectMultiScale(grayImage, faces, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(30, 30));
+
+		// Load the image to be overlaid
+		Mat overlayImage = imread("C:\\Users\\김경태\\Downloads\\headpin01.jpeg");
+		if (overlayImage.empty())
+		{
+			AfxMessageBox(_T("Error loading overlay image."));
+			return;
+		}
+
+		// Resize the overlay image to a smaller size (adjust the width and height as needed)
+		//int newWidth = 50;  // New width of the overlay image
+		//int newHeight = 50; // New height of the overlay image
+		//resize(overlayImage, overlayImage, Size(newWidth, newHeight));
 
 		// Loop over detected faces
 		for (size_t i = 0; i < faces.size(); i++)
 		{
-			Point faceCenter(faces[i].x + faces[i].width / 2, faces[i].y + faces[i].height / 2);
-			int radius = cvRound(faces[i].width / 2.0);
-
-			// Draw the green circle
-			circle(myImg, faceCenter, radius, Scalar(0, 255, 0), 2);
+			// Draw the green rectangle
+			rectangle(myImg, faces[i], Scalar(0, 255, 0), 2);
 
 			// Define the region of interest (ROI) where the overlay will be applied
-			Rect roiRect(faceCenter.x - radius, faces[i].y, 2 * radius, radius);
-			Mat roi = myImg(roiRect);
+			//Rect roiRect(faces[i].x, faces[i].y, faces[i].width, faces[i].height);
 
-			// Resize overlay image to match the ROI size
-			resize(overlayImage, overlayImage, roi.size());
+			// Calculate the position to overlay the image on top of the face region
+			//int overlayX = faces[i].x + faces[i].width / 4;
+			//int overlayY = faces[i].y - faces[i].height / 4;
 
-			// Blend the overlay image with the ROI using addWeighted
-			addWeighted(roi, 0.2, overlayImage, 1.0, 0.0, roi);
+			// Ensure that the overlay position is within the bounds of the image
+			//overlayX = max(overlayX, 0);
+			//overlayY = max(overlayY, 0);
+
+			// Calculate the size of the overlay image based on the face size
+			//int newWidth = faces[i].width / 2;
+			//int newHeight = faces[i].height / 2;
+
+			// Resize the overlay image
+			//resize(overlayImage, overlayImage, Size(newWidth, newHeight));
+
+			// Ensure that the overlay region is within the bounds of the image
+			//if (overlayX + overlayImage.cols <= myImg.cols && overlayY + overlayImage.rows <= myImg.rows)
+			//{
+				// Overlay the image on top of the face region
+				//overlayImage.copyTo(myImg(Rect(overlayX, overlayY, overlayImage.cols, overlayImage.rows)));
+			//}
 		}
 
 		// Redraw the image with face detection and overlay

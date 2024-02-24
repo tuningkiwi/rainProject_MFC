@@ -137,11 +137,12 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 
 	//현재 window 크기 출력
 	CRect m_rectCurHist;
-	this->GetWindowRect(m_rectCurHist);// right:창의 너비 bottm: 창의 높이 
+	this->GetWindowRect(m_rectCurHist);// right:창의 너비 bottm: 창의 높이
+
 	int btnlocLeft = int(m_rectCurHist.right * 5 / 6);
 	int btnWidth = int(m_rectCurHist.right * 1 / 6);
-	GetDlgItem(IDC_PC_VIEW)->MoveWindow(0, 0, btnlocLeft, m_rectCurHist.bottom);
 
+	GetDlgItem(IDC_PC_VIEW)->MoveWindow(0, 0, btnlocLeft, m_rectCurHist.bottom);
 	GetDlgItem(IDC_BUTTON2)->MoveWindow(btnlocLeft, 50, btnWidth, 60);
 	GetDlgItem(IDC_FILTER_BTN)->MoveWindow(btnlocLeft, 130, btnWidth/2-15, 60);
 	GetDlgItem(IDC_BTN_VIDEO_FILTER)->MoveWindow(btnlocLeft+(btnWidth / 2)-15, 130, btnWidth/2, 60);
@@ -151,6 +152,7 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 	GetDlgItem(IDC_BRIGHTNESSCTRL_BTN)->MoveWindow(btnlocLeft, 450, btnWidth, 60);
 	GetDlgItem(IDC_VIDEO_BTN)->MoveWindow(btnlocLeft, 530, btnWidth, 60);
 	GetDlgItem(IDC_MERGE_FACE)->MoveWindow(btnlocLeft, 610, btnWidth, 60);
+	GetDlgItem(IDC_MERGE_FACE)->ShowWindow(SW_HIDE);
 	GetDlgItem(IDOK)->MoveWindow(btnlocLeft, m_rectCurHist.bottom - 200, btnWidth, 60);
 	GetDlgItem(IDCANCEL)->MoveWindow(btnlocLeft, m_rectCurHist.bottom - 120, btnWidth, 60);
 
@@ -628,6 +630,9 @@ void CMFCApplication1Dlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStru
 
 void CMFCApplication1Dlg::OnBnClickedVideoBtn()
 {
+	// VIDEO 버튼 클릭 시 MERGE 버튼 보이도록 설정
+	GetDlgItem(IDC_MERGE_FACE)->ShowWindow(SW_SHOW);
+
 	GetDlgItem(IDC_PC_VIEW)->MoveWindow(100,100,1280,720);
 	
 	// 웹캠 열기
@@ -651,9 +656,8 @@ void CMFCApplication1Dlg::OnBnClickedVideoBtn()
 
 void CMFCApplication1Dlg::OnDestroy()
 {
+	KillTimer(1);
 	CDialogEx::OnDestroy();
-
-	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 }
 
 
@@ -774,7 +778,7 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 
 		CDialogEx::OnTimer(nIDEvent);
 	}
-	
+	/*
 	if (nIDEvent == 2)
 	{
 		// Pictual Control에서 이미지 가져오기
@@ -841,9 +845,71 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 		// Handle other timer events or call the base class
 		CDialogEx::OnTimer(nIDEvent);
 	}
+	*/
+
+	if (nIDEvent == 2)
+	{
+		// Pictual Control에서 이미지 가져오기
+		CWnd* pWnd = GetDlgItem(IDC_PC_VIEW);
+		CDC* pDC = pWnd->GetDC();
+
+		CRect rect;
+		pWnd->GetClientRect(rect);
+
+		// 이미지 합성할 이미지 읽어오기
+		cv::Mat imageToOverlay = cv::imread("C:\\Users\\김경태\\Downloads\\headpin01.jpg");
+
+		// Pictual Control 크기에 맞는 Mat 생성
+		cv::Mat mat_frame(rect.Height(), rect.Width(), CV_8UC3);
+		if (imageToOverlay.empty())
+		{
+			MessageBox(_T("이미지를 불러올 수 없습니다."));
+			pWnd->ReleaseDC(pDC);
+			return;
+		}
+		int newWidth = 5;  // New width of the overlay image
+		int newHeight = 5; // New height of the overlay image
+		resize(imageToOverlay, imageToOverlay, Size(newWidth, newHeight));
+
+		BITMAPINFO bitmapInfo;
+		memset(&bitmapInfo, 0, sizeof(bitmapInfo));
+		bitmapInfo.bmiHeader.biSize = sizeof(bitmapInfo.bmiHeader);
+		bitmapInfo.bmiHeader.biWidth = rect.Width();
+		bitmapInfo.bmiHeader.biHeight = -rect.Height(); // Minus for top-down DIB
+		bitmapInfo.bmiHeader.biPlanes = 1;
+		bitmapInfo.bmiHeader.biBitCount = 24; // Assuming 24-bit RGB
+
+		// Loop for continuous merging
+		const int numIterations = 100; // Set the desired number of iterations
+		for (int i = 0; i < numIterations; ++i)
+		{
+			// Pictual Control에서 이미지를 Mat으로 복사
+			::GetDIBits(pDC->GetSafeHdc(), (HBITMAP)pWnd->SendMessage(WM_GETOBJECT, 0, OBJ_BITMAP), 0,
+				rect.Height(), mat_frame.data, &bitmapInfo, DIB_RGB_COLORS);
+
+			// 이미지 크기 조정 (맞추기)
+			cv::resize(imageToOverlay, imageToOverlay, mat_frame.size());
+			//cv::resize(imageToOverlay, imageToOverlay, Size(rect.Width(), rect.Height()));
+
+			// 이미지 합성
+			cv::addWeighted(mat_frame, 1.0, imageToOverlay, 0.5, 0.0, mat_frame);
+
+			// 이미지를 Pictual Control에 갱신
+			StretchDIBits(pDC->GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), 0, 0, rect.Width(), rect.Height(), mat_frame.data, &bitmapInfo, DIB_RGB_COLORS, SRCCOPY);
+
+			// Add a delay (milliseconds) between iterations
+			Sleep(100); // Adjust the delay as needed
+		}
+
+		pWnd->ReleaseDC(pDC);
+		UpdateImageOnScreen();
+	}
+	else
+	{
+		CDialogEx::OnTimer(nIDEvent);
+	}
 }
 
-//주석 추가 
 /*
 void CMFCApplication1Dlg::OnBnClickedMergeBtn()
 {
@@ -898,7 +964,7 @@ void CMFCApplication1Dlg::OnBnClickedMergeBtn()
 	pWnd->ReleaseDC(pDC);
 	UpdateImageOnScreen();
 }
-
+*/
 void CMFCApplication1Dlg::UpdateImageOnScreen()
 {
 	// Calculate padding and border
@@ -961,7 +1027,6 @@ void CMFCApplication1Dlg::UpdateImageOnScreen()
 	bitmap.DeleteObject();
 	memDC.DeleteDC();
 }
-*/
 
 void CMFCApplication1Dlg::OnBnClickedMergeBtn()
 {
