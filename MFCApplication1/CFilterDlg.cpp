@@ -225,9 +225,10 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 		CRect wnd;
 		this->GetClientRect(&wnd); // 기본 사각형의 x,y 좌표설정이되고 =(0,0) 시작되는함수'GetClientRect' 함수에 
 		int wid = int(wnd.right * 5 / 6);
-		int hei = int(wnd.right*720/1280);
-		
-		picCtrl_FT.MoveWindow(0, 0, wid, hei);//픽쳐컨트롤 크기 조정 
+		int hei = int(wid*720/1280);
+		int y = cvRound((wnd.bottom - hei) / 2);
+		picCtrl_FT.MoveWindow(0, y, wid, hei);//픽쳐컨트롤 크기 조정
+
 
 		// 웹캠 열기
 		capture = new VideoCapture(0, CAP_DSHOW);
@@ -257,47 +258,17 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 		int bpp = 8 * videoFrame.elemSize();
 		assert((bpp == 8 || bpp == 24 || bpp == 32));
 
-		int padding = 0;
-		//32 bit image is always DWORD aligned because each pixel requires 4 bytes
-		if (bpp < 32)
-			padding = 4 - (videoFrame.cols % 4);
-
-		if (padding == 4)
-			padding = 0;
-
-		int border = 0;
-		//32 bit image is always DWORD aligned because each pixel requires 4 bytes
-		if (bpp < 32)
-		{
-			border = 4 - (videoFrame.cols % 4);
-		}
-
-		Mat mat_temp;
-		if (border > 0 || videoFrame.isContinuous() == false)
-		{
-			// Adding needed columns on the right (max 3 px)
-			cv::copyMakeBorder(videoFrame, mat_temp, 0, 0, 0, border, cv::BORDER_CONSTANT, 0);
-		}
-		else
-		{
-			mat_temp = videoFrame;
-		}
-
+		Mat mat_temp = videoFrame;
 		bmpHistory.push_back(mat_temp); //borderline 처리한 이미지 행렬
 		RECT r;
 		picCtrl_FT.GetClientRect(&r);
-		//r=pictureControlSizeSet();//mat_temp크기에 따른 picture control 조정 
 
-		//r.right = 500;
-		//r.bottom = 500;
 		cv::Size winSize(r.right, r.bottom);
-
 		cimage_mfc.Create(winSize.width, winSize.height, 24);
 
 		//CreateBitmapInfo(BITMAPINFO * *btmInfo, int w, int h, int bpp)
 		BITMAPINFO* bitInfo = CreateBitmapInfo(mat_temp.cols,mat_temp.rows,mat_temp.channels()*8);
 		bmpInfoHistory.push_back(bitInfo);
-		//bmpInfoHistory.push_back(bitInfo);
 
 		//이미지 처리 함수 
 
@@ -324,7 +295,7 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 			// rectangle defined on source bitmap
 			// using imgWidth instead of mat_temp.cols will ignore the padding border
 			int imgx = 0, imgy = 0;
-			int imgWidth = mat_temp.cols - border;
+			int imgWidth = mat_temp.cols; //- border;
 			int imgHeight = mat_temp.rows;
 
 			StretchDIBits(cimage_mfc.GetDC(),
@@ -340,7 +311,7 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 
 		cimage_mfc.ReleaseDC();
 		cimage_mfc.Destroy();
-		if (bmpHistory.size() == 5) {
+		if (bmpHistory.size() == 6) {
 			bmpHistory.clear();
 			bmpInfoHistory.clear();
 		}
