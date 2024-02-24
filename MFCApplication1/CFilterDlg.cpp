@@ -399,7 +399,7 @@ void CFilterDlg::OnDestroy()
 	// TODO: Add your message handler code here
 }
 
-//진흙필터 :1채널 필터링 : grayscale이미지로 변환 필요 
+//진흙필터함수 :1채널 필터링 : grayscale이미지로 변환 필요 
 void CFilterDlg::OnBnClickedEmbossFt()//1채널 필터링 
 {
 	// TODO: Add your control notification handler code here
@@ -637,12 +637,11 @@ void CFilterDlg::OnMouseMove(UINT nFlags, CPoint point)
 void CFilterDlg::OnBnClickedPartblurFt()
 {
 	//// TODO: Add your control notification handler code here
-	if(myImgAfterChange.data !=NULL && myImgAfterChange.channels() <3 ){
-		MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널3개 이미지만 처리합니다", L"사용불가 알림", IDOK);
-	}else{
+	if (bmpHistory.back().channels() >=3) {
 		partBlurModeOn = !partBlurModeOn;
+	}else{
+		MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널3개 이미지만 처리합니다", L"사용불가 알림", IDOK);
 	}
-	
 }
 
 
@@ -747,7 +746,7 @@ HBRUSH CFilterDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	return hbr;
 }
 
-
+//마우스 왼쪽 버튼 클릭 
 void CFilterDlg::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
@@ -760,15 +759,17 @@ void CFilterDlg::OnLButtonDown(UINT nFlags, CPoint point)
 		CString loc;
 		loc.Format(_T("point x: %u y: %u"), point.x, point.y);
 		SetDlgItemText(IDC_STATIC_POINTLOC, (LPCTSTR)loc);
-		partBlurProc(point);
-		DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+		int ret = partBlurProc(point);
+		if(ret == 1){//마우스 클릭 위치가 이미지 위치 정보 안에 있을 때. 
+			DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+		}
 	}
 
 	CDialogEx::OnLButtonDown(nFlags, point);
 }
 
 
-//블러 처리 : 컬러영상에 대한 / 흑백영상은 추후 구현 
+//부분블러 처리 : 컬러영상에 대한 / 흑백영상은 추후 구현 
 //평균값 마스크: 3x3 1/9 필터 
 int CFilterDlg::partBlurProc(CPoint point) {
 	//1. 마우스 포인터 위치값으로, 이미지상의 실제 위치를 계산한다 
@@ -777,6 +778,12 @@ int CFilterDlg::partBlurProc(CPoint point) {
 	CPoint locInImg;//본인 창에서의 이미지 위치 x= left, y =top 
 	locInImg.x = point.x - picLTRB.left;// 
 	locInImg.y = point.y - picLTRB.top;
+
+	//mouse 위치 정보가 이미지를 벗어났을 때. 함수 종료. 
+	if(locInImg.x <0 || locInImg.y <0){
+		return -1;
+	}
+
 	//진흙필터 >되돌리기> 부분블러 ON > 에러 
 	//range 범위가 벗어낫을 때 에러 
 	CRect blurArea;//이미지 공간 안에서의 블러 영역 
@@ -790,14 +797,9 @@ int CFilterDlg::partBlurProc(CPoint point) {
 	if (blurArea.bottom > picLTRB.bottom - picLTRB.top) {
 		blurArea.bottom = picLTRB.bottom - picLTRB.top-1;	}
 
-	Mat src;
-	if (myImgAfterChange.data == NULL) {//아무것도 저장되어 있지 않는 상태 
-		myImgAfterChange = myImg.clone();
-		src = myImg.clone();
-	}
-	else {
-		src = myImgAfterChange.clone(); 
-	}
+	Mat src= bmpHistory.back().clone(); 
+	Mat dstimg= bmpHistory.back().clone();
+
 	for (int y = blurArea.top; y <= blurArea.bottom; y++) {
 		for (int x = blurArea.left; x <= blurArea.right; x++) {
 			if(x-1<1||y-1<1||x+1>blurArea.right||y+1>blurArea.bottom){
@@ -813,10 +815,7 @@ int CFilterDlg::partBlurProc(CPoint point) {
 			Vec3b& p8 = src.at<Vec3b>(y + 1, x);
 			Vec3b& p9 = src.at<Vec3b>(y+1, x+1);
 
-			Vec3b& dst = myImgAfterChange.at<Vec3b>(y, x);
-			//dst[0] = 0;
-			//dst[1] = 0;
-			//dst[2] = 0;
+			Vec3b& dst = dstimg.at<Vec3b>(y, x);
 
 			//b
 			dst[0] = int(cvRound((p1[0] + p2[0] + p3[0] + p4[0] +
@@ -832,7 +831,11 @@ int CFilterDlg::partBlurProc(CPoint point) {
 			int r = dst[2];
 		}
 	}
-	//CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
+
+	bmpHistory.push_back(dstimg);
+	BITMAPINFO* dstimginfo = bmpInfoHistory.back();
+	bmpInfoHistory.push_back(dstimginfo);
+	
 	return 1;
 }
 
