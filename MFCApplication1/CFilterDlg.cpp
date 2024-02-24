@@ -301,6 +301,7 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 
 		//이미지 처리 함수 
 
+
 		if (mat_temp.cols == winSize.width && mat_temp.rows == winSize.height)
 		{
 			// source and destination have same size
@@ -378,7 +379,9 @@ void CFilterDlg::OnBnClickedEmbossFt()//1채널 필터링
 		bmpHistory.push_back(dst);
 		BITMAPINFO* bmpinfo = CreateBitmapInfo(bmpHistory.back().cols, bmpHistory.back().rows, bmpHistory.back().channels() * 8);
 		bmpInfoHistory.push_back(bmpinfo);
-		DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+		if(myfileMode==0){//사진 모드 
+			DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+		}
 	
 	}else{
 		MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널 3개 이미지만 처리합니다", L"알림", IDOK);
@@ -538,7 +541,9 @@ void CFilterDlg::OnBnClickedBilateralFt()
 		bmpHistory.push_back(dst);
 		BITMAPINFO* bmpinfo = CreateBitmapInfo(bmpHistory.back().cols, bmpHistory.back().rows, bmpHistory.back().channels() * 8);
 		bmpInfoHistory.push_back(bmpinfo);
-		DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+		if(myfileMode==0){//사진 모드 
+			DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+		}
 	}else{
 		MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널3개 이미지만 처리합니다", L"알림", IDOK);
 	}
@@ -710,7 +715,9 @@ void CFilterDlg::OnLButtonDown(UINT nFlags, CPoint point)
 		SetDlgItemText(IDC_STATIC_POINTLOC, (LPCTSTR)loc);
 		int ret = partBlurProc(point);
 		if(ret == 1){//마우스 클릭 위치가 이미지 위치 정보 안에 있을 때. 
-			DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+			if(myfileMode==0){//사진 모드 
+				DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+			}
 		}
 	}
 
@@ -781,9 +788,11 @@ int CFilterDlg::partBlurProc(CPoint point) {
 		}
 	}
 
+
 	bmpHistory.push_back(dstimg);
 	BITMAPINFO* dstimginfo = bmpInfoHistory.back();
 	bmpInfoHistory.push_back(dstimginfo);
+
 	
 	return 1;
 }
@@ -798,7 +807,10 @@ int CFilterDlg::fogFilter(int sigma){
 	bmpHistory.push_back(dst);
 	BITMAPINFO* dstinfo = bmpInfoHistory.back();
 	bmpInfoHistory.push_back(dstinfo);
-	DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+
+	if(myfileMode==0){//사진 모드 
+		DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+	}
 	return 1;
 }
 
@@ -813,7 +825,9 @@ int CFilterDlg::sharpFilter(int sigma){
 	bmpHistory.push_back(dst);
 	BITMAPINFO* dstinfo = bmpInfoHistory.back();
 	bmpInfoHistory.push_back(dstinfo);
-	DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+	if(myfileMode==0){//사진 모드 
+		DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+	}
 	return 1; 
 }
 
@@ -830,7 +844,9 @@ int CFilterDlg::noiseFilter(int stddev){
 		bmpHistory.push_back(dst);
 		BITMAPINFO* bmpinfo = bmpInfoHistory.back();
 		bmpInfoHistory.push_back(bmpinfo);
-		DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+		if(myfileMode==0){//사진 모드 
+			DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+		}
 		return 1;
 	}else {//3채널이미지 
 		Mat noise(bmpHistory.back().size(), CV_32SC3);
@@ -842,7 +858,9 @@ int CFilterDlg::noiseFilter(int stddev){
 		bmpHistory.push_back(dst);
 		BITMAPINFO* bmpinfo = bmpInfoHistory.back();
 		bmpInfoHistory.push_back(bmpinfo);
-		DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+		if(myfileMode==0){//사진 모드 
+			DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+		}
 		return 3;
 	}
 }
