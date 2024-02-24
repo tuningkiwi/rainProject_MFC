@@ -557,33 +557,18 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	}
 	else if (*pScrollBar == noiseFT) {//노이즈필터
 		int stddev = noiseFT.GetPos();
-		Mat dst;
-
-		//1채널 이미지, 변환 이미지 유. 
-		if(myImgAfterChange.data != NULL && myImgAfterChange.channels() <3){//그레이스케일 이미지로 변환  		
-//			colorToGray();
-			Mat noise(myImgAfterChange.size(), CV_32SC1);
-			randn(noise, 0, stddev);		
-			add(myImgAfterChange, noise, dst, Mat(), CV_8U);
-			myImgAfterChange = dst;
-			DrawImage(myImgAfterChange, myBmpInfoAfterChange);
-		}else if(myImgAfterChange.data != NULL&& myImgAfterChange.channels()>=3){//3채널 이미지, 변환 이미지 유.  
-			Mat noise(myImgAfterChange.size(), CV_32SC3);
-			randn(noise, 0, stddev);
-			add(myImgAfterChange, noise, dst, Mat(),CV_8UC3);
-			myImgAfterChange = dst;
-			DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+		cntScroll++;
+		if(stddev ==0 || cntScroll==2){
+			cntScroll = 0;
+			return;
 		}
-		else {//3채널 이미지, 원본 이미지. 
-			Mat noise(myImg.size(), CV_32SC3);
-			randn(noise, 0, stddev);
-			add(myImg, noise, dst, Mat(), CV_8UC3);
-			myImgAfterChange = dst;
-			DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+		int ret = noiseFilter(stddev); 
+		if(ret < 1){
+			//샤프닝필터 적용 안됨. 
+			MessageBox(L"안개필터적용 에러", L"알림", IDOK);	
 		}
-		
 	}
-	else if (*pScrollBar == partBlurSlider) {
+	else if (*pScrollBar == partBlurSlider) {//부분블러함수에서 블러범위지정할때 사용
 		blurRangeHalfWid = partBlurSlider.GetPos();
 	}
 
@@ -881,6 +866,46 @@ int CFilterDlg::sharpFilter(int sigma){
 	DrawImage(bmpHistory.back(), bmpInfoHistory.back());
 	return 1; 
 }
+
+int CFilterDlg::noiseFilter(int stddev){
+//1채널 이미지, 변환 이미지 유. 
+	if(bmpHistory.back().channels() <3){//1채널 이미지 
+		//colorToGray();
+		Mat noise(bmpHistory.back().size(), CV_32SC1);
+		randn(noise, 0, stddev);
+		Mat tmp = bmpHistory.back().clone();
+		Mat dst;		
+		add(tmp, noise, dst, Mat(), CV_8U);
+		
+		bmpHistory.push_back(dst);
+		BITMAPINFO* bmpinfo = bmpInfoHistory.back();
+		bmpInfoHistory.push_back(bmpinfo);
+		DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+		return 1;
+	}else {//3채널이미지 
+		Mat noise(bmpHistory.back().size(), CV_32SC3);
+		randn(noise, 0, stddev);
+		Mat tmp = bmpHistory.back().clone();
+		Mat dst;		
+		add(tmp, noise, dst, Mat(), CV_8UC3);
+		
+		bmpHistory.push_back(dst);
+		BITMAPINFO* bmpinfo = bmpInfoHistory.back();
+		bmpInfoHistory.push_back(bmpinfo);
+		DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+		return 3;
+	}
+	// }
+	// else {//3채널 이미지, 원본 이미지. 
+	// 	Mat noise(myImg.size(), CV_32SC3);
+	// 	randn(noise, 0, stddev);
+	// 	add(myImg, noise, dst, Mat(), CV_8UC3);
+	// 	myImgAfterChange = dst;
+	// 	DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+	// }
+
+}
+
 //void CFilterDlg::OnStnClickedStaticPointloc()
 //{
 //	// TODO: Add your control notification handler code here

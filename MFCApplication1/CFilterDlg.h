@@ -83,8 +83,9 @@ public:
 	Mat colorToGray();//컬러영상 >> 그레이 영상으로 변환 
 	int partBlurProc(CPoint point);//부분 블러 처리 메소드 
 	void videoPrint();//비디오 출력
-	int fogFilter(int);//안개 필터 수행
-	int sharpFilter(int); 
+	int fogFilter(int);//안개필터 수행
+	int sharpFilter(int);//샤프닝필터
+	int noiseFilter(int); //노이즈필터
 	
 };
 
