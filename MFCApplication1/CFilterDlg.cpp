@@ -181,47 +181,18 @@ void CFilterDlg::OnBnClickedOk()
 }
 
 
-//다이얼로그창에 사진 띄우기 
+//#드로우이미지 다이얼로그창에 사진 띄우기 
 void CFilterDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
-	KillTimer(0);
+	KillTimer(0);//0사진타이머 
 
-	//필터창 크기
-	CRect wnd;
-	this->GetClientRect(&wnd); // 기본 사각형의 x,y 좌표설정이되고 =(0,0) 시작되는함수'GetClientRect' 함수에 
-	int wx = int(wnd.right * 5 / 6);
-	int wy = wnd.bottom;
+	//현재 불러올 이미지에 대한 picture contorl 크기 조정  
+	CRect rect = pictureControlSizeSet();
 
-	//불러올 사진 cols 가져오기.
-	CClientDC dc(GetDlgItem(IDC_PC_FT)); 
-	CRect rect;// 이미지를 넣을 사각형 
-	if (requestImg.cols > wx) {
-		//cols: 1080 = rows : wid;
-		int resize_h = cvRound((wx * requestImg.rows) / requestImg.cols);
-		int resize_w = wx; //width를 최대크기로 설정 
-		if (wy - resize_h < 0) { //width를 맞추니, height가 넘친다 
-			resize_w = wy * wx / resize_h;
-		}
-		int x = cvRound((wx - resize_w) / 2);
-		int y = cvRound((wy - resize_h) / 2);
-		GetDlgItem(IDC_PC_FT)->MoveWindow(x, y, resize_w, resize_h);
-		picLTRB.left = x; picLTRB.top = y;
-		picLTRB.right = resize_w; picLTRB.bottom = resize_h;
-	}
-	else {
-		int x = cvRound((wx - requestImg.cols) / 2);
-		int y = cvRound((wy - requestImg.rows) / 2);
-		GetDlgItem(IDC_PC_FT)->MoveWindow(x, y, requestImg.cols, requestImg.rows);
-		picLTRB.left = x; picLTRB.top = y;
-		picLTRB.right = x + requestImg.cols; picLTRB.bottom = y+ requestImg.rows;
-	}
-
-
-	//GetClientRect(left, top, right, bottom ) 클라이언트 영역의 좌표
-	//함수가 성공하면 반환 값이 0이 아닙니다.
 	//불러올 이미지 사진에 따라 조정된 Picture Ctrl 크기 
 	GetDlgItem(IDC_PC_FT)->GetClientRect(&rect);
 
 	//픽셀을 삭제합니다. 이 모드는 해당 정보를 보존하지 않고 
+	CClientDC dc(GetDlgItem(IDC_PC_FT));
 	SetStretchBltMode(dc.GetSafeHdc(), COLORONCOLOR);
 
 	//StretchDIBits 함수는 DIB, JPEG 또는 PNG 이미지의 픽셀 사각형에 
@@ -237,18 +208,18 @@ void CFilterDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
 //	DrawImage();
 //}
 
-
+//타이머함수
 void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: Add your message handler code here and/or call default
-	if (nIDEvent==0) {
+	if (nIDEvent==0) {//0번타이머
 
 		//처음 다이얼로그 창을 띄울 때 onInitDialog()에서 drawimage가 이후 
 		// 자동 수행되는 메시지 함수에의해서 출력이 안되서 
 		//onInitDialog()에 타이머로 걸어놓음  
 		DrawImage(bmpHistory.back(), bmpInfoHistory.back());//처음 로딩되는 이미지 
 		KillTimer(0);
-	}else if (nIDEvent==1) {//video capture 세팅 
+	}else if (nIDEvent==1) {//1번타이머 video capture 세팅 
 
 		CRect wnd;
 		this->GetClientRect(&wnd); // 기본 사각형의 x,y 좌표설정이되고 =(0,0) 시작되는함수'GetClientRect' 함수에 
@@ -272,22 +243,23 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 		SetTimer(2, 30, NULL);//본격 동영상 출력을 위한 프로세스로 넘어간다 
 		KillTimer(1);//카메라세팅 타이머 
 		
-	}else if (nIDEvent==2) {//영상 출력 
-		capture->read(mat_frame);
-		myImg = mat_frame.clone();
+	}else if (nIDEvent==2) {//2번타이머 영상 출력 
+		Mat videoFrame;
+		capture->read(videoFrame);
+		bmpHistory.push_back(videoFrame); 
 
 		//이곳에 OpenCV 함수들을 적용합니다.
 		//여기에서는 그레이스케일 이미지로 변환합니다.
 		//cvtColor(mat_frame, mat_frame, COLOR_BGR2GRAY);
 
 		//화면에 보여주기 위한 처리입니다.
-		int bpp = 8 * mat_frame.elemSize();
+		int bpp = 8 * videoFrame.elemSize();
 		assert((bpp == 8 || bpp == 24 || bpp == 32));
 
 		int padding = 0;
 		//32 bit image is always DWORD aligned because each pixel requires 4 bytes
 		if (bpp < 32)
-			padding = 4 - (mat_frame.cols % 4);
+			padding = 4 - (videoFrame.cols % 4);
 
 		if (padding == 4)
 			padding = 0;
@@ -296,18 +268,18 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 		//32 bit image is always DWORD aligned because each pixel requires 4 bytes
 		if (bpp < 32)
 		{
-			border = 4 - (mat_frame.cols % 4);
+			border = 4 - (videoFrame.cols % 4);
 		}
 
 		Mat mat_temp;
-		if (border > 0 || mat_frame.isContinuous() == false)
+		if (border > 0 || videoFrame.isContinuous() == false)
 		{
 			// Adding needed columns on the right (max 3 px)
-			cv::copyMakeBorder(mat_frame, mat_temp, 0, 0, 0, border, cv::BORDER_CONSTANT, 0);
+			cv::copyMakeBorder(videoFrame, mat_temp, 0, 0, 0, border, cv::BORDER_CONSTANT, 0);
 		}
 		else
 		{
-			mat_temp = mat_frame;
+			mat_temp = videoFrame;
 		}
 
 		RECT r;
@@ -645,7 +617,7 @@ void CFilterDlg::OnBnClickedPartblurFt()
 
 
 
-//버튼 컬러 구현 
+//버튼컬러 구현 
 void CFilterDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
@@ -727,7 +699,7 @@ void CFilterDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 	//CDialogEx::OnDrawItem(nIDCtl, lpDrawItemStruct);
 }
 
-
+//#텍스트컬러
 HBRUSH CFilterDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
@@ -895,15 +867,39 @@ int CFilterDlg::noiseFilter(int stddev){
 		DrawImage(bmpHistory.back(), bmpInfoHistory.back());
 		return 3;
 	}
-	// }
-	// else {//3채널 이미지, 원본 이미지. 
-	// 	Mat noise(myImg.size(), CV_32SC3);
-	// 	randn(noise, 0, stddev);
-	// 	add(myImg, noise, dst, Mat(), CV_8UC3);
-	// 	myImgAfterChange = dst;
-	// 	DrawImage(myImgAfterChange, myBmpInfoAfterChange);
-	// }
+}
 
+CRect CFilterDlg::pictureControlSizeSet(){
+	//필터창 크기
+	CRect wnd;
+	this->GetClientRect(&wnd); // 기본 사각형의 x,y 좌표설정이되고 =(0,0) 시작되는함수'GetClientRect' 함수에 
+	int wx = int(wnd.right * 5 / 6);
+	int wy = wnd.bottom;
+
+	//불러올 사진 cols 가져오기.
+	CClientDC dc(GetDlgItem(IDC_PC_FT)); 
+	CRect rect;// 이미지를 넣을 사각형 
+	if (bmpHistory.back().cols > wx) {
+		//cols: 1080 = rows : wid;
+		int resize_h = cvRound((wx * bmpHistory.back().rows) / bmpHistory.back().cols);
+		int resize_w = wx; //width를 최대크기로 설정 
+		if (wy - resize_h < 0) { //width를 맞추니, height가 넘친다 
+			resize_w = wy * wx / resize_h;
+		}
+		int x = cvRound((wx - resize_w) / 2);
+		int y = cvRound((wy - resize_h) / 2);
+		GetDlgItem(IDC_PC_FT)->MoveWindow(x, y, resize_w, resize_h);
+		picLTRB.left = x; picLTRB.top = y;
+		picLTRB.right = resize_w; picLTRB.bottom = resize_h;
+	}
+	else {
+		int x = cvRound((wx - bmpHistory.back().cols) / 2);
+		int y = cvRound((wy - bmpHistory.back().rows) / 2);
+		GetDlgItem(IDC_PC_FT)->MoveWindow(x, y, bmpHistory.back().cols, bmpHistory.back().rows);
+		picLTRB.left = x; picLTRB.top = y;
+		picLTRB.right = x + bmpHistory.back().cols; picLTRB.bottom = y+ bmpHistory.back().rows;
+	}
+	return rect;
 }
 
 //void CFilterDlg::OnStnClickedStaticPointloc()
