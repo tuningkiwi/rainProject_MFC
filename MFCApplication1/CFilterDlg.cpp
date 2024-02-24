@@ -6,6 +6,14 @@
 #include "afxdialogex.h"
 #include "CFilterDlg.h"
 
+//비디오 필터모드 
+#define BASICVM		0 //기본:필터 적용안함
+#define EMBOSSVM	1 //진흙
+#define BILATERALVM	2 //양방향
+#define PARTBLURVM	3 //부분블러
+#define FOGVM		4 //안개
+#define SHARPVM		5 //샤프닝
+#define NOISEVM		6 //노이즈 
 
 // CFilterDlg 대화 상자
 
@@ -76,7 +84,7 @@ END_MESSAGE_MAP()
 
 // CFilterDlg 메시지 처리기
 
-
+//시작함수
 BOOL CFilterDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
@@ -89,7 +97,7 @@ BOOL CFilterDlg::OnInitDialog()
 	this->GetClientRect(&wnd); // 기본 사각형의 x,y 좌표설정이되고 =(0,0) 시작되는함수'GetClientRect' 함수에 
 	int btnLocX = int(wnd.right * 5 / 6);
 	int btnLocY = 40;
-	int bottom_btnLocY = wnd.bottom -40;
+	int bottom_btnLocY = wnd.bottom - 40;
 
 	embossFT.MoveWindow(btnLocX, btnLocY, 200, 45); btnLocY += 45;//1000, 40, 200, 45
 	bilateralBtn_FT.MoveWindow(btnLocX, btnLocY, 200, 45); btnLocY += 45;
@@ -112,10 +120,10 @@ BOOL CFilterDlg::OnInitDialog()
 	sharpSliderFT.SetPos(0);
 	noiseLB_FT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;
 	noiseFT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;
-	noiseFT.SetRange(0,100);
+	noiseFT.SetRange(0, 100);
 	noiseFT.SetTicFreq(10);
 	noiseFT.SetPos(0);
-	
+
 	blurRangeHalfWid = 1;
 
 	GetDlgItem(IDCANCEL)->MoveWindow(btnLocX, bottom_btnLocY, 200, 45); bottom_btnLocY -= 55;
@@ -129,7 +137,7 @@ BOOL CFilterDlg::OnInitDialog()
 	else {
 		SetTimer(1, 80, NULL);//100ms  동영상 불러오기 위한 타이머 
 	}
-	
+
 	CDialogEx::SetBackgroundColor(0x004D3428, 1);
 
 	CFont font;
@@ -145,8 +153,19 @@ BOOL CFilterDlg::OnInitDialog()
 	GetDlgItem(IDCANCEL)->SetFont(&font);
 	GetDlgItem(IDC_REVERT_FT)->SetFont(&font);
 	font.Detach();//font 종료 꼭 해주기 메모리 할당 해제 
-	
+
 	cntScroll = 0;
+	//비디오모드 설정 
+	//0:기본 1:진흙 2:양방향 3:부분블러 4:안개필터 5:샤프닝 6:노이즈
+	videoMode[0] = BASICVM; //0번 
+	videoMode[1] = 0;//트랙바의 경우 필터의 강도 
+	// videoMode.push_back("basic",0,0);
+	// videoMode.push_back("emboss",0,0);
+	// videoMode.push_back("bilateral",0,0);
+	// videoMode.push_back("partBlur",0,0);
+	// videoMode.push_back("fog",0,0);
+	// videoMode.push_back("sharpen",0,0);
+	// videoMode.push_back("noise",0,0);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
@@ -171,11 +190,13 @@ BOOL CFilterDlg::OnInitDialog()
 //}
 
 
+//#저장버튼 저장함수
 //적용 버튼을 누르면, 창을 종료하고, 부모창에도 변경된 이미지가 보여짐 
 void CFilterDlg::OnBnClickedOk()
 {
 	// TODO: Add your control notification handler code here
 	//메세지 박스 적용되었습니다 알림 넣기 
+
 	KillTimer(2);
 	CDialogEx::OnOK();
 }
@@ -248,32 +269,34 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 	}else if (nIDEvent==2) {//2번타이머 영상 출력 
 		Mat videoFrame;
 		capture->read(videoFrame);
-
-		
-		//이곳에 OpenCV 함수들을 적용합니다.
-		//여기에서는 그레이스케일 이미지로 변환합니다.
-		//cvtColor(mat_frame, mat_frame, COLOR_BGR2GRAY);
-
+		//이미지 처리 함수
+		bmpHistory.push_back(videoFrame);
+		BITMAPINFO* bmpinfo = CreateBitmapInfo(bmpHistory.back().cols, bmpHistory.back().rows, bmpHistory.back().channels() * 8);
+		bmpInfoHistory.push_back(bmpinfo);
+		// BITMAPINFO* dstinfo = bmpInfoHistory.back();
+		//bmpInfoHistory.push_back(dstinfo);
+	 	
+		int filtermode = videoMode[0];
+		int level = videoMode[1];
+		if(filtermode ==FOGVM ){
+			fogFilter(level);
+		}
+		videoFrame = bmpHistory.back();
+		//videoFrame = bmpHistory.back();
 		//화면에 보여주기 위한 처리입니다.
 		int bpp = 8 * videoFrame.elemSize();
 		assert((bpp == 8 || bpp == 24 || bpp == 32));
 
-		Mat mat_temp = videoFrame;
-		bmpHistory.push_back(mat_temp); //borderline 처리한 이미지 행렬
+		//Mat mat_temp = videoFrame;
+		// bmpHistory.push_back(videoFrame); //borderline 처리한 이미지 행렬
 		RECT r;
 		picCtrl_FT.GetClientRect(&r);
 
 		cv::Size winSize(r.right, r.bottom);
 		cimage_mfc.Create(winSize.width, winSize.height, 24);
+		BITMAPINFO* bitInfo = bmpInfoHistory.back();
 
-		//CreateBitmapInfo(BITMAPINFO * *btmInfo, int w, int h, int bpp)
-		BITMAPINFO* bitInfo = CreateBitmapInfo(mat_temp.cols,mat_temp.rows,mat_temp.channels()*8);
-		bmpInfoHistory.push_back(bitInfo);
-
-		//이미지 처리 함수 
-
-
-		if (mat_temp.cols == winSize.width && mat_temp.rows == winSize.height)
+		if (videoFrame.cols == winSize.width && videoFrame.rows == winSize.height)
 		{
 			// source and destination have same size
 			// transfer memory block
@@ -282,8 +305,8 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 			SetDIBitsToDevice(cimage_mfc.GetDC(),
 				//destination rectangle
 				0, 0, winSize.width, winSize.height,
-				0, 0, 0, mat_temp.rows,
-				mat_temp.data, bitInfo, DIB_RGB_COLORS);
+				0, 0, 0, videoFrame.rows,
+				videoFrame.data, bitInfo, DIB_RGB_COLORS);
 		}
 		else
 		{
@@ -295,13 +318,13 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 			// rectangle defined on source bitmap
 			// using imgWidth instead of mat_temp.cols will ignore the padding border
 			int imgx = 0, imgy = 0;
-			int imgWidth = mat_temp.cols; //- border;
-			int imgHeight = mat_temp.rows;
+			int imgWidth = videoFrame.cols; //- border;
+			int imgHeight = videoFrame.rows;
 
 			StretchDIBits(cimage_mfc.GetDC(),
 				destx, desty, destw, desth,
 				imgx, imgy, imgWidth, imgHeight,
-				mat_temp.data, bitInfo, DIB_RGB_COLORS, SRCCOPY);
+				videoFrame.data, bitInfo, DIB_RGB_COLORS, SRCCOPY);
 		}
 
 		HDC dc = ::GetDC(picCtrl_FT.m_hWnd);
@@ -410,18 +433,33 @@ BITMAPINFO* CFilterDlg::CreateBitmapInfo(int w, int h, int bpp) {
 void CFilterDlg::OnBnClickedRevertFt()
 {
 	// TODO: Add your control notification handler code here
-	if(bmpHistory.size()>1){
-		bmpHistory.pop_back(); bmpInfoHistory.pop_back();
-		
-		DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+	if (videoMode[0] > 0) {//비디오 모드에서 필터가 적용중일 때 초기화
+		videoMode[0] = 0;
+		videoMode[1] = 0;
 		partBlurSlider.SetPos(1);
 		fogslider_FT.SetPos(0);
 		sharpSliderFT.SetPos(0);
 		noiseFT.SetPos(0);
-		MessageBox(L"이전으로 돌아갑니다", L"알림",MB_OK);
-	}else{
-		MessageBox(L"더이상 되돌아갈 이미지가 없고\n원본이미지만 남았습니다", L"알림",MB_OK);
+		MessageBox(L"필터링 제거했습니다\n 원본 영상입니다", L"알림", MB_OK);
+
 	}
+	else {//사진 필터링 적용 중 
+		if (bmpHistory.size() > 1) {
+			bmpHistory.pop_back(); bmpInfoHistory.pop_back();
+
+			DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+			partBlurSlider.SetPos(1);
+			fogslider_FT.SetPos(0);
+			sharpSliderFT.SetPos(0);
+			noiseFT.SetPos(0);
+			MessageBox(L"이전으로 돌아갑니다", L"알림", MB_OK);
+		}
+		else {
+			MessageBox(L"더이상 되돌아갈 이미지가 없고\n원본이미지만 남았습니다", L"알림", MB_OK);
+		}
+	
+	}
+	
 }
 
 //필터 창을 종료하고, 부모창 사진에는 변경이 안되어 있어야함. 
@@ -459,11 +497,17 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			return;
 		}
 		sharpSliderFT.SetPos(0);
-		int ret = fogFilter(sigma); 
-		if(ret != 1){
-			//안개필터 적용 안됨. 
-			MessageBox(L"안개필터적용 에러", L"알림", IDOK);	
+		if(myfileMode==0){//사진모드
+			int ret = fogFilter(sigma); 
+			if(ret != 1){
+				//안개필터 적용 안됨. 
+				MessageBox(L"안개필터적용 에러", L"알림", IDOK);	
+			}
+		}else{//비디오모드
+			videoMode[0] = { FOGVM };
+			videoMode[1] = sigma;
 		}
+		
 	}
 	else if (*pScrollBar == sharpSliderFT) {//샤프닝필터
 		int sigma = sharpSliderFT.GetPos();
