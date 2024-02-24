@@ -2,7 +2,9 @@
 #include "afxdialogex.h"
 #include "opencv2/opencv.hpp"
 #include <string>
+#include <vector>
 using namespace cv;
+using namespace std;
 
 #define	MEANBLUR	1
 #define	BLACKBLUR 	2
@@ -30,6 +32,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual BOOL OnInitDialog();//다이얼로그 띄우기 직전 아이템 속성 업데이트 
+	vector<Mat> bmpHistory;
+	vector<BITMAPINFO*> bmpInfoHistory;
 	Mat myImg;// 이미지 정보를 담고 있는 객체.
 	BITMAPINFO* myBitmapInfo; // Bitmap 정보를 담고 있는 구조체.
 	Mat myImgAfterChange;
@@ -74,8 +78,8 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 
 	void DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo);//이미지 그리기
-	void CreateBitmapInfo(BITMAPINFO** newInfo, int w, int h, int bpp);
-	BOOL colorToGray();//컬러영상 >> 그레이 영상으로 변환 
+	BITMAPINFO* CreateBitmapInfo( int w, int h, int bpp);
+	Mat colorToGray();//컬러영상 >> 그레이 영상으로 변환 
 	int partBlurProc(CPoint point);//부분 블러 처리 메소드 
 	void CFilterDlg::videoPrint();//비디오 출력
 

@@ -20,9 +20,11 @@ CFilterDlg::CFilterDlg()
 CFilterDlg::CFilterDlg(Mat Img, BITMAPINFO* bitmapInfo, int fileMode)
 	: CDialogEx(IDD_DIALOG1)
 {
-	myImg = Img; // 이미지 매트릭스 정보 가져오기 
-	myBitmapInfo = bitmapInfo;
+	// myImg = Img; // 이미지 매트릭스 정보 가져오기 
+	// myBitmapInfo = bitmapInfo;
 	myfileMode = fileMode;
+	bmpHistory.push_back(Img);
+	bmpInfoHistory.push_back(bitmapInfo);
 }
 
 CFilterDlg::~CFilterDlg()
@@ -89,6 +91,13 @@ BOOL CFilterDlg::OnInitDialog()
 	int bottom_btnLocY = wnd.bottom -40;
 
 	embossFT.MoveWindow(btnLocX, btnLocY, 200, 45); btnLocY += 45;//1000, 40, 200, 45
+	bilateralBtn_FT.MoveWindow(btnLocX, btnLocY, 200, 45); btnLocY += 45;
+	partBlutBtn.MoveWindow(btnLocX, btnLocY, 200, 45); btnLocY += 45;
+	pointLocFT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;
+	partBlurSlider.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;
+	partBlurSlider.SetRange(1, 5);
+	partBlurSlider.SetTicFreq(1);
+	partBlurSlider.SetPos(1);
 	fogLB_FT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;//1000, 105, 200, 20
 	fogslider_FT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;
 	fogslider_FT.SetRange(0, 5);
@@ -96,22 +105,16 @@ BOOL CFilterDlg::OnInitDialog()
 	fogslider_FT.SetTic(5);
 	fogslider_FT.SetPos(0);
 	sharpLB_FT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;
-	sharpSliderFT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 45;
+	sharpSliderFT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;
 	sharpSliderFT.SetRange(0, 5);
 	sharpSliderFT.SetTicFreq(1);
 	sharpSliderFT.SetPos(0);
-	bilateralBtn_FT.MoveWindow(btnLocX, btnLocY, 200, 45); btnLocY += 45;
 	noiseLB_FT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;
 	noiseFT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;
 	noiseFT.SetRange(0,100);
 	noiseFT.SetTicFreq(10);
 	noiseFT.SetPos(0);
-	partBlutBtn.MoveWindow(btnLocX, btnLocY, 200, 45); btnLocY += 45;
-	pointLocFT.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;
-	partBlurSlider.MoveWindow(btnLocX, btnLocY, 200, 20); btnLocY += 20;
-	partBlurSlider.SetRange(1, 5);
-	partBlurSlider.SetTicFreq(1);
-	partBlurSlider.SetPos(1);
+	
 	blurRangeHalfWid = 1;
 
 	GetDlgItem(IDCANCEL)->MoveWindow(btnLocX, bottom_btnLocY, 200, 45); bottom_btnLocY -= 55;
@@ -136,6 +139,7 @@ BOOL CFilterDlg::OnInitDialog()
 	bilateralBtn_FT.SetFont(&font);
 	noiseLB_FT.SetFont(&font);
 	partBlutBtn.SetFont(&font);
+	pointLocFT.SetFont(&font);
 	GetDlgItem(IDOK)->SetFont(&font);
 	GetDlgItem(IDCANCEL)->SetFont(&font);
 	GetDlgItem(IDC_REVERT_FT)->SetFont(&font);
@@ -239,7 +243,7 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 		//처음 다이얼로그 창을 띄울 때 onInitDialog()에서 drawimage가 이후 
 		// 자동 수행되는 메시지 함수에의해서 출력이 안되서 
 		//onInitDialog()에 타이머로 걸어놓음  
-		DrawImage(myImg, myBitmapInfo);//처음 로딩되는 이미지 
+		DrawImage(bmpHistory.back(), bmpInfoHistory.back());//처음 로딩되는 이미지 
 		KillTimer(0);
 	}else if (nIDEvent==1) {//video capture 세팅 
 
@@ -399,80 +403,92 @@ void CFilterDlg::OnDestroy()
 void CFilterDlg::OnBnClickedEmbossFt()//1채널 필터링 
 {
 	// TODO: Add your control notification handler code here
-	if(colorToGray()==true){//color 사진의 경우 gray로 변경. 
+	if (bmpHistory.back().channels() >=3) {
 
+		Mat src = colorToGray();//color 사진의 경우 gray로 변경.
+		//그레이로 잘 출력되는 지 확인 
+		/*BITMAPINFO* srcinfo = CreateBitmapInfo(src.cols,src.rows,src.channels()*8);
+		DrawImage(src, srcinfo);*/ 
 		float data[] = { -1,-1,0,-1,0,1,0,1,1 };
 		Mat emboss(3, 3, CV_32FC1, data);
 
 		Mat dst;
-		filter2D(myImgAfterChange, dst, -1, emboss, Point(-1, -1), 128);
-		myImgAfterChange = dst;
-		DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+		filter2D(src, dst, -1, emboss, Point(-1, -1), 128);
+
+		bmpHistory.push_back(dst);
+		BITMAPINFO* bmpinfo = CreateBitmapInfo(bmpHistory.back().cols, bmpHistory.back().rows, bmpHistory.back().channels() * 8);
+		bmpInfoHistory.push_back(bmpinfo);
+		DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+	
 	}else{
 		MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널 3개 이미지만 처리합니다", L"알림", IDOK);
 	}
 }
 
 //컬러(채널3)를 그레이(채널1)로 변경 
-BOOL CFilterDlg::colorToGray()
+Mat CFilterDlg::colorToGray()
 {
 	// TODO: Add your implementation code here.
 	//현재 채널 정보를 확인해서 gray가 아닐 경우
-	if (myImg.channels() >=3) {
-		cvtColor(myImg, myImgAfterChange, COLOR_BGR2GRAY);
-		CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
-		return true; 
-	}
-	return false; 
+	
+	Mat dst; 
+	cvtColor(bmpHistory.back(), dst, COLOR_BGR2GRAY);
+	return dst; 
+	
 }
 
 
 //BITMAP 정보 구조체 데이터 생성 
-void CFilterDlg::CreateBitmapInfo(BITMAPINFO** btmInfo, int w, int h, int bpp){
-	if (*btmInfo != NULL) //기존 비트맵 정보 초기화 
-	{
-		delete *btmInfo;
-		*btmInfo = NULL; //기존 BITMAP 정보 삭제 
-	}
+BITMAPINFO* CFilterDlg::CreateBitmapInfo(int w, int h, int bpp) {
+	BITMAPINFO* bmpinfo = NULL;
+	//if (bmpinfo != NULL) //기존 비트맵 정보 초기화 
+	//{
+	//	delete bmpinfo;
+	//	bmpinfo = NULL; //기존 BITMAP 정보 삭제 
+	//}
 
 	if (bpp == 8) //1채널 
-		*btmInfo = (BITMAPINFO*) new BYTE[sizeof(BITMAPINFO) + 255 * sizeof(RGBQUAD)];
+		bmpinfo = (BITMAPINFO*) new BYTE[sizeof(BITMAPINFO) + 255 * sizeof(RGBQUAD)];
 	else // 24(3채널) or 32bit(4채널)
-		*btmInfo = (BITMAPINFO*) new BYTE[sizeof(BITMAPINFO)];
+		bmpinfo = (BITMAPINFO*) new BYTE[sizeof(BITMAPINFO)];
 
-	(*btmInfo)->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);//구조체에 필요한 바이트 수
-	(*btmInfo)->bmiHeader.biPlanes = 1;// 대상 디바이스의 평면 수를 지정합니다. 이 값은 1로 설정해야 합니다.
-	(*btmInfo)->bmiHeader.biBitCount = bpp;//픽셀당 비트 수(bpp)를 지정합니다. 압축되지 않은 형식의 경우 이 값은 픽셀당 평균 비트 수입니다.
-	(*btmInfo)->bmiHeader.biCompression = BI_RGB;//압축되지 않은 RGB.
-	(*btmInfo)->bmiHeader.biSizeImage = 0;//이미지의 크기(바이트)를 지정합니다.
-	(*btmInfo)->bmiHeader.biXPelsPerMeter = 0;//비트맵에 대한 대상 디바이스의 가로 해상도(미터당 픽셀)
-	(*btmInfo)->bmiHeader.biYPelsPerMeter = 0;//비트맵에 대한 대상 디바이스의 세로 해상도(미터당 픽셀)를 지정합니다.
-	(*btmInfo)->bmiHeader.biClrUsed = 0;//비트맵에서 실제로 사용되는 색 테이블의 색 인덱스 수를 지정합니다.
-	(*btmInfo)->bmiHeader.biClrImportant = 0;//비트맵을 표시하는 데 중요한 것으로 간주되는 색 인덱스의 수를 지정합니다.이 값이 0이면 모든 색이 중요합니다.
+	(bmpinfo)->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);//구조체에 필요한 바이트 수
+	(bmpinfo)->bmiHeader.biPlanes = 1;// 대상 디바이스의 평면 수를 지정합니다. 이 값은 1로 설정해야 합니다.
+	(bmpinfo)->bmiHeader.biBitCount = bpp;//픽셀당 비트 수(bpp)를 지정합니다. 압축되지 않은 형식의 경우 이 값은 픽셀당 평균 비트 수입니다.
+	(bmpinfo)->bmiHeader.biCompression = BI_RGB;//압축되지 않은 RGB.
+	(bmpinfo)->bmiHeader.biSizeImage = 0;//이미지의 크기(바이트)를 지정합니다.
+	(bmpinfo)->bmiHeader.biXPelsPerMeter = 0;//비트맵에 대한 대상 디바이스의 가로 해상도(미터당 픽셀)
+	(bmpinfo)->bmiHeader.biYPelsPerMeter = 0;//비트맵에 대한 대상 디바이스의 세로 해상도(미터당 픽셀)를 지정합니다.
+	(bmpinfo)->bmiHeader.biClrUsed = 0;//비트맵에서 실제로 사용되는 색 테이블의 색 인덱스 수를 지정합니다.
+	(bmpinfo)->bmiHeader.biClrImportant = 0;//비트맵을 표시하는 데 중요한 것으로 간주되는 색 인덱스의 수를 지정합니다.이 값이 0이면 모든 색이 중요합니다.
 
 	if (bpp == 8)
 	{
 		for (int i = 0; i < 256; i++)
 		{
-			(*btmInfo)->bmiColors[i].rgbBlue = (BYTE)i;
-			(*btmInfo)->bmiColors[i].rgbGreen = (BYTE)i;
-			(*btmInfo)->bmiColors[i].rgbRed = (BYTE)i;
-			(*btmInfo)->bmiColors[i].rgbReserved = 0;
-		}
-	}
+			(bmpinfo)->bmiColors[i].rgbBlue = (BYTE)i;
+			(bmpinfo)->bmiColors[i].rgbGreen = (BYTE)i;
+			(bmpinfo)->bmiColors[i].rgbRed = (BYTE)i;
+			(bmpinfo)->bmiColors[i].rgbReserved = 0;
 
-	(*btmInfo)->bmiHeader.biWidth = w;
-	(*btmInfo)->bmiHeader.biHeight = -h;//음수는 원본이 왼쪽 위 모서리에 있는 하향식 DIB입니다.
+		}
+
+		(bmpinfo)->bmiHeader.biWidth = w;
+		(bmpinfo)->bmiHeader.biHeight = -h;//음수는 원본이 왼쪽 위 모서리에 있는 하향식 DIB입니다.
+		return bmpinfo;
+	}
 }
 
 //되돌리기 기능 (원본 이미지로 돌아감) 
 void CFilterDlg::OnBnClickedRevertFt()
 {
 	// TODO: Add your control notification handler code here
-	DrawImage(myImg, myBitmapInfo);
-	myImgAfterChange = myImg.clone();
-	myBmpInfoAfterChange = myBitmapInfo;
-	MessageBox(L"원본으로 돌아갑니다", L"알림",MB_OK);
+	bmpHistory.pop_back(); bmpInfoHistory.pop_back();
+	DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+	// DrawImage(myImg, myBitmapInfo);
+	// myImgAfterChange = myImg.clone();
+	// myBmpInfoAfterChange = myBitmapInfo;
+	MessageBox(L"이전으로 돌아갑니다", L"알림",MB_OK);
 }
 
 //필터 창을 종료하고, 부모창 사진에는 변경이 안되어 있어야함. 
@@ -507,7 +523,7 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		int sigma = fogslider_FT.GetPos();
 		if (sigma != 0) {
 			GaussianBlur(myImg, myImgAfterChange, Size(), (double)sigma);
-			CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
+			//CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
 			DrawImage(myImgAfterChange, myBmpInfoAfterChange);
 		}
 		
@@ -520,7 +536,7 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			float alpha = 1.f;
 			Mat dst = (1 + alpha) * myImg - alpha * myImgAfterChange;
 			myImgAfterChange = dst;
-			CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
+			//CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
 			DrawImage(myImgAfterChange, myBmpInfoAfterChange);
 		}
 		
@@ -564,14 +580,14 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 void CFilterDlg::OnBnClickedBilateralFt()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if(colorToGray()==true){//color 사진의 경우 gray로 변경.
-		Mat dst;
-		bilateralFilter(myImgAfterChange, dst, -1, 10, 5); // -1 sigmaSpace로부터 자동생성됨. 10: 색공간에서의 가우시안 표준 편차 5: 좌표 공간에서의 가우시안 표준편차 
-		myImgAfterChange = dst.clone();
-		DrawImage(myImgAfterChange, myBmpInfoAfterChange);
-	}else{
-		MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널3개 이미지만 처리합니다", L"알림", IDOK);
-	}
+	//if(colorToGray()==true){//color 사진의 경우 gray로 변경.
+	//	Mat dst;
+	//	bilateralFilter(myImgAfterChange, dst, -1, 10, 5); // -1 sigmaSpace로부터 자동생성됨. 10: 색공간에서의 가우시안 표준 편차 5: 좌표 공간에서의 가우시안 표준편차 
+	//	myImgAfterChange = dst.clone();
+	//	DrawImage(myImgAfterChange, myBmpInfoAfterChange);
+	//}else{
+	//	MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널3개 이미지만 처리합니다", L"알림", IDOK);
+	//}
 }
 
 
@@ -690,8 +706,6 @@ void CFilterDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 			p_dc->DrawText(L"부분블러OFF", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 			break;
 		}
-
-		
 	}
 	case IDC_REVERT_FT: {
 		p_dc->DrawText(L"되돌리기", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
@@ -813,7 +827,7 @@ int CFilterDlg::partBlurProc(CPoint point) {
 			int r = dst[2];
 		}
 	}
-	CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
+	//CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
 	return 1;
 }
 
@@ -889,7 +903,7 @@ void CFilterDlg::videoPrint() {
 
 	// cimage_mfc.Create(winSize.width, winSize.height, 24);
 
-	// //CreateBitmapInfo(BITMAPINFO * *btmInfo, int w, int h, int bpp)
+	// //CreateBitmapInfo(BITMAPINFO * *bmpinfo, int w, int h, int bpp)
 
 	// BITMAPINFO* bitInfo = (BITMAPINFO*)malloc(sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD));
 	// bitInfo->bmiHeader.biBitCount = bpp;
