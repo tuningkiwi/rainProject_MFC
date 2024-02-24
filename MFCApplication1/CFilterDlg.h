@@ -34,10 +34,6 @@ public:
 	virtual BOOL OnInitDialog();//다이얼로그 띄우기 직전 아이템 속성 업데이트 
 	vector<Mat> bmpHistory;
 	vector<BITMAPINFO*> bmpInfoHistory;
-	// Mat myImg;// 이미지 정보를 담고 있는 객체.
-	// BITMAPINFO* myBitmapInfo; // Bitmap 정보를 담고 있는 구조체.
-	// Mat myImgAfterChange;
-	// BITMAPINFO* myBmpInfoAfterChange;// 변환 후 이미지 정보 
 	int myfileMode; //파일 모드: 0사진, 1동영상 
 	CPoint prev_mousePos;//이전 마우스 위치 
 	BOOL partBlurModeOn;//부분블러 모드 ON 

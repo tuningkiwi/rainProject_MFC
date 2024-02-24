@@ -181,7 +181,7 @@ void CFilterDlg::OnBnClickedOk()
 }
 
 
-//#드로우이미지 다이얼로그창에 사진 띄우기 
+//#드로우이미지 다이얼로그창blurLoc에 사진 띄우기 
 void CFilterDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
 	KillTimer(0);//0사진타이머 
 
@@ -247,8 +247,8 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 	}else if (nIDEvent==2) {//2번타이머 영상 출력 
 		Mat videoFrame;
 		capture->read(videoFrame);
-		bmpHistory.push_back(videoFrame); 
 
+		
 		//이곳에 OpenCV 함수들을 적용합니다.
 		//여기에서는 그레이스케일 이미지로 변환합니다.
 		//cvtColor(mat_frame, mat_frame, COLOR_BGR2GRAY);
@@ -283,8 +283,11 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 			mat_temp = videoFrame;
 		}
 
+		bmpHistory.push_back(mat_temp); //borderline 처리한 이미지 행렬
 		RECT r;
 		picCtrl_FT.GetClientRect(&r);
+		//r=pictureControlSizeSet();//mat_temp크기에 따른 picture control 조정 
+
 		//r.right = 500;
 		//r.bottom = 500;
 		cv::Size winSize(r.right, r.bottom);
@@ -292,34 +295,11 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 		cimage_mfc.Create(winSize.width, winSize.height, 24);
 
 		//CreateBitmapInfo(BITMAPINFO * *btmInfo, int w, int h, int bpp)
+		BITMAPINFO* bitInfo = CreateBitmapInfo(mat_temp.cols,mat_temp.rows,mat_temp.channels()*8);
+		bmpInfoHistory.push_back(bitInfo);
+		//bmpInfoHistory.push_back(bitInfo);
 
-		//CreateBitmapInfo(&myBitmapInfo, myImg.cols, myImg.rows, myImg.channels() * 8);
-		BITMAPINFO* bitInfo = (BITMAPINFO*)malloc(sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD));
-		bitInfo->bmiHeader.biBitCount = bpp;
-		bitInfo->bmiHeader.biWidth = mat_temp.cols;
-		bitInfo->bmiHeader.biHeight = -mat_temp.rows;
-		bitInfo->bmiHeader.biPlanes = 1;
-		bitInfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-		bitInfo->bmiHeader.biCompression = BI_RGB;
-		bitInfo->bmiHeader.biClrImportant = 0;
-		bitInfo->bmiHeader.biClrUsed = 0;
-		bitInfo->bmiHeader.biSizeImage = 0;
-		bitInfo->bmiHeader.biXPelsPerMeter = 0;
-		bitInfo->bmiHeader.biYPelsPerMeter = 0;
-
-		//그레이스케일 인경우 팔레트가 필요
-		if (bpp == 8)
-		{
-			RGBQUAD* palette = bitInfo->bmiColors;
-			for (int i = 0; i < 256; i++)
-			{
-				palette[i].rgbBlue = palette[i].rgbGreen = palette[i].rgbRed = (BYTE)i;
-				palette[i].rgbReserved = 0;
-			}
-		}
-
-		// Image is bigger or smaller than into destination rectangle
-		// we use stretch in full rect
+		//이미지 처리 함수 
 
 		if (mat_temp.cols == winSize.width && mat_temp.rows == winSize.height)
 		{
@@ -359,6 +339,10 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 
 		cimage_mfc.ReleaseDC();
 		cimage_mfc.Destroy();
+		if (bmpHistory.size() == 5) {
+			bmpHistory.clear();
+			bmpInfoHistory.clear();
+		}
 		
 	}
 	
@@ -417,14 +401,9 @@ Mat CFilterDlg::colorToGray()
 //BITMAP 정보 구조체 데이터 생성 
 BITMAPINFO* CFilterDlg::CreateBitmapInfo(int w, int h, int bpp) {
 	BITMAPINFO* bmpinfo = NULL;
-	//if (bmpinfo != NULL) //기존 비트맵 정보 초기화 
-	//{
-	//	delete bmpinfo;
-	//	bmpinfo = NULL; //기존 BITMAP 정보 삭제 
-	//}
 
 	if (bpp == 8) //1채널 
-		bmpinfo = (BITMAPINFO*) new BYTE[sizeof(BITMAPINFO) + 255 * sizeof(RGBQUAD)];
+		bmpinfo = (BITMAPINFO*) new BYTE[sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD)];
 	else // 24(3채널) or 32bit(4채널)
 		bmpinfo = (BITMAPINFO*) new BYTE[sizeof(BITMAPINFO)];
 
@@ -437,6 +416,8 @@ BITMAPINFO* CFilterDlg::CreateBitmapInfo(int w, int h, int bpp) {
 	(bmpinfo)->bmiHeader.biYPelsPerMeter = 0;//비트맵에 대한 대상 디바이스의 세로 해상도(미터당 픽셀)를 지정합니다.
 	(bmpinfo)->bmiHeader.biClrUsed = 0;//비트맵에서 실제로 사용되는 색 테이블의 색 인덱스 수를 지정합니다.
 	(bmpinfo)->bmiHeader.biClrImportant = 0;//비트맵을 표시하는 데 중요한 것으로 간주되는 색 인덱스의 수를 지정합니다.이 값이 0이면 모든 색이 중요합니다.
+	(bmpinfo)->bmiHeader.biWidth = w;
+	(bmpinfo)->bmiHeader.biHeight = -h;//음수는 원본이 왼쪽 위 모서리에 있는 하향식 DIB입니다.
 
 	if (bpp == 8)
 	{
@@ -446,13 +427,9 @@ BITMAPINFO* CFilterDlg::CreateBitmapInfo(int w, int h, int bpp) {
 			(bmpinfo)->bmiColors[i].rgbGreen = (BYTE)i;
 			(bmpinfo)->bmiColors[i].rgbRed = (BYTE)i;
 			(bmpinfo)->bmiColors[i].rgbReserved = 0;
-
 		}
-
-		(bmpinfo)->bmiHeader.biWidth = w;
-		(bmpinfo)->bmiHeader.biHeight = -h;//음수는 원본이 왼쪽 위 모서리에 있는 하향식 DIB입니다.
-		return bmpinfo;
 	}
+	return bmpinfo;
 }
 
 //#되돌리기함수 기능 (원본 이미지로 돌아감) 

@@ -229,7 +229,7 @@ HCURSOR CMFCApplication1Dlg::OnQueryDragIcon()
 }
 
 
-//BITMAP 정보 구조체 데이터 생성 
+//#비트맵인포 BITMAP 정보 구조체 데이터 생성 
 void CMFCApplication1Dlg::CreateBitmapInfo(int w, int h, int bpp) {
 	if (m_pBitmapInfo != NULL) //기존 비트맵 정보 초기화 
 	{
@@ -238,7 +238,7 @@ void CMFCApplication1Dlg::CreateBitmapInfo(int w, int h, int bpp) {
 	}
 
 	if (bpp == 8) //1채널 
-		m_pBitmapInfo = (BITMAPINFO*) new BYTE[sizeof(BITMAPINFO) + 255 * sizeof(RGBQUAD)];
+		m_pBitmapInfo = (BITMAPINFO*) new BYTE[sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD)];
 	else // 24(3채널) or 32bit(4채널)
 		m_pBitmapInfo = (BITMAPINFO*) new BYTE[sizeof(BITMAPINFO)];
 
@@ -251,6 +251,8 @@ void CMFCApplication1Dlg::CreateBitmapInfo(int w, int h, int bpp) {
 	m_pBitmapInfo->bmiHeader.biYPelsPerMeter = 0;//비트맵에 대한 대상 디바이스의 세로 해상도(미터당 픽셀)를 지정합니다.
 	m_pBitmapInfo->bmiHeader.biClrUsed = 0;//비트맵에서 실제로 사용되는 색 테이블의 색 인덱스 수를 지정합니다.
 	m_pBitmapInfo->bmiHeader.biClrImportant = 0;//비트맵을 표시하는 데 중요한 것으로 간주되는 색 인덱스의 수를 지정합니다.이 값이 0이면 모든 색이 중요합니다.
+	m_pBitmapInfo->bmiHeader.biWidth = w;
+	m_pBitmapInfo->bmiHeader.biHeight = -h;
 
 	if (bpp == 8)
 	{
@@ -263,8 +265,7 @@ void CMFCApplication1Dlg::CreateBitmapInfo(int w, int h, int bpp) {
 		}
 	}
 
-	m_pBitmapInfo->bmiHeader.biWidth = w;
-	m_pBitmapInfo->bmiHeader.biHeight = -h;//음수는 원본이 왼쪽 위 모서리에 있는 하향식 DIB입니다.
+	//음수는 원본이 왼쪽 위 모서리에 있는 하향식 DIB입니다.
 }
 
 //다이얼로그창에 사진 띄우기 
