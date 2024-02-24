@@ -40,6 +40,7 @@ public:
 	CStatic picCtrl_IT;
 	CButton rotationR;
 	CButton rotationL;
+	CButton Flip;
 	CSliderCtrl SizeSlide;
 	CRect picLTRB;//윈도우 상에서 현재 사진의 위치 
 	void MakeBitmapInfo(BITMAPINFO** newInfo, int w, int h, int bpp);
@@ -55,4 +56,5 @@ public:
 	CBrush m_backBrush;
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct);
+	afx_msg void OnBnClickedButtonFlip();
 };

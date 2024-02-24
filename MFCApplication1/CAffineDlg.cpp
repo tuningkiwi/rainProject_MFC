@@ -36,6 +36,7 @@ void CAffineDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_RR, rotationR);
 	DDX_Control(pDX, IDC_BUTTON_LR, rotationL);
 	DDX_Control(pDX, IDC_SIZE_SLIDER, SizeSlide);
+	DDX_Control(pDX, IDC_BUTTON_FLIP, Flip);
 }
 
 
@@ -51,6 +52,7 @@ BEGIN_MESSAGE_MAP(CAffineDlg, CDialogEx)
 	ON_WM_HSCROLL()
 	ON_WM_ERASEBKGND()
 	ON_WM_DRAWITEM()
+	ON_BN_CLICKED(IDC_BUTTON_FLIP, &CAffineDlg::OnBnClickedButtonFlip)
 END_MESSAGE_MAP()
 
 
@@ -70,7 +72,7 @@ BOOL CAffineDlg::OnInitDialog()
 	int btnLocY = 40;
 
 	rotationR.MoveWindow(btnLocX, 120, 200, 45);
-	rotationL.MoveWindow(btnLocX, 200, 200, 45);
+	rotationL.MoveWindow(btnLocX, 180, 200, 45);
 	
 	GetDlgItem(IDC_SIZE_TEXT)->MoveWindow(btnLocX, 280, 200, 20);
 	SizeSlide.MoveWindow(btnLocX, 320, 200, 20);
@@ -78,6 +80,7 @@ BOOL CAffineDlg::OnInitDialog()
 	SizeSlide.SetTicFreq(1);
 	SizeSlide.SetTic(1);
 	SizeSlide.SetPos(1);
+	Flip.MoveWindow(btnLocX, 720 - 340, 200, 45);
 
 	GetDlgItem(IDCANCEL)->MoveWindow(btnLocX, 720 - 160, 200, 45);
 	GetDlgItem(IDOK)->MoveWindow(btnLocX, 720 - 220, 200, 45);
@@ -89,6 +92,7 @@ BOOL CAffineDlg::OnInitDialog()
 	font.CreatePointFont(140, _T("함초롬돋움 확장 보통"));
 	rotationR.SetFont(&font);
 	rotationL.SetFont(&font);
+	Flip.SetFont(&font);
 	GetDlgItem(IDC_SIZE_TEXT)->SetFont(&font);
 	GetDlgItem(IDOK)->SetFont(&font);
 	GetDlgItem(IDCANCEL)->SetFont(&font);
@@ -390,7 +394,7 @@ void CAffineDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 	switch (nIDCtl)
 	{
 		case IDCANCEL: case IDOK: case IDC_REVERSE_IT:
-		case IDC_BUTTON_RR: case IDC_BUTTON_LR:	
+		case IDC_BUTTON_RR: case IDC_BUTTON_LR:	case IDC_BUTTON_FLIP:
 		{
 			if (lpDrawItemStruct->itemAction & 0x07) 
 			{
@@ -436,8 +440,18 @@ void CAffineDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 		p_dc->DrawText(L"취소", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 		break;
 	}
+	case IDC_BUTTON_FLIP: {
+		p_dc->DrawText(L"좌우 반전", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		break;
+	}
 	default:
 		break;
 	}
 	//CDialogEx::OnDrawItem(nIDCtl, lpDrawItemStruct);
+}
+
+
+void CAffineDlg::OnBnClickedButtonFlip()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
