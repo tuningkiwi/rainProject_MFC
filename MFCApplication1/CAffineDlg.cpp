@@ -332,6 +332,7 @@ void CAffineDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				static_cast<int>(myImg.rows * scaleFactor[pos])),
 				INTER_LINEAR);
 
+
 			// 비트맵 정보 생성 및 이미지 출력
 			MakeBitmapInfo(&resultmyBitmapInfo, SizeImg.cols, SizeImg.rows, SizeImg.channels() * 8);
 			ReadImage(SizeImg, resultmyBitmapInfo);
@@ -343,6 +344,7 @@ void CAffineDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			resize(ChangeImg, SizeImg, Size(static_cast<int>(myImg.cols * scaleFactor[pos]),
 				static_cast<int>(myImg.rows * scaleFactor[pos])),
 				INTER_LINEAR);
+
 
 			// 비트맵 정보 생성 및 이미지 출력
 			MakeBitmapInfo(&resultmyBitmapInfo, SizeImg.cols, SizeImg.rows, SizeImg.channels() * 8);
