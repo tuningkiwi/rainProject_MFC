@@ -580,14 +580,19 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 void CFilterDlg::OnBnClickedBilateralFt()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	//if(colorToGray()==true){//color 사진의 경우 gray로 변경.
-	//	Mat dst;
-	//	bilateralFilter(myImgAfterChange, dst, -1, 10, 5); // -1 sigmaSpace로부터 자동생성됨. 10: 색공간에서의 가우시안 표준 편차 5: 좌표 공간에서의 가우시안 표준편차 
-	//	myImgAfterChange = dst.clone();
-	//	DrawImage(myImgAfterChange, myBmpInfoAfterChange);
-	//}else{
-	//	MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널3개 이미지만 처리합니다", L"알림", IDOK);
-	//}
+	if (bmpHistory.back().channels() >=3) {
+
+		Mat src = colorToGray();
+		Mat dst;
+		bilateralFilter(src, dst, -1, 10, 5); // -1 sigmaSpace로부터 자동생성됨. 10: 색공간에서의 가우시안 표준 편차 5: 좌표 공간에서의 가우시안 표준편차 
+		
+		bmpHistory.push_back(dst);
+		BITMAPINFO* bmpinfo = CreateBitmapInfo(bmpHistory.back().cols, bmpHistory.back().rows, bmpHistory.back().channels() * 8);
+		bmpInfoHistory.push_back(bmpinfo);
+		DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+	}else{
+		MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널3개 이미지만 처리합니다", L"알림", IDOK);
+	}
 }
 
 
