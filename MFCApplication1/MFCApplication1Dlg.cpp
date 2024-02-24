@@ -373,6 +373,7 @@ void CMFCApplication1Dlg::OnBnClickedButton2()
 		m_matImage = imread(strPath);//png파일의 경우 alpha채널도 가져옴
 
 		CreateBitmapInfo(m_matImage.cols, m_matImage.rows, m_matImage.channels() * 8);
+		pictureCtrlSizeChange();
 		if (mode == 0) {
 			SetTimer(1, 30, NULL);
 		}
@@ -671,7 +672,8 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 		//mat_frame가 입력 이미지입니다.
 		Mat mat_frame;
 		if (mode == 0) {
-			mat_frame = m_matImage; 
+			mat_frame = m_matImage;
+			
 		}
 		else {
 			capture->read(mat_frame);
@@ -855,6 +857,36 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 		// Handle other timer events or call the base class
 		CDialogEx::OnTimer(nIDEvent);
 	}
+}
+
+
+void CMFCApplication1Dlg::pictureCtrlSizeChange() {
+
+	CRect wnd;
+	this->GetClientRect(&wnd); // 기본 사각형의 x,y 좌표설정이되고 =(0,0) 시작되는함수'GetClientRect' 함수에 
+	int wx = int(wnd.right * 5 / 6);
+	int wy = wnd.bottom;
+
+	//불러올 사진 cols 가져오기.
+	CClientDC dc(GetDlgItem(IDC_PC_VIEW));
+	CRect rect;// 이미지를 넣을 사각형 
+	if (m_matImage.cols > wx) {
+		//cols: 1080 = rows : wid;
+		int resize_h = cvRound((wx * m_matImage.rows) / m_matImage.cols);
+		int resize_w = wx; //width를 최대크기로 설정 
+		if (wy - resize_h < 0) { //width를 맞추니, height가 넘친다 
+			resize_w = wy * wx / resize_h;
+		}
+		int x = cvRound((wx - resize_w) / 2);
+		int y = cvRound((wy - resize_h) / 2);
+		GetDlgItem(IDC_PC_VIEW)->MoveWindow(x, y, resize_w, resize_h);
+	}
+	else {
+		int x = cvRound((wx - m_matImage.cols) / 2);
+		int y = cvRound((wy - m_matImage.rows) / 2);
+		GetDlgItem(IDC_PC_VIEW)->MoveWindow(x, y, m_matImage.cols, m_matImage.rows);
+	}
+	return;
 }
 
 //주석 추가 

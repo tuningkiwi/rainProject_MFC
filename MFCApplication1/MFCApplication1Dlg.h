@@ -88,4 +88,5 @@ public:
 	CButton videoFilterBtn;
 	afx_msg void OnBnClickedBtnVideoFilter();
 	int mode;
+	void pictureCtrlSizeChange();
 };
