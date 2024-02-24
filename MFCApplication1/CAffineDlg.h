@@ -32,7 +32,7 @@ public:
 	Mat currentRotatedImg; // 회전된 이미지를 저장하기 위한 변수 
 	Mat SizeImg;
 	Mat ChangeImg; // Affine 이미지 정보를 담기위한 원본에 원본 이미지 
-	Mat rotresultImg;
+	Mat FlipImg;
 	Mat resultImg; // 부모창에 띄울 최종 변환 이미지 
 	BITMAPINFO* myBitmapInfo; // 원본 이미지 Bitmap 정보를 담고 있는 구조체.
 	BITMAPINFO* resultmyBitmapInfo;  // 변경된 Bitmap 정보를 담고있는 구조체. 
@@ -40,6 +40,7 @@ public:
 	CStatic picCtrl_IT;
 	CButton rotationR;
 	CButton rotationL;
+	CButton Flip;
 	CSliderCtrl SizeSlide;
 	CRect picLTRB;//윈도우 상에서 현재 사진의 위치 
 	void MakeBitmapInfo(BITMAPINFO** newInfo, int w, int h, int bpp);
@@ -55,4 +56,5 @@ public:
 	CBrush m_backBrush;
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct);
+	afx_msg void OnBnClickedButtonFlip();
 };
