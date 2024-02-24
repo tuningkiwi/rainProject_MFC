@@ -132,7 +132,7 @@ BOOL CFilterDlg::OnInitDialog()
 	partBlurModeOn = false;
 	//DrawImage(); dialog 호출시 oninitDiaog()뒤에 실행되는 메세지들에 의하여, 사진이 출력되지 않음 
 	if (myfileMode == 0) {
-		SetTimer(0, 80, NULL);//100ms  사진 불러오기 위한 타이머 
+		SetTimer(0, 30, NULL);//100ms  사진 불러오기 위한 타이머 
 	}
 	else {
 		SetTimer(1, 80, NULL);//100ms  동영상 불러오기 위한 타이머 
@@ -219,6 +219,68 @@ void CFilterDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
 	StretchDIBits(dc.GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), 0, 0, requestImg.cols, requestImg.rows, requestImg.data, requestBmpInfo, DIB_RGB_COLORS, SRCCOPY);
 }
 
+void CFilterDlg::DrawImage2(Mat requestImg, BITMAPINFO* requestBmpInfo) {
+	//KillTimer(0);//0사진타이머 
+
+	//현재 불러올 이미지에 대한 picture contorl 크기 조정  
+	CRect rect = pictureControlSizeSet();
+	//부모창에서 정상 출력되지만, 자식 창에서 문제가 생김. 
+
+	CImage cimage_mfc;
+	cv::Size winSize(rect.right, rect.bottom);
+	cimage_mfc.Create(winSize.width, winSize.height, 24);
+
+	if (requestImg.cols == winSize.width && requestImg.rows == winSize.height)
+	{
+		// source and destination have same size
+		// transfer memory block
+		// NOTE: the padding border will be shown here. Anyway it will be max 3px width
+
+		SetDIBitsToDevice(cimage_mfc.GetDC(),
+			//destination rectangle
+			0, 0, winSize.width, winSize.height,
+			0, 0, 0, requestImg.rows,
+			requestImg.data, requestBmpInfo, DIB_RGB_COLORS);
+	}
+	else
+	{
+		// destination rectangle
+		int destx = 0, desty = 0;
+		int destw = winSize.width;
+		int desth = winSize.height;
+
+		// rectangle defined on source bitmap
+		// using imgWidth instead of mat_temp.cols will ignore the padding border
+		int imgx = 0, imgy = 0;
+		int imgWidth = requestImg.cols;
+		int imgHeight = requestImg.rows;
+
+		StretchDIBits(cimage_mfc.GetDC(),
+			destx, desty, destw, desth,
+			imgx, imgy, imgWidth, imgHeight,
+			requestImg.data, requestBmpInfo, DIB_RGB_COLORS, SRCCOPY);
+	}
+
+	HDC dc = ::GetDC(picCtrl_FT.m_hWnd);
+	cimage_mfc.BitBlt(dc, 0, 0);
+
+	::ReleaseDC(picCtrl_FT.m_hWnd, dc);
+
+	cimage_mfc.ReleaseDC();
+	cimage_mfc.Destroy();
+
+	//GetDlgItem(IDC_PC_FT)->GetClientRect(&rect);
+	//CClientDC dc(GetDlgItem(IDC_PC_FT));
+	////픽셀을 삭제합니다. 이 모드는 해당 정보를 보존하지 않고 
+	//SetStretchBltMode(dc.GetSafeHdc(), COLORONCOLOR);
+
+	//StretchDIBits 함수는 DIB, JPEG 또는 PNG 이미지의 픽셀 사각형에 
+	// 대한 색 데이터를 지정된 대상 사각형에 복사합니다.
+	//dc.GetSafeHdc(): 출력 디바이스 컨텍스트를 가져옵니다
+	// 함수가 성공하면 반환 값은 복사된 검사 줄의 수입니다. 이 값은 미러된 콘텐츠에 대해 음수일 수 있습니다.
+	//StretchDIBits(dc.GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), 0, 0, requestImg.cols, requestImg.rows, requestImg.data, requestBmpInfo, DIB_RGB_COLORS, SRCCOPY);
+}
+
 //void CFilterDlg::OnBnClickedImgloadFt()
 //{
 	// TODO: Add your control notification handler code here
@@ -231,11 +293,120 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 	// TODO: Add your message handler code here and/or call default
 	if (nIDEvent==0) {//0번타이머
 
+		Mat mat_frame = bmpHistory.back().clone();
+		BITMAPINFO* requestBmpInfo = bmpInfoHistory.back();
+		//현재 불러올 이미지에 대한 picture contorl 크기 조정 
+
+		//화면에 보여주기 위한 처리입니다.
+		int bpp = 8 * mat_frame.elemSize();
+		assert((bpp == 8 || bpp == 24 || bpp == 32));
+
+		int padding = 0;
+		//32 bit image is always DWORD aligned because each pixel requires 4 bytes
+		if (bpp < 32)
+			padding = 4 - (mat_frame.cols % 4);
+
+		if (padding == 4)
+			padding = 0;
+
+		int border = 0;
+		//32 bit image is always DWORD aligned because each pixel requires 4 bytes
+		if (bpp < 32)
+		{
+			border = 4 - (mat_frame.cols % 4);
+		}
+
+		Mat mat_temp;
+		if (border > 0 || mat_frame.isContinuous() == false)
+		{
+			// Adding needed columns on the right (max 3 px)
+			cv::copyMakeBorder(mat_frame, mat_temp, 0, 0, 0, border, cv::BORDER_CONSTANT, 0);
+		}
+		else
+		{
+			mat_temp = mat_frame;
+		}
+		pictureControlSizeSet();
+
+		RECT r;
+		picCtrl_FT.GetClientRect(&r);
+		//r.right = 500;
+		//r.bottom = 500;
+		cv::Size winSize(r.right, r.bottom);
+
+		cimage_mfc.Create(winSize.width, winSize.height, 24);
+
+		BITMAPINFO* bitInfo = (BITMAPINFO*)malloc(sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD));
+		bitInfo->bmiHeader.biBitCount = bpp;
+		bitInfo->bmiHeader.biWidth = mat_temp.cols;
+		bitInfo->bmiHeader.biHeight = -mat_temp.rows;
+		bitInfo->bmiHeader.biPlanes = 1;
+		bitInfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+		bitInfo->bmiHeader.biCompression = BI_RGB;
+		bitInfo->bmiHeader.biClrImportant = 0;
+		bitInfo->bmiHeader.biClrUsed = 0;
+		bitInfo->bmiHeader.biSizeImage = 0;
+		bitInfo->bmiHeader.biXPelsPerMeter = 0;
+		bitInfo->bmiHeader.biYPelsPerMeter = 0;
+
+		//그레이스케일 인경우 팔레트가 필요
+		if (bpp == 8)
+		{
+			RGBQUAD* palette = bitInfo->bmiColors;
+			for (int i = 0; i < 256; i++)
+			{
+				palette[i].rgbBlue = palette[i].rgbGreen = palette[i].rgbRed = (BYTE)i;
+				palette[i].rgbReserved = 0;
+			}
+		}
+
+		// Image is bigger or smaller than into destination rectangle
+		// we use stretch in full rect
+
+		if (mat_temp.cols == winSize.width && mat_temp.rows == winSize.height)
+		{
+			// source and destination have same size
+			// transfer memory block
+			// NOTE: the padding border will be shown here. Anyway it will be max 3px width
+
+			SetDIBitsToDevice(cimage_mfc.GetDC(),
+				//destination rectangle
+				0, 0, winSize.width, winSize.height,
+				0, 0, 0, mat_temp.rows,
+				mat_temp.data, bitInfo, DIB_RGB_COLORS);
+		}
+		else
+		{
+			// destination rectangle
+			int destx = 0, desty = 0;
+			int destw = winSize.width;
+			int desth = winSize.height;
+
+			// rectangle defined on source bitmap
+			// using imgWidth instead of mat_temp.cols will ignore the padding border
+			int imgx = 0, imgy = 0;
+			int imgWidth = mat_temp.cols - border;
+			int imgHeight = mat_temp.rows;
+
+			StretchDIBits(cimage_mfc.GetDC(),
+				destx, desty, destw, desth,
+				imgx, imgy, imgWidth, imgHeight,
+				mat_temp.data, bitInfo, DIB_RGB_COLORS, SRCCOPY);
+		}
+
+		HDC dc = ::GetDC(picCtrl_FT.m_hWnd);
+		cimage_mfc.BitBlt(dc, 0, 0);
+
+		::ReleaseDC(picCtrl_FT.m_hWnd, dc);
+
+		cimage_mfc.ReleaseDC();
+		cimage_mfc.Destroy();
+
 		//처음 다이얼로그 창을 띄울 때 onInitDialog()에서 drawimage가 이후 
 		// 자동 수행되는 메시지 함수에의해서 출력이 안되서 
 		//onInitDialog()에 타이머로 걸어놓음  
-		DrawImage(bmpHistory.back(), bmpInfoHistory.back());//처음 로딩되는 이미지 
-		KillTimer(0);
+		//DrawImage2(bmpHistory.back(), bmpInfoHistory.back());//처음 로딩되는 이미지 
+		//KillTimer(0);
 	}else if (nIDEvent==1) {//1번타이머 video capture 세팅 
 
 		CRect wnd;

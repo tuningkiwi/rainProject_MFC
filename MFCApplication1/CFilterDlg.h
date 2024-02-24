@@ -87,6 +87,7 @@ public:
 	int embossFilter();//진흙필터 엠보싱필터
 	int bilateralFilter_my();//양방향 필터 
 	CRect pictureControlSizeSet();
+	void DrawImage2(Mat requestImg, BITMAPINFO* requestBmpInfo);
 	
 };
 
