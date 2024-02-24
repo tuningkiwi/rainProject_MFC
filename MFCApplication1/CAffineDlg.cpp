@@ -237,7 +237,6 @@ void CAffineDlg::OnBnClickedReverseIt()
 	ReadImage(myImg, myBitmapInfo);
 	MessageBox(L"원본 이미지로 돌아갑니다", L"알림", MB_OK);
 	currentRotatedImg = myImg.clone();
-	rotresultImg = myImg.clone();
 	resultImg = myImg.clone();
 	ChangeImg = myImg.clone();
 	SizeSlide.SetPos(1);
@@ -269,7 +268,6 @@ void CAffineDlg::OnBnClickedButtonRr()
 	// 화면에 회전된 이미지 표시
 	ReadImage(currentRotatedImg, resultmyBitmapInfo);
 	
-	rotresultImg = currentRotatedImg.clone();
 	resultImg = currentRotatedImg.clone();
 }
 
@@ -300,7 +298,6 @@ void CAffineDlg::OnBnClickedButtonLr()
 	// 화면에 회전된 이미지 표시
 	ReadImage(currentRotatedImg, resultmyBitmapInfo);
 	
-	rotresultImg = currentRotatedImg.clone();
 	resultImg = currentRotatedImg.clone();
 }
 
@@ -309,9 +306,9 @@ void CAffineDlg::OnBnClickedButtonLr()
 void CAffineDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	if (!rotresultImg.empty())
+	if (!resultImg.empty())
 	{
-		ChangeImg = rotresultImg.clone();
+		ChangeImg = resultImg.clone();
 	}
 	else
 	{
@@ -373,7 +370,7 @@ void CAffineDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 // 주석 테스트 
 
-
+//Static Text 글씨크기
 BOOL CAffineDlg::OnEraseBkgnd(CDC* pDC)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
@@ -386,14 +383,13 @@ BOOL CAffineDlg::OnEraseBkgnd(CDC* pDC)
 	return TRUE;
 }
 
-
+//버튼 색상 및 버튼명 
 void CAffineDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	
 	switch (nIDCtl)
 	{
-		case IDCANCEL: case IDOK: case IDC_REVERSE_IT:
 		case IDC_BUTTON_RR: case IDC_BUTTON_LR:	case IDC_BUTTON_FLIP:
 		{
 			if (lpDrawItemStruct->itemAction & 0x07) 
@@ -407,8 +403,29 @@ void CAffineDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 				}
 				else
 				{//버튼이 눌리지 않은 상태일 때 
-					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(255, 192, 203)); // 다른 배경색 설정 예시 (흰색)
+					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(255, 192, 203)); // 버튼의 색상
 					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(135, 206, 235), RGB(135, 206, 235));//버튼 외곽선 (검은색)
+					p_dc->SetTextColor(RGB(0, 0, 0)); // 텍스트 색상 (검은색)
+				}
+				p_dc->SetBkMode(TRANSPARENT);
+			}
+			break;
+		}
+		case IDCANCEL: case IDOK: case IDC_REVERSE_IT:
+		{
+			if (lpDrawItemStruct->itemAction & 0x07)
+			{
+				CDC* p_dc = CDC::FromHandle(lpDrawItemStruct->hDC);
+				if (lpDrawItemStruct->itemState & ODS_SELECTED)
+				{//버튼 클릭시 
+					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(255, 0, 0));//버튼의 색상
+					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(255, 255, 0), RGB(255, 255, 0));//버튼 외곽선
+					p_dc->SetTextColor(RGB(0, 0, 0));
+				}
+				else
+				{//버튼이 눌리지 않은 상태일 때 
+					p_dc->FillSolidRect(&lpDrawItemStruct->rcItem, RGB(255, 253, 208)); // 버튼의 색상
+					p_dc->Draw3dRect(&lpDrawItemStruct->rcItem, RGB(245, 245, 220), RGB(245, 245, 220));//버튼 외곽선 
 					p_dc->SetTextColor(RGB(0, 0, 0)); // 텍스트 색상 (검은색)
 				}
 				p_dc->SetBkMode(TRANSPARENT);
@@ -450,8 +467,26 @@ void CAffineDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 	//CDialogEx::OnDrawItem(nIDCtl, lpDrawItemStruct);
 }
 
-
+//좌우반전
 void CAffineDlg::OnBnClickedButtonFlip()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (!resultImg.empty())
+	{
+		ChangeImg = resultImg.clone();
+	}
+	else
+	{
+		ChangeImg = myImg.clone();
+	}
+
+	// 이미지 좌우 반전
+	cv::flip(ChangeImg, FlipImg, 1); // 1은 좌우 반전을 의미합니다.
+
+	// 이미지 크기가 변경되었으므로 비트맵 정보 업데이트
+	MakeBitmapInfo(&resultmyBitmapInfo, FlipImg.cols, FlipImg.rows, FlipImg.channels() * 8);
+
+	// 변경된 이미지 출력
+	ReadImage(FlipImg, resultmyBitmapInfo);
+	resultImg = FlipImg.clone();
 }
