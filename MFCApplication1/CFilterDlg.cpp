@@ -276,11 +276,17 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 		// BITMAPINFO* dstinfo = bmpInfoHistory.back();
 		//bmpInfoHistory.push_back(dstinfo);
 	 	
-		int filtermode = videoMode[0];
+		int filterMode = videoMode[0];
 		int level = videoMode[1];
-		if(filtermode ==FOGVM ){
-			fogFilter(level);
+		switch (filterMode) {
+			case FOGVM: fogFilter(level); break;
+			case SHARPVM: sharpFilter(level); break;
+			//case NOISEVM: fogFilter(level); break;
+			//case FOGVM: fogFilter(level); break;
+			//case FOGVM: fogFilter(level); break;
+			//case FOGVM: fogFilter(level); break;
 		}
+		
 		videoFrame = bmpHistory.back();
 		//videoFrame = bmpHistory.back();
 		//화면에 보여주기 위한 처리입니다.
@@ -517,10 +523,16 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			return;
 		}
 		fogslider_FT.SetPos(0);
-		int ret = sharpFilter(sigma); 
-		if(ret != 1){
-			//샤프닝필터 적용 안됨. 
-			MessageBox(L"안개필터적용 에러", L"알림", IDOK);	
+		if (myfileMode == 0) {//사진모드
+			int ret = sharpFilter(sigma);
+			if (ret != 1) {
+				//샤프닝필터 적용 안됨. 
+				MessageBox(L"샤프닝필터적용 에러", L"알림", IDOK);
+			}
+		}
+		else {//비디오모드
+			videoMode[0] = { SHARPVM };
+			videoMode[1] = sigma;
 		}
 	}
 	else if (*pScrollBar == noiseFT) {//노이즈필터
