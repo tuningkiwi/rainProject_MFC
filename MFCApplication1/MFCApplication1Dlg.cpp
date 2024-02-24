@@ -414,8 +414,8 @@ void CMFCApplication1Dlg::OnBnClickedFilterBtn()
 		break;
 	case IDOK:
 		// Do something
-		m_matImage = filterDlg.myImgAfterChange;
-		m_pBitmapInfo = filterDlg.myBmpInfoAfterChange;
+		m_matImage = filterDlg.bmpHistory.back();
+		m_pBitmapInfo = filterDlg.bmpInfoHistory.back();
 		DrawImage(m_matImage, m_pBitmapInfo);
 		break;
 	case IDCANCEL:
@@ -988,8 +988,8 @@ void CMFCApplication1Dlg::OnBnClickedBtnVideoFilter()
 		break;
 	case IDOK:
 		// Do something
-		m_matImage = filterDlg.myImgAfterChange;
-		m_pBitmapInfo = filterDlg.myBmpInfoAfterChange;
+		m_matImage = filterDlg.bmpHistory.back();
+		m_pBitmapInfo = filterDlg.bmpInfoHistory.back();
 		DrawImage(m_matImage, m_pBitmapInfo);
 		break;
 	case IDCANCEL:

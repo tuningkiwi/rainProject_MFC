@@ -188,11 +188,12 @@ void CFilterDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
 	//현재 불러올 이미지에 대한 picture contorl 크기 조정  
 	CRect rect = pictureControlSizeSet();
 
+	//GetClientRect(left, top, right, bottom ) 클라이언트 영역의 좌표
+	//함수가 성공하면 반환 값이 0이 아닙니다.
 	//불러올 이미지 사진에 따라 조정된 Picture Ctrl 크기 
 	GetDlgItem(IDC_PC_FT)->GetClientRect(&rect);
-
+	CClientDC dc(GetDlgItem(IDC_PC_FT)); 
 	//픽셀을 삭제합니다. 이 모드는 해당 정보를 보존하지 않고 
-	CClientDC dc(GetDlgItem(IDC_PC_FT));
 	SetStretchBltMode(dc.GetSafeHdc(), COLORONCOLOR);
 
 	//StretchDIBits 함수는 DIB, JPEG 또는 PNG 이미지의 픽셀 사각형에 
@@ -604,7 +605,7 @@ void CFilterDlg::OnMouseMove(UINT nFlags, CPoint point)
 	//}
 //}
 
-
+//#부분블러버튼
 void CFilterDlg::OnBnClickedPartblurFt()
 {
 	//// TODO: Add your control notification handler code here
@@ -877,7 +878,7 @@ CRect CFilterDlg::pictureControlSizeSet(){
 	int wy = wnd.bottom;
 
 	//불러올 사진 cols 가져오기.
-	CClientDC dc(GetDlgItem(IDC_PC_FT)); 
+
 	CRect rect;// 이미지를 넣을 사각형 
 	if (bmpHistory.back().cols > wx) {
 		//cols: 1080 = rows : wid;
