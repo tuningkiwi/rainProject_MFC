@@ -281,7 +281,7 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 		switch (filterMode) {
 			case FOGVM: fogFilter(level); break;
 			case SHARPVM: sharpFilter(level); break;
-			//case NOISEVM: fogFilter(level); break;
+			case NOISEVM: noiseFilter(level); break;
 			//case FOGVM: fogFilter(level); break;
 			//case FOGVM: fogFilter(level); break;
 			//case FOGVM: fogFilter(level); break;
@@ -542,10 +542,17 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			cntScroll = 0;
 			return;
 		}
-		int ret = noiseFilter(stddev); 
-		if(ret < 1){
-			//샤프닝필터 적용 안됨. 
-			MessageBox(L"안개필터적용 에러", L"알림", IDOK);	
+		if (myfileMode == 0) {//사진모드
+
+			int ret = noiseFilter(stddev);
+			if (ret < 1) {
+				//샤프닝필터 적용 안됨. 
+				MessageBox(L"안개필터적용 에러", L"알림", IDOK);
+			}
+		}
+		else {//비디오모드
+			videoMode[0] = { NOISEVM };
+			videoMode[1] = stddev;
 		}
 	}
 	else if (*pScrollBar == partBlurSlider) {//부분블러함수에서 블러범위지정할때 사용
