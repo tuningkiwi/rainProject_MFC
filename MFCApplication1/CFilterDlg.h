@@ -47,6 +47,7 @@ public:
 	CImage cimage_mfc;
 	int cntScroll; //스크롤을 조정하니, 2번 들어가서 수행하는 것을 막기 위해서. 
 	int videoMode[2]; //0:기본 1:진흙 2:양방향 3:부분블러 4:안개필터 5:샤프닝 6:노이즈
+	CPoint leftDownClickPoint;
 
 	CStatic picCtrl_FT;
 	CButton embossFT;// 진흙효과를 내는 엠보싱 필터 구현버튼

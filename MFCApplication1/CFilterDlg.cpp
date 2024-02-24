@@ -159,13 +159,6 @@ BOOL CFilterDlg::OnInitDialog()
 	//0:기본 1:진흙 2:양방향 3:부분블러 4:안개필터 5:샤프닝 6:노이즈
 	videoMode[0] = BASICVM; //0번 
 	videoMode[1] = 0;//트랙바의 경우 필터의 강도 
-	// videoMode.push_back("basic",0,0);
-	// videoMode.push_back("emboss",0,0);
-	// videoMode.push_back("bilateral",0,0);
-	// videoMode.push_back("partBlur",0,0);
-	// videoMode.push_back("fog",0,0);
-	// videoMode.push_back("sharpen",0,0);
-	// videoMode.push_back("noise",0,0);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
@@ -250,6 +243,8 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 		int y = cvRound((wnd.bottom - hei) / 2);
 		picCtrl_FT.MoveWindow(0, y, wid, hei);//픽쳐컨트롤 크기 조정
 
+		picLTRB.left = 0; picLTRB.top = y;
+		picLTRB.right = wid; picLTRB.bottom = hei;
 
 		// 웹캠 열기
 		capture = new VideoCapture(0, CAP_DSHOW);
@@ -284,7 +279,8 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 			case NOISEVM: noiseFilter(level); break;
 			case EMBOSSVM: embossFilter(); break;
 			case BILATERALVM: bilateralFilter_my(); break;
-			//case FOGVM: fogFilter(level); break;
+			case PARTBLURVM: partBlurProc(blurLoc); break;
+
 		}
 		
 		videoFrame = bmpHistory.back();
@@ -556,8 +552,15 @@ void CFilterDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			videoMode[1] = stddev;
 		}
 	}
-	else if (*pScrollBar == partBlurSlider) {//부분블러함수에서 블러범위지정할때 사용
-		blurRangeHalfWid = partBlurSlider.GetPos();
+	else if (*pScrollBar == partBlurSlider) {//부분블러함수에서 블러범위지정할때 
+		int range = partBlurSlider.GetPos();
+		if (myfileMode == 0) {//사진모드
+			blurRangeHalfWid = range;
+		}
+		else {
+			videoMode[1] = range;
+		}
+		
 	}
 
 	//CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
@@ -628,10 +631,19 @@ void CFilterDlg::OnMouseMove(UINT nFlags, CPoint point)
 void CFilterDlg::OnBnClickedPartblurFt()
 {
 	//// TODO: Add your control notification handler code here
-	if (bmpHistory.back().channels() >=3) {
+	if (myfileMode ==0) {//사진 필터 
+		if (bmpHistory.back().channels() >= 3) {
+			partBlurModeOn = !partBlurModeOn;
+
+		}
+		else {
+			MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널3개 이미지만 처리합니다", L"사용불가 알림", IDOK);
+		}
+	}
+	else {//동영상 모드 
 		partBlurModeOn = !partBlurModeOn;
-	}else{
-		MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널3개 이미지만 처리합니다", L"사용불가 알림", IDOK);
+		videoMode[0] = PARTBLURVM;
+		videoMode[1] = 1;
 	}
 }
 
@@ -693,6 +705,7 @@ void CFilterDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 		break;
 	}
 	case IDC_PARTBLUR_FT: {
+		
 		if (partBlurModeOn ==true) {
 			p_dc->DrawText(L"부분블러ON", -1, &lpDrawItemStruct->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 			break;
@@ -737,7 +750,7 @@ HBRUSH CFilterDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	return hbr;
 }
 
-//마우스 왼쪽 버튼 클릭 
+//마우스 왼쪽 버튼 클릭 부분블러필터 
 void CFilterDlg::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
@@ -750,11 +763,14 @@ void CFilterDlg::OnLButtonDown(UINT nFlags, CPoint point)
 		CString loc;
 		loc.Format(_T("point x: %u y: %u"), point.x, point.y);
 		SetDlgItemText(IDC_STATIC_POINTLOC, (LPCTSTR)loc);
-		int ret = partBlurProc(point);
-		if(ret == 1){//마우스 클릭 위치가 이미지 위치 정보 안에 있을 때. 
-			if(myfileMode==0){//사진 모드 
+		if (myfileMode == 0) {//사진 모드 
+			int ret = partBlurProc(point);
+			if (ret == 1) {//마우스 클릭 위치가 이미지 위치 정보 안에 있을 때. 		
 				DrawImage(bmpHistory.back(), bmpInfoHistory.back());
 			}
+		}
+		else {//비디오모드 
+			videoMode[0] = PARTBLURVM;
 		}
 	}
 
@@ -767,61 +783,77 @@ void CFilterDlg::OnLButtonDown(UINT nFlags, CPoint point)
 int CFilterDlg::partBlurProc(CPoint point) {
 	//1. 마우스 포인터 위치값으로, 이미지상의 실제 위치를 계산한다 
 	// picLTRB에는 마지막 draw 했을 때의 rect 정보가 담김
-	
-	CPoint locInImg;//본인 창에서의 이미지 위치 x= left, y =top 
-	locInImg.x = point.x - picLTRB.left;// 
-	locInImg.y = point.y - picLTRB.top;
+
+	CPoint locInImg;//이미지 안에서의 상대적인 위치 
+	locInImg.x = point.x - picLTRB.left;//point: 해당 다이얼로그 안에서의 위치 
+	locInImg.y = point.y - picLTRB.top;//picLTRB: 사진을 담을 PICTURECONTROL의 위치 
+
+	RECT r;
+	picCtrl_FT.GetClientRect(&r);
+
+	//int ydiff = bmpHistory.front().rows - r.bottom;
+	//int xdiff = bmpHistory.front().cols - r.right; 
+
+	float realX = locInImg.x *float(bmpHistory.front().cols) / r.right;
+	float  realY = locInImg.y * float(bmpHistory.front().rows) / r.bottom; 
+
+	locInImg.x = int(cvRound(realX));
+	locInImg.y = int(cvRound(realY)); 
 
 	//mouse 위치 정보가 이미지를 벗어났을 때. 함수 종료. 
 	if(locInImg.x <0 || locInImg.y <0){
 		return -1;
 	}
 
-	//진흙필터 >되돌리기> 부분블러 ON > 에러 
-	//range 범위가 벗어낫을 때 에러 
 	CRect blurArea;//이미지 공간 안에서의 블러 영역 
-	int range = blurRangeHalfWid*50;
+	int range = blurRangeHalfWid*100;
 	blurArea.left = locInImg.x - range; blurArea.top = locInImg.y - range;
 	blurArea.right = locInImg.x + range; blurArea.bottom = locInImg.y + range;
 	if (blurArea.left < 0) { blurArea.left = 0; }
 	if(blurArea.top <0) { blurArea.top = 0; }
-	if (blurArea.right > picLTRB.right- picLTRB.left) { 
-		blurArea.right = picLTRB.right - picLTRB.left-1; }
-	if (blurArea.bottom > picLTRB.bottom - picLTRB.top) {
-		blurArea.bottom = picLTRB.bottom - picLTRB.top-1;	}
+	if (blurArea.right > bmpHistory.front().cols) {
+		blurArea.right = bmpHistory.front().cols; }
+	if (blurArea.bottom > bmpHistory.front().rows) {
+		blurArea.bottom = bmpHistory.front().rows;	}
 
 	Mat src= bmpHistory.back().clone(); 
 	Mat dstimg= bmpHistory.back().clone();
-
-	for (int y = blurArea.top; y <= blurArea.bottom; y++) {
-		for (int x = blurArea.left; x <= blurArea.right; x++) {
-			if(x-1<1||y-1<1||x+1>blurArea.right||y+1>blurArea.bottom){
+	for (int y = blurArea.top; y < blurArea.bottom; y++) {
+		for (int x = blurArea.left; x < blurArea.right; x++) {
+			if(x-1<1||y-1<1||x+1> bmpHistory.front().cols-1 ||y+1> bmpHistory.front().rows-1){
 				continue;
 			}
-			Vec3b& p1 = src.at<Vec3b>(y - 1, x - 1);
-			Vec3b& p2 = src.at<Vec3b>(y - 1, x);
-			Vec3b& p3 = src.at<Vec3b>(y - 1, x + 1);
-			Vec3b& p4 = src.at<Vec3b>(y, x - 1);
-			Vec3b& p5 = src.at<Vec3b>(y, x);
-			Vec3b& p6 = src.at<Vec3b>(y, x + 1);
-			Vec3b& p7 = src.at<Vec3b>(y + 1, x - 1);
-			Vec3b& p8 = src.at<Vec3b>(y + 1, x);
-			Vec3b& p9 = src.at<Vec3b>(y+1, x+1);
-
 			Vec3b& dst = dstimg.at<Vec3b>(y, x);
 
-			//b
-			dst[0] = int(cvRound((p1[0] + p2[0] + p3[0] + p4[0] +
-				p5[0] + p6[0] + p7[0] + p8[0] + p9[0])/9));
-			int b = dst[0];
-			//g
-			dst[1] = int(cvRound((p1[1] + p2[1] + p3[1] + p4[1] +
-				p5[1] + p6[1] + p7[1] + p8[1] + p9[1])/9));
-			int g = dst[1];
-			//r
-			dst[2] = int(cvRound((p1[2] + p2[2] + p3[2] + p4[2] +
-				p5[2] + p6[2] + p7[2] + p8[2] + p9[2])/ 9));
-			int r = dst[2];
+			if(myfileMode == 0){
+
+				Vec3b& p1 = src.at<Vec3b>(y - 1, x - 1);
+				Vec3b& p2 = src.at<Vec3b>(y - 1, x);
+				Vec3b& p3 = src.at<Vec3b>(y - 1, x + 1);
+				Vec3b& p4 = src.at<Vec3b>(y, x - 1);
+				Vec3b& p5 = src.at<Vec3b>(y, x);
+				Vec3b& p6 = src.at<Vec3b>(y, x + 1);
+				Vec3b& p7 = src.at<Vec3b>(y + 1, x - 1);
+				Vec3b& p8 = src.at<Vec3b>(y + 1, x);
+				Vec3b& p9 = src.at<Vec3b>(y+1, x+1);
+				//b
+				dst[0] = int(cvRound((p1[0] + p2[0] + p3[0] + p4[0] +
+					p5[0] + p6[0] + p7[0] + p8[0] + p9[0])/9));
+				int b = dst[0];
+				//g
+				dst[1] = int(cvRound((p1[1] + p2[1] + p3[1] + p4[1] +
+					p5[1] + p6[1] + p7[1] + p8[1] + p9[1])/9));
+				int g = dst[1];
+				//r
+				dst[2] = int(cvRound((p1[2] + p2[2] + p3[2] + p4[2] +
+					p5[2] + p6[2] + p7[2] + p8[2] + p9[2])/ 9));
+				int r = dst[2];
+			}else{
+				dst[0]=255;
+				dst[1]=255;
+				dst[2]=255;
+			}
+	
 		}
 	}
 
