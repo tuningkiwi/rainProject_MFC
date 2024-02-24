@@ -282,7 +282,7 @@ void CFilterDlg::OnTimer(UINT_PTR nIDEvent)
 			case FOGVM: fogFilter(level); break;
 			case SHARPVM: sharpFilter(level); break;
 			case NOISEVM: noiseFilter(level); break;
-			//case FOGVM: fogFilter(level); break;
+			case EMBOSSVM: embossFilter(); break;
 			//case FOGVM: fogFilter(level); break;
 			//case FOGVM: fogFilter(level); break;
 		}
@@ -364,27 +364,21 @@ void CFilterDlg::OnDestroy()
 void CFilterDlg::OnBnClickedEmbossFt()//1채널 필터링 
 {
 	// TODO: Add your control notification handler code here
-	if (bmpHistory.back().channels() >=3) {
-
-		Mat src = colorToGray();//color 사진의 경우 gray로 변경.
-		//그레이로 잘 출력되는 지 확인 
-		/*BITMAPINFO* srcinfo = CreateBitmapInfo(src.cols,src.rows,src.channels()*8);
-		DrawImage(src, srcinfo);*/ 
-		float data[] = { -1,-1,0,-1,0,1,0,1,1 };
-		Mat emboss(3, 3, CV_32FC1, data);
-
-		Mat dst;
-		filter2D(src, dst, -1, emboss, Point(-1, -1), 128);
-
-		bmpHistory.push_back(dst);
-		BITMAPINFO* bmpinfo = CreateBitmapInfo(bmpHistory.back().cols, bmpHistory.back().rows, bmpHistory.back().channels() * 8);
-		bmpInfoHistory.push_back(bmpinfo);
-		if(myfileMode==0){//사진 모드 
-			DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+	if (myfileMode == 0) {//사진모드
+		if (bmpHistory.back().channels() >= 3) {
+			int ret = embossFilter();
 		}
-	
-	}else{
-		MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널 3개 이미지만 처리합니다", L"알림", IDOK);
+		else {
+			MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널 3개 이미지만 처리합니다", L"알림", IDOK);
+		}
+	}
+	else {
+		if (bmpHistory.back().channels() >= 3) {
+			videoMode[0] = EMBOSSVM;
+		}
+		else {
+			MessageBox(L"이 사진은 채널 1개인 이미지 입니다\n이 기능은 채널 3개 이미지만 처리합니다", L"알림", IDOK);
+		}
 	}
 }
 
@@ -897,6 +891,26 @@ int CFilterDlg::noiseFilter(int stddev){
 		}
 		return 3;
 	}
+}
+
+int CFilterDlg::embossFilter() {
+	Mat src = colorToGray();//color 사진의 경우 gray로 변경.
+	//그레이로 잘 출력되는 지 확인 
+	/*BITMAPINFO* srcinfo = CreateBitmapInfo(src.cols,src.rows,src.channels()*8);
+	DrawImage(src, srcinfo);*/
+	float data[] = { -1,-1,0,-1,0,1,0,1,1 };
+	Mat emboss(3, 3, CV_32FC1, data);
+
+	Mat dst;
+	filter2D(src, dst, -1, emboss, Point(-1, -1), 128);
+
+	bmpHistory.push_back(dst);
+	BITMAPINFO* bmpinfo = CreateBitmapInfo(bmpHistory.back().cols, bmpHistory.back().rows, bmpHistory.back().channels() * 8);
+	bmpInfoHistory.push_back(bmpinfo);
+	if (myfileMode == 0) {//사진 모드 
+		DrawImage(bmpHistory.back(), bmpInfoHistory.back());
+	}
+	return 1;
 }
 
 CRect CFilterDlg::pictureControlSizeSet(){

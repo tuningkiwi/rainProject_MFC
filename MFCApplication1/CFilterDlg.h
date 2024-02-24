@@ -83,8 +83,8 @@ public:
 	int fogFilter(int);//안개필터 수행
 	int sharpFilter(int);//샤프닝필터
 	int noiseFilter(int); //노이즈필터
+	int CFilterDlg::embossFilter();//진흙필터 엠보싱필터
 	CRect pictureControlSizeSet();
-
 	
 };
 
