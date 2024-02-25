@@ -361,7 +361,7 @@ void CMFCApplication1Dlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) 
 void CMFCApplication1Dlg::OnBnClickedButton2()
 {
 	// TODO: Add your control notification handler code here
-	//파일 열기 다이얼로그를 생성합니다. 
+	//파일열기 다이얼로그를 생성합니다. 
 	CFileDialog fileDlg(TRUE, NULL, NULL, OFN_READONLY, _T("image file(*.jpg;*.bmp;*.png;)|*.jpg;*.bmp;*.png;|All Files(*.*)|*.*||"));
 	if (fileDlg.DoModal() == IDOK)//성공적으로 읽어왔을 때
 	{
@@ -370,7 +370,7 @@ void CMFCApplication1Dlg::OnBnClickedButton2()
 		CT2CA pszString(path);
 		std::string strPath(pszString);
 
-		m_matImage = imread(strPath);//png파일의 경우 alpha채널도 가져옴
+		m_matImage = imread(strPath, IMREAD_COLOR);//png파일의 경우 alpha채널도 가져옴
 
 		CreateBitmapInfo(m_matImage.cols, m_matImage.rows, m_matImage.channels() * 8);
 		DrawImage(m_matImage, m_pBitmapInfo);
