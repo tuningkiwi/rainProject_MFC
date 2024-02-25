@@ -114,14 +114,14 @@ void CAffineDlg::ReadImage(Mat originImg, BITMAPINFO* originBmpInfo)
 	int wx = int(wnd.right * 5 / 6);
 	int wy = wnd.bottom;
 
-	int mode = 0;
+	//int mode = 0;
 
 	//불러올 사진 cols 가져오기.
 	CClientDC dc(GetDlgItem(IDC_PC_IT));
 	CRect rect;// 이미지를 넣을 사각형 
 	if (originImg.cols > wx || originImg.rows > wy)
 	{
-		mode = 1;
+		//mode = 1;
 		//cols: 1080 = rows : wid;
 		int resize_h = cvRound((wx * originImg.rows) / originImg.cols);
 		int resize_w = wx; //width를 최대크기로 설정 
@@ -138,7 +138,7 @@ void CAffineDlg::ReadImage(Mat originImg, BITMAPINFO* originBmpInfo)
 	}
 	else 
 	{
-		mode = 2;
+		//mode = 2;
 		int x = cvRound((wx - originImg.cols) / 2);
 		int y = cvRound((wy - originImg.rows) / 2);
 		GetDlgItem(IDC_PC_IT)->MoveWindow(x, y, originImg.cols, originImg.rows);
@@ -158,12 +158,13 @@ void CAffineDlg::ReadImage(Mat originImg, BITMAPINFO* originBmpInfo)
 	// 대한 색 데이터를 지정된 대상 사각형에 복사합니다.
 	//dc.GetSafeHdc(): 출력 디바이스 컨텍스트를 가져옵니다
 	// 함수가 성공하면 반환 값은 복사된 검사 줄의 수입니다. 이 값은 미러된 콘텐츠에 대해 음수일 수 있습니다.
-	if (mode == 1) {
-		StretchDIBits(dc.GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), 0, 0, originImg.cols, originImg.rows, originImg.data, originBmpInfo, DIB_RGB_COLORS, SRCCOPY);
-	}
-	else {
-		SetDIBitsToDevice(dc.GetSafeHdc(), 0, 0, originImg.cols, originImg.rows, 0, 0, 0, originImg.rows, originImg.data, originBmpInfo, DIB_RGB_COLORS);
-	}
+	StretchDIBits(dc.GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), 0, 0, originImg.cols, originImg.rows, originImg.data, originBmpInfo, DIB_RGB_COLORS, SRCCOPY);
+//	if (mode == 1) {
+//StretchDIBits(dc.GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), 0, 0, originImg.cols, originImg.rows, originImg.data, originBmpInfo, DIB_RGB_COLORS, SRCCOPY);		
+//	}
+	//else {
+	//	SetDIBitsToDevice(dc.GetSafeHdc(), 0, 0, originImg.cols, originImg.rows, 0, 0, 0, originImg.rows, originImg.data, originBmpInfo, DIB_RGB_COLORS);
+	//}
 	
 	
 
