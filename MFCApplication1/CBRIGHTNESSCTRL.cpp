@@ -8,14 +8,14 @@
 #include "opencv2/opencv.hpp"
 #include <iostream>
 using namespace cv;
-
+using namespace std;
 // CBRIGHTNESSCTRL 대화 상자
 
 IMPLEMENT_DYNAMIC(CBRIGHTNESSCTRL, CDialogEx)
 
 CBRIGHTNESSCTRL::CBRIGHTNESSCTRL()
 	: CDialogEx(IDC_BRIGHTNESSCTRL_BTN_1)
-{} //기본생성자 ?
+{} 
 
 CBRIGHTNESSCTRL::CBRIGHTNESSCTRL(Mat Img, BITMAPINFO* bitmapInfo)
 	: CDialogEx(IDC_BRIGHTNESSCTRL_BTN_1)
@@ -23,6 +23,13 @@ CBRIGHTNESSCTRL::CBRIGHTNESSCTRL(Mat Img, BITMAPINFO* bitmapInfo)
 	myImg = Img; // 이미지 매트릭스 정보 가져오기 
 	myBitmapInfo = bitmapInfo;
 }
+
+
+void CBRIGHTNESSCTRL::OnBnClickedButton1()
+{
+	printf; 
+}
+
 
 CBRIGHTNESSCTRL::~CBRIGHTNESSCTRL()
 {}
@@ -53,19 +60,31 @@ BOOL CBRIGHTNESSCTRL::OnInitDialog()
 
 	GetDlgItem(IDC_BUTTON2)->MoveWindow(980, 370 ,75,40); 
 	GetDlgItem(IDC_BUTTON3)->MoveWindow(1100, 370, 75, 40); 
+	GetDlgItem(IDC_BUTTON4)->MoveWindow(980, 450, 75, 40);
+	GetDlgItem(IDC_BUTTON1)->MoveWindow(1100, 450, 75, 40);
 
 	// 슬라이더 초기화
 	m_slider.SetRange(-100, 100); // 밝기 범위 설정
 	m_slider.SetPos(0); // 초기 밝기 값 설정
 	m_slider.SetTicFreq(10);
 
+	m_slider2.SetRange(-100, 100); // 명암비 범위 설정
+	m_slider2.SetPos(0); // 초기 명암비 값 설정
+	m_slider2.SetTicFreq(10);
+
+
+
 	// 스핀 컨트롤 초기화
 	//m_spin.SetRange(-100, 100); // 밝기 범위 설정
 	//m_spin.SetPos(50); // 초기 밝기 값 설정
 
 	// 에디트 컨트롤 초기화
+	m_edit2.SetWindowText(_T("0")); // 초기 명암비 값 설정
+
 	m_edit.SetWindowText(_T("50")); // 초기 밝기 값 설정
+
 	m_edit_val = 0; 
+	m_edit_val2 = 0;
 
 	SetTimer(1, 80, NULL);
 	return TRUE; // 포커스 설정을 위한 기본값 반환
@@ -79,6 +98,10 @@ void CBRIGHTNESSCTRL::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLIDER1, m_slider);
 	DDX_Control(pDX, IDC_EDIT1, m_edit);
 	DDX_Control(pDX, IDC_SPIN1, m_spin);
+
+	DDX_Control(pDX, IDC_SLIDER2, m_slider2);
+	DDX_Control(pDX, IDC_EDIT2, m_edit2);
+	DDX_Control(pDX, IDC_SPIN2, m_spin2);
 }
 
 
@@ -91,6 +114,11 @@ ON_WM_HSCROLL()
 ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, &CBRIGHTNESSCTRL::OnNMCustomdrawSlider1)
 //ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN1, &CBRIGHTNESSCTRL::OnDeltaposSpin1)
 ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN1, &CBRIGHTNESSCTRL::mspin_updown)
+
+ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER2, &CBRIGHTNESSCTRL::OnNMCustomdrawSlider2)
+ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN2, &CBRIGHTNESSCTRL::mspin_updown2)
+ON_BN_CLICKED(IDC_BUTTON4, &CBRIGHTNESSCTRL::OnBnClickedButton4)
+ON_BN_CLICKED(IDC_BUTTON1, &CBRIGHTNESSCTRL::OnBnClickedButton1)
 END_MESSAGE_MAP()
 // CBRIGHTNESSCTRL 메시지 처리기
 
@@ -105,7 +133,7 @@ void CBRIGHTNESSCTRL::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) // �
 	//불러올 사진 cols 가져오기.
 
 	CClientDC dc(GetDlgItem(IDC_CANVAS));
-	//CRect rect;// 이미지를 넣을 사각형 
+	
 	if (requestImg.cols > wx) {
 		
 		int resize_h = cvRound((wx * requestImg.rows) / requestImg.cols);
@@ -124,23 +152,11 @@ void CBRIGHTNESSCTRL::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) // �
 		requestImg.data, requestBmpInfo, DIB_RGB_COLORS, SRCCOPY);
 	
 }
-//
-//void CBRIGHTNESSCTRL::OnTimer(UINT_PTR nIDEvent)
-//{
-//	switch (nIDEvent)
-//	{
-//		case 1:
-//			DrawImage(myImg ,myBitmapInfo);
-//	}
-//	KillTimer(1);
-//	CDialogEx::OnTimer(nIDEvent);
-//	
-//}
 
-//void CBRIGHTNESSCTRL::OnDestroy()
-//{
-//	CDialogEx::OnDestroy();
-//}
+void CBRIGHTNESSCTRL::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+}
 
 void CBRIGHTNESSCTRL::CreateBitmapInfo(BITMAPINFO** btmInfo, int w, int h, int bpp) {
 	if (*btmInfo != NULL) //기존 비트맵 정보 초기화 
@@ -179,6 +195,16 @@ void CBRIGHTNESSCTRL::CreateBitmapInfo(BITMAPINFO** btmInfo, int w, int h, int b
 	(*btmInfo)->bmiHeader.biHeight = -h;//음수는 원본이 왼쪽 위 모서리에 있는 하향식 DIB입니다.
 }
 
+void CBRIGHTNESSCTRL::OnBnClickedButton4()
+{
+	//if ((myImg.channels()==3 )||(myImg.channels()==1)) {
+		colorToGray();
+		GrayToColor();
+		DrawImage(myImg, myBitmapInfo);
+		MessageBox(L"원본으로 돌아갑니다", _T("원초적본능"), MB_OK | MB_ICONINFORMATION);
+	
+}
+
 void CBRIGHTNESSCTRL::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
@@ -190,15 +216,6 @@ void CBRIGHTNESSCTRL::OnTimer(UINT_PTR nIDEvent)
 	KillTimer(1);
 	CDialogEx::OnTimer(nIDEvent);
 }
-
-
-//HRESULT CBRIGHTNESSCTRL::get_accChild(VARIANT varChild, IDispatch** ppdispChild)
-//{
-	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
-
-//	return CDialogEx::get_accChild(varChild, ppdispChild);
-//}
-//주석추가
 
 void CBRIGHTNESSCTRL::OnBnClickedButton2()
 {
@@ -218,27 +235,29 @@ void CBRIGHTNESSCTRL::OnBnClickedButton3()
 
 BOOL CBRIGHTNESSCTRL::colorToGray()
 {
-	if (myImg.channels() == 3) // 이미지가 칼라 이미지인지 확인
+	if (myImg.channels() == 3) // 이미지가 컬러 이미지인지 확인
 	{
-		// 칼라 이미지를 백업
+		// 컬러 이미지를 백업
 		backupImg = myImg.clone();
 
 		// 흑백 이미지로 변환
-		cv::cvtColor(myImg, myImg, cv::COLOR_BGR2GRAY);
+		cvtColor(myImg, myImg, cv::COLOR_BGR2GRAY);
 
 		// 이미지 정보 업데이트
-		CreateBitmapInfo(&BitChangeImg, myImg.cols, myImg.rows, 8); // 흑백 이미지로 변환되었으므로 채널 수는 1이므로 8로 설정
-
+		CreateBitmapInfo(&BitChangeImg, myImg.cols, myImg.rows, 8); 
+		// 흑백 이미지로 변환되었으므로 채널 수는 1이므로 8로 설정
+		// 즉 컬러체널 원소 = 3 ==> 흑백으로 변환되니 흑백 기준의 채널 수 '8'로 변경되는것!
+		
 		// 성공 메시지 출력
-		CString successMessage = _T("성공적으로 흑백모드으로 변환되었습니다.");
-		MessageBox(successMessage, _T("성공"), MB_OK | MB_ICONINFORMATION);
+		//CString successMessage = _T("성공적으로 변환되었습니다.");
+		//MessageBox(successMessage, _T("성공"), MB_OK | MB_ICONINFORMATION);
 		return true;
 	}
 	else
 	{
 		// 에러 메시지 출력
-		CString errorMessage = _T("이미 흑백모드 이미지입니다.");
-		MessageBox(errorMessage, _T("에러"), MB_OK | MB_ICONERROR);
+		//CString errorMessage = _T("이미 흑백모드 이미지입니다.");
+		//MessageBox(errorMessage, _T("에러"), MB_OK | MB_ICONERROR);
 		return false;
 	}
 }
@@ -247,22 +266,22 @@ BOOL CBRIGHTNESSCTRL::GrayToColor()
 {
 	if (myImg.channels() == 1) // 이미지가 흑백 이미지인지 확인
 	{
-		// 백업된 칼라 이미지를 불러오기
+		// 백업된 컬러 이미지를 불러오기
 		myImg = backupImg.clone();
 
 		// 이미지 정보 업데이트
-		CreateBitmapInfo(&BitChangeImg2, myImg.cols, myImg.rows,myImg.channels() *8); // 칼라 이미지로 변환되었으므로 채널 수는 3이므로 24로 설정
+		CreateBitmapInfo(&BitChangeImg2, myImg.cols, myImg.rows,myImg.channels() *8); // 컬러 이미지로 변환되었으므로 채널 수는 3이므로 24로 설정
 
 		// 성공 메시지 출력
-		CString successMessage = _T("성공적으로 컬러모드로 변환되었습니다.");
-		MessageBox(successMessage, _T("성공"), MB_OK | MB_ICONINFORMATION);
+		//CString successMessage = _T("성공적으로 변환되었습니다.");
+		//MessageBox(successMessage, _T("성공"), MB_OK | MB_ICONINFORMATION);
 		return true;
 	}
 	else
 	{
 		// 에러 메시지 출력
-		CString errorMessage = _T("이미 컬러 이미지입니다.");
-		MessageBox(errorMessage, _T("에러"), MB_OK | MB_ICONERROR);
+		//CString errorMessage = _T("이미 컬러 이미지입니다.");
+		//MessageBox(errorMessage, _T("에러"), MB_OK | MB_ICONERROR);
 		return false;
 	}
 }
@@ -271,44 +290,81 @@ void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	
 		int newValue = 0;
+		int newValue2 = 0;
 		if (pScrollBar->GetDlgCtrlID() == IDC_SLIDER1) {
 			// 슬라이더에서 값 변경될 때
 			newValue = m_slider.GetPos(); // 슬라이더에서 값 가져오기
-			
 			m_spin.SetPos(newValue); // 스핀 컨트롤에 값 설정
 			CString strValue;
 			strValue.Format(_T("%d"), newValue);
 			m_edit.SetWindowText(strValue); // 에디트 컨트롤에 값 설정
-			
-		if ((myImg.channels() == 3))
-		{
-			Mat tmpImg = myImg.clone();
-			cvtColor(tmpImg, tmpImg, COLOR_BGR2YCrCb);
 
-			std::vector<Mat> ycrcb_planes;
-			split(tmpImg, ycrcb_planes);
+			if ((myImg.channels() == 3))
+			{
+				Mat tmpImg = myImg.clone(); //open cv4 책= ycrcv 참조
+				cvtColor(tmpImg, tmpImg, COLOR_BGR2YCrCb);
 
-			Mat adjustedImage;
-			ycrcb_planes[0] = ycrcb_planes[0] + newValue;
-			merge(ycrcb_planes, adjustedImage);
+				std::vector<Mat> ycrcb_planes;
+				split(tmpImg, ycrcb_planes);
 
-			cvtColor(adjustedImage, adjustedImage, COLOR_YCrCb2BGR);
+				Mat adjustedImage;
+				ycrcb_planes[0] = ycrcb_planes[0] + newValue;
+				merge(ycrcb_planes, adjustedImage);
 
-			// 이미지 표시
-			CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
-			DrawImage(adjustedImage, BitChangeImg);
+				cvtColor(adjustedImage, adjustedImage, COLOR_YCrCb2BGR);
+
+				// 이미지 표시
+				CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
+				DrawImage(adjustedImage, BitChangeImg);
+			}
+			else if (myImg.channels() == 1)
+			{
+				Mat adjustedImage = myImg + newValue;
+
+				// 이미지 표시
+				CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
+				DrawImage(adjustedImage, BitChangeImg);
+			}
+
 		}
-		else if (myImg.channels() == 1)
-		{
-			Mat adjustedImage = myImg + newValue;
+		else if(pScrollBar->GetDlgCtrlID() == IDC_SLIDER2) {
+			// 슬라이더에서 값 변경될 때
+			int newValue2 = m_slider2.GetPos(); // 슬라이더에서 값 가져오기
+			m_spin2.SetPos(newValue2); // 스핀 컨트롤에 값 설정
+			CString strValue2;
+			strValue2.Format(_T("%d"), newValue2);
+			m_edit2.SetWindowText(strValue2); // 에디트 컨트롤에 값 설정
 
-			// 이미지 표시
-			CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
-			DrawImage(adjustedImage, BitChangeImg);
+			if ((myImg.channels() == 3))
+			{
+				Mat tmpImg2 = myImg.clone(); //open cv4 책= ycrcv 참조
+				cvtColor(tmpImg2, tmpImg2, COLOR_BGR2YCrCb);
+
+				std::vector<Mat> ycrcb_planes2;
+				split(tmpImg2, ycrcb_planes2);
+
+				Mat adjustedImage2;
+				ycrcb_planes2[0] = ycrcb_planes2[0] + newValue2;
+				merge(ycrcb_planes2, adjustedImage2);
+
+				cvtColor(adjustedImage2, adjustedImage2, COLOR_YCrCb2BGR);
+
+				// 이미지 표시
+				CreateBitmapInfo(&BitChangeImg2, adjustedImage2.cols, adjustedImage2.rows, adjustedImage2.channels() * 8);
+				DrawImage(adjustedImage2, BitChangeImg2);
+			}
+			else if (myImg.channels() == 1)
+			{
+				float contrast = 1.0;
+
+				Mat adjustedImage2 = myImg + (newValue2-128)*contrast;
+
+				// 이미지 표시
+				CreateBitmapInfo(&BitChangeImg2, adjustedImage2.cols, adjustedImage2.rows, adjustedImage2.channels() * 8);
+				DrawImage(adjustedImage2, BitChangeImg2);
+			}
+
 		}
-
-		}
-
 
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 
@@ -319,7 +375,7 @@ void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 void CBRIGHTNESSCTRL::OnNMCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	
 	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 
 	// 슬라이더의 값이 변경될 때
@@ -332,45 +388,17 @@ void CBRIGHTNESSCTRL::OnNMCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
-//
-//void CBRIGHTNESSCTRL::OnDeltaposSpin1_DH(NMHDR* pNMHDR, LRESULT* pResult)
-//{
-//	
-//	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
-//
-//	// 스핀 컨트롤의 값이 변경될 때
-//	if (pNMUpDown->iDelta < 0) {
-//		m_edit_val +=10; 
-//	}
-//	else {
-//		m_edit_val -= 10;
-//	
-//	}
-//
-//	//m_spin.SetPos(m_edit_val); // 스핀 컨트롤에 새로운 값 설정
-//	m_slider.SetPos(m_edit_val); // 슬라이더에도 새로운 값 설정
-//	CString strValue;
-//	strValue.Format(_T("%d"), m_edit_val);
-//	m_edit.SetWindowText(strValue); // 에디트 컨트롤에도 새로운 값 설정
-//
-//	//pNMUpDown->iDelta *= 2;
-//
-//	//float m_ppos = m_spin.GetPos(); 
-//	//int newValue = m_spin.GetPos() + pNMUpDown->iDelta; // 현재 값에 변화량을 더하여 새로운 값 계산
-//	//
-//	//
-//	//newValue = max(min(newValue, 100), 0); // 값을 0에서 100 사이로 제한
-//	//
-//	//
-//	//m_spin.SetPos(newValue); // 스핀 컨트롤에 새로운 값 설정
-//	//m_slider.SetPos(newValue); // 슬라이더에도 새로운 값 설정
-//	//CString strValue;
-//	//strValue.Format(_T("%d"), newValue);
-//	//m_edit.SetWindowText(strValue); // 에디트 컨트롤에도 새로운 값 설정
-//
-//	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-//	*pResult = 0;
-//}
+void CBRIGHTNESSCTRL::OnNMCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	int newValue2 = m_slider2.GetPos(); // 슬라이더의 현재 값 가져오기
+	m_spin2.SetPos(newValue2); // 스핀 컨트롤에도 값 설정
+	CString strValue2;
+	strValue2.Format(_T("%d"), newValue2);
+	m_edit2.SetWindowText(strValue2); // 에디트 컨트롤에도 값 설정
+	
+	*pResult = 0;
+}
 
 
 void CBRIGHTNESSCTRL::mspin_updown(NMHDR* pNMHDR, LRESULT* pResult)
@@ -422,3 +450,58 @@ void CBRIGHTNESSCTRL::mspin_updown(NMHDR* pNMHDR, LRESULT* pResult)
 
 	*pResult = 0;
 }
+
+
+
+
+void CBRIGHTNESSCTRL::mspin_updown2(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMUPDOWN pNMUpDown2 = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+		// 스핀 컨트롤의 값이 변경될 때
+	if (pNMUpDown2->iDelta < 0) {//위로 증가 버튼눌렀을 때 iDelta 음수가 출력 
+		m_edit_val2 += 10;
+	}
+	else {//아래 버튼을 눌렀을 때 iDelta 양수가 출력된다 
+		m_edit_val2 -= 10;
+	}
+
+	m_spin2.SetPos(m_edit_val); // 스핀 컨트롤에 새로운 값 설정
+	m_slider2.SetPos(m_edit_val2); // 슬라이더에도 새로운 값 설정
+	CString strValue2;
+	strValue2.Format(_T("%d"), m_edit_val2);
+	m_edit2.SetWindowText(strValue2); // 에디트 컨트롤에도 새로운 값 설정
+
+	if ((myImg.channels() == 3))
+	{
+		Mat tmpImg2 = myImg.clone();
+		cvtColor(tmpImg2, tmpImg2, COLOR_BGR2YCrCb);
+
+		std::vector<Mat> ycrcb_planes2;
+		split(tmpImg2, ycrcb_planes2);
+
+		Mat adjustedImage2;
+		ycrcb_planes2[0] = ycrcb_planes2[0] + m_edit_val2;
+		merge(ycrcb_planes2, adjustedImage2);
+
+		cvtColor(adjustedImage2, adjustedImage2, COLOR_YCrCb2BGR);
+
+		// 이미지 표시
+		CreateBitmapInfo(&BitChangeImg2, adjustedImage2.cols, adjustedImage2.rows, adjustedImage2.channels() * 8);
+		DrawImage(adjustedImage2, BitChangeImg2);
+	}
+	else if (myImg.channels() == 1)
+	{
+		float contrast = 1.0;
+
+		Mat adjustedImage2 = myImg + (m_edit_val2 - 128) * contrast;
+		
+		// 이미지 표시
+		CreateBitmapInfo(&BitChangeImg2, adjustedImage2.cols, adjustedImage2.rows, adjustedImage2.channels() * 8);
+		DrawImage(adjustedImage2, BitChangeImg2);
+	}
+	*pResult = 0;
+}
+
+

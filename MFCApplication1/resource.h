@@ -46,7 +46,9 @@
 #define IDC_BUTTON3                     1018
 #define IDC_BUTTON_RR                   1018
 #define IDC_BUTTON_LR                   1019
+#define IDC_BUTTON4                     1019
 #define IDC_PARTBLUR_FT                 1020
+#define IDC_BUTTON5                     1020
 #define IDC_STATIC_delete               1021
 #define IDC_STATIC_POINTLOC             1022
 #define IDC_EDIT1                       1023
