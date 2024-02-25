@@ -69,10 +69,10 @@ public:
 	//컬러버튼 값으로 그리기 및 변환	
 	Vec3b m_selectedColor;//선택한 컬러
 	CPoint start_pos;//시작점 좌표
-	bool drawingMode = false; // 그리기 모드를 나타내는 플래그 변수	
+	bool drawingMode = false; //그리기 모드를 나타내는 플래그 변수	
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnBnClickedDrawing();//선택한 컬러로 그리기	
 	afx_msg void OnBnClickedFindColor();//선택한 컬러 이미지에서 추출
-	void CColorControls::FindingColor(const Mat& myImg, const Scalar& m_selectedColor);
+	void CColorControls::FindingColor(const Mat& loadedImage, const Vec3b& targetColor);
 };

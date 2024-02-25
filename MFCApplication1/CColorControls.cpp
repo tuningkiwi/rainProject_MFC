@@ -416,6 +416,7 @@ void CColorControls::OnLButtonUp(UINT nFlags, CPoint point)
 	if (drawingMode == true) 
 	{
 		CClientDC dc(this);
+
 		//Vec3b에서는 순서가 반대이므로 [2]:R, [1]:G, [0]:B
 		CPen mypen(PS_SOLID, 5, RGB(m_selectedColor[2], m_selectedColor[1], m_selectedColor[0]));
 		dc.SelectObject(&mypen);
@@ -450,13 +451,41 @@ void CColorControls::OnBnClickedDrawing()
 }
 
 // 이미지에서 선택 색상을 추출하고 해당 영역을 강조
-void CColorControls::FindingColor(const Mat& myImg, const Scalar& m_selectedColor)
+void CColorControls::FindingColor(const Mat& myImg, const Vec3b& targetColor)
 {
+	// 입력 이미지를 HSV 색 공간으로 변환
+	Mat grayImage;
+	cvtColor(myImg, grayImage, COLOR_BGR2GRAY);
+		
+	// 목표 색상 범위 내의 픽셀을 마스크로 지정
+	Mat mask;
+	Vec3b lowerBound = targetColor - Vec3b(10, 10, 10); // 선택한 색상의 하한 값 설정
+	Vec3b upperBound = targetColor + Vec3b(10, 10, 10); // 선택한 색상의 상한 값 설정
+	inRange(myImg, lowerBound, upperBound, mask);
+
+	// 입력 이미지와 마스크를 사용하여 목표 색상이 있는 영역을 추출
+	Mat extractedColor;
+	myImg.copyTo(extractedColor, mask);
+	
+	// 이미지 출력
+	CreateBitmapInfo(&myBmpInfoAfterChange, extractedColor.cols, extractedColor.rows, extractedColor.channels() * 8);
+	DrawImage(extractedColor, myBmpInfoAfterChange);
 
 }
 
 void CColorControls::OnBnClickedFindColor()
 {
-	Scalar m_selectedColor;// 추출하려는 색상 설정 (BGR 순서)	
-	FindingColor(myImg, m_selectedColor);
+	// MFC Color 버튼에서 선택한 색상 가져오기
+	COLORREF selectedColor = m_mfcColorBtn.GetColor(); 
+
+	// 선택한 색상의 RGB 값을 추출
+	int red = GetRValue(selectedColor);
+	int green = GetGValue(selectedColor);
+	int blue = GetBValue(selectedColor);
+
+	// OpenCV에서 사용할 색상 값으로 변환 (BGR 순서로 변환)
+	Vec3b targetColor(blue, green, red);
+
+	// 이미지에서 선택한 색상을 추출하고 해당 영역을 강조
+	FindingColor(myImg, targetColor);
 }
