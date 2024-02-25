@@ -31,7 +31,7 @@ public:
 
 	Mat myImg; // 이미지 정보를 담고 있는 객체.
 	BITMAPINFO* myBitmapInfo; // Bitmap 정보를 담고 있는 구조체.	
-	CStatic m_imageControl;
+	CStatic m_imageControl;//이미지 영역	
 
 	Mat myImgAfterChange;
 	BITMAPINFO* myBmpInfoAfterChange;
@@ -45,14 +45,12 @@ public:
 		
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnBnClickedCancel();
-	afx_msg void OnBnClickedBack();
-
-	//afx_msg void OnPaint();
+	afx_msg void OnBnClickedBack();	
 	afx_msg HCURSOR OnQueryDragIcon();
 	
 	//컬러버튼
 	CMFCColorButton m_mfcColorBtn;//컬러 버튼
-	CStatic m_staticColor;//색상 표시블록
+	CStatic m_staticColor;//선택 색상 블록
 	CBrush m_brushColor;//색상 채우는 브러쉬
 	CEdit m_color_edit;//RGB값 출력칸
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);//선택한 색으로 변경
@@ -66,15 +64,15 @@ public:
 	CEdit m_slider_edit_s;//채도값
 	CEdit m_slider_edit_v;//밝기값
 	void CColorControls::UpdateSliderValue(int sliderID, int editID);//슬라이더 조정값 표시
-	//afx_msg void OnNMCustomdrawSliderH(NMHDR* pNMHDR, LRESULT* pResult);
+	//afx_msg void OnNMCustomdrawSliderH(NMHDR* pNMHDR, LRESULT* pResult);	
 	
-	//컬러버튼 값으로 변환
-	CPoint m_ptDragStart; // 드래그 시작점 저장
-	CPoint m_ptDragEnd; // 드래그 끝점 저장
-	bool m_bDragging = false; // 드래그 중 여부를 나타내는 플래그
+	//컬러버튼 값으로 그리기 및 변환	
 	Vec3b m_selectedColor;//선택한 컬러
+	CPoint start_pos;//시작점 좌표
+	bool drawingMode = false; // 그리기 모드를 나타내는 플래그 변수	
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);	
-	void CColorControls::ApplyColorToDraggedRegion(CPoint startPoint, CPoint endPoint);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnBnClickedDrawing();//선택한 컬러로 그리기	
+	afx_msg void OnBnClickedFindColor();//선택한 컬러 이미지에서 추출
+	void CColorControls::FindingColor(const Mat& myImg, const Scalar& m_selectedColor);
 };

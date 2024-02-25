@@ -22,6 +22,7 @@
 #define IDC_FILTER_BTN                  1000
 #define IDC_BILATERAL_FT                1000
 #define IDC_REVERSE_IT                  1000
+#define IDC_DRAWING                     1000
 #define IDC_BUTTON2                     1001
 #define IDC_PC_VIEW                     1002
 #define IDC_COLOR_BTN                   1003
@@ -82,6 +83,7 @@
 #define IDC_EDIT5                       1044
 #define IDC_SLIDER_EDIT_V               1044
 #define IDC_SLIDER_NAME_V               1045
+#define IDC_FIND_COLOR                  1046
 
 // Next default values for new objects
 // 
@@ -89,7 +91,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        138
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1046
+#define _APS_NEXT_CONTROL_VALUE         1047
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
