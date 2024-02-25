@@ -93,3 +93,4 @@ public:
 //권한테스트
 //풀리퀘스트테스트2
 //권한확인테스트1
+//username tuningnaver email naver
