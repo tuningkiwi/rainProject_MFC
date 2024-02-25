@@ -401,7 +401,8 @@ void CColorControls::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	
-	if (drawingMode == true) 
+	//if (drawingMode == true)
+	if (drawingMode && IsPointInsideImageArea(point))
 	{
 		start_pos = point;
 	}
@@ -413,44 +414,75 @@ void CColorControls::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	
-	if (drawingMode == true) 
+	if (drawingMode && IsPointInsideImageArea(point))
 	{
 		CClientDC dc(this);
 
-		//Vec3b에서는 순서가 반대이므로 [2]:R, [1]:G, [0]:B
-		CPen mypen(PS_SOLID, 5, RGB(m_selectedColor[2], m_selectedColor[1], m_selectedColor[0]));
-		dc.SelectObject(&mypen);
-		SelectObject(dc, GetStockObject(NULL_BRUSH));
+		// 그리기를 진행할 이미지 영역에 대한 정보를 얻습니다.
+		CRect imageRect;
+		GetImageRect(imageRect);
 
-		if (nFlags & MK_CONTROL)
+		// 마우스 클릭 지점이 이미지 영역 내에 있는지 확인합니다.
+		if (imageRect.PtInRect(start_pos) && imageRect.PtInRect(point))
 		{
-			//왼쪽 상단 모서리의 x 좌표, y좌표, 오른쪽 하단 모서리의 x 좌표, y좌표
-			dc.Ellipse(start_pos.x, start_pos.y, point.x, point.y);
+			// 이미지 영역 내에서만 그리기 작업을 수행합니다.
+			CPen mypen(PS_SOLID, 5, RGB(m_selectedColor[2], m_selectedColor[1], m_selectedColor[0]));
+			dc.SelectObject(&mypen);
+			dc.SelectObject(GetStockObject(NULL_BRUSH));
+
+			if (nFlags & MK_CONTROL)
+			{
+				// 왼쪽 상단 모서리의 x 좌표, y좌표, 오른쪽 하단 모서리의 x 좌표, y좌표
+				dc.Ellipse(start_pos.x, start_pos.y, point.x, point.y);
+			}
+			else if (nFlags & MK_SHIFT)
+			{
+				// 선 그리기
+				dc.MoveTo(start_pos);
+				dc.LineTo(point);
+			}
+			else
+			{
+				dc.Rectangle(start_pos.x, start_pos.y, point.x, point.y);
+			}
 		}
-		else if (nFlags & MK_SHIFT)
-		{
-			// 선 그리기
-			dc.MoveTo(start_pos);
-			dc.LineTo(point);
-		}
-		else
-		{
-			dc.Rectangle(start_pos.x, start_pos.y, point.x, point.y);
-		}
-		
-		drawingMode = false;// 그리기 모드를 종료합니다.
+
+		drawingMode = false; // 그리기 모드를 종료합니다.
 	}
-	
+	/*CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
+	DrawImage(myImgAfterChange, myBmpInfoAfterChange);*/
+		
 	CDialogEx::OnLButtonUp(nFlags, point);
 }
 
-
+//그리기 버튼
 void CColorControls::OnBnClickedDrawing()
 {
 	drawingMode = true;
 }
 
-// 이미지에서 선택 색상을 추출하고 해당 영역을 강조
+// 이미지 영역 내에서만 그리기를 허용하는지 확인하는 함수
+bool CColorControls::IsPointInsideImageArea(CPoint point)
+{
+	CRect imageRect;
+	GetImageRect(imageRect);
+	return imageRect.PtInRect(point);
+}
+
+// 이미지 영역을 얻어오는 함수
+void CColorControls::GetImageRect(CRect& rect)
+{
+	// 이미지를 표시하는 컨트롤의 위치와 크기를 얻어옵니다.
+	CWnd* pImageCtrl = GetDlgItem(IDC_IMAGE_CONTROL); // 이미지를 표시하는 컨트롤의 ID를 적절히 수정하세요.
+	if (pImageCtrl)
+	{
+		pImageCtrl->GetClientRect(rect); // 클라이언트 영역을 얻어옵니다.
+		pImageCtrl->ClientToScreen(rect); // 화면 좌표로 변환합니다.
+		ScreenToClient(rect); // 클라이언트 영역으로 다시 변환합니다.
+	}
+}
+
+//추출 색상을 선택해 해당 색상으로 변환
 void CColorControls::FindingColor(const Mat& myImg, const Vec3b& targetColor)
 {
 	// 입력 이미지를 HSV 색 공간으로 변환
@@ -464,15 +496,18 @@ void CColorControls::FindingColor(const Mat& myImg, const Vec3b& targetColor)
 	inRange(myImg, lowerBound, upperBound, mask);
 
 	// 입력 이미지와 마스크를 사용하여 목표 색상이 있는 영역을 추출
-	Mat extractedColor;
-	myImg.copyTo(extractedColor, mask);
+	//Mat extractedColor;
+	myImg.copyTo(myImgAfterChange, mask);
 	
-	// 이미지 출력
-	CreateBitmapInfo(&myBmpInfoAfterChange, extractedColor.cols, extractedColor.rows, extractedColor.channels() * 8);
-	DrawImage(extractedColor, myBmpInfoAfterChange);
+	//부모창에 전달하려면 선언되어있는 myImgAfterChange멤버 변수 사용할 것
+	/*CreateBitmapInfo(&myBmpInfoAfterChange, extractedColor.cols, extractedColor.rows, extractedColor.channels() * 8);
+	DrawImage(extractedColor, myBmpInfoAfterChange);*/
 
+	CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
+	DrawImage(myImgAfterChange, myBmpInfoAfterChange);
 }
 
+//추출 버튼
 void CColorControls::OnBnClickedFindColor()
 {
 	// MFC Color 버튼에서 선택한 색상 가져오기

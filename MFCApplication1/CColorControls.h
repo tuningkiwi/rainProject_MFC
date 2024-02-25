@@ -73,6 +73,9 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnBnClickedDrawing();//선택한 컬러로 그리기	
-	afx_msg void OnBnClickedFindColor();//선택한 컬러 이미지에서 추출
-	void CColorControls::FindingColor(const Mat& loadedImage, const Vec3b& targetColor);
+	afx_msg void OnBnClickedFindColor();//이미지에서 컬러 추출
+	void CColorControls::FindingColor(const Mat& myImg, const Vec3b& targetColor);//추출 컬러로 변환
+	bool CColorControls::IsPointInsideImageArea(CPoint point);
+	void CColorControls::GetImageRect(CRect& rect);
+
 };
