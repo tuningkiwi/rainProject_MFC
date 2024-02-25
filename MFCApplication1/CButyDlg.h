@@ -1,8 +1,9 @@
 ﻿#pragma once
+
 #include "afxdialogex.h"
 #include "opencv2/opencv.hpp"
 using namespace cv;
-
+using namespace std;
 
 // CButyDlg 대화 상자
 
@@ -38,6 +39,9 @@ public:
 	BITMAPINFO* myBmpInfoAfterChange;
 	CImage m_displayImage;
 	int eyeRadius; // 추가된 부분
+	CSliderCtrl m_eyeSizeSliderCtrl;
+	std::vector<Rect> m_detectedEyes;
+
 
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
@@ -46,7 +50,14 @@ public:
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnBnClickedDetect();
 	afx_msg void OnBnClickedMerge();
+	afx_msg void OnBnClickedImageCall();
+	afx_msg void OnBnClickedVideoCall();
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void DetectEyesAndDrawRectangles();
+	afx_msg void AdjustEyeSizeUsingSlider();
+
+	// 동영상 불러오기
+
 };
 
 //백업용 코드 저장소 커밋 확인 

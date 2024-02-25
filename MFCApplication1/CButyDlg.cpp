@@ -37,7 +37,7 @@ void CButyDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_PC_FT, picCtrl_FT);
-
+	DDX_Control(pDX, IDC_SLIDER_EYE, m_eyeSizeSliderCtrl);
 }
 
 
@@ -49,6 +49,8 @@ BEGIN_MESSAGE_MAP(CButyDlg, CDialogEx)
 	ON_BN_CLICKED(IDCANCEL, &CButyDlg::OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_DETECT, &CButyDlg::OnBnClickedDetect)
 	ON_BN_CLICKED(IDC_MERGE, &CButyDlg::OnBnClickedMerge)
+	ON_BN_CLICKED(IDC_IMAGECALL, &CButyDlg::OnBnClickedImageCall)
+	ON_BN_CLICKED(IDC_VIDEOCALL, &CButyDlg::OnBnClickedVideoCall)
 	ON_WM_HSCROLL()
 END_MESSAGE_MAP()
 
@@ -66,6 +68,8 @@ BOOL CButyDlg::OnInitDialog()
 	GetDlgItem(IDC_REVERT_FT)->MoveWindow(1000, 720 - 220, 200, 45);
 	GetDlgItem(IDC_DETECT)->MoveWindow(1000, 720 - 280, 200, 45);
 	GetDlgItem(IDC_MERGE)->MoveWindow(1000, 720 - 400, 200, 45);
+	GetDlgItem(IDC_IMAGECALL)->MoveWindow(1000, 720 - 460, 200, 45);
+	GetDlgItem(IDC_VIDEOCALL)->MoveWindow(1000, 720 - 520, 200, 45);
 
 	// Slider control 초기화
 	CSliderCtrl* pSlider = static_cast<CSliderCtrl*>(GetDlgItem(IDC_SLIDER_EYE));
@@ -77,9 +81,6 @@ BOOL CButyDlg::OnInitDialog()
 		// Slider control의 위치 설정 (절대적인 수치 사용)
 		pSlider->MoveWindow(1000, 720 - 280 - 55, 200, 45);  // 적절한 수치로 설정
 	}
-
-	//DrawImage(); dialog 호출시 oninitDiaog()뒤에 실행되는 메세지들에 의하여, 사진이 출력되지 않음 
-	SetTimer(1, 80, NULL);//100ms  사진 불러오기 위한 타이머 
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
@@ -186,19 +187,22 @@ void CButyDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
 }
 
 
-
-
 void CButyDlg::OnTimer(UINT_PTR nIDEvent)
 {
-	// TODO: Add your message handler code here and/or call default
-	switch (nIDEvent) {
-	case 1:
-		DrawImage(myImg, myBitmapInfo);//처음 로딩되는 이미지 
-
-	}
-	KillTimer(1);//처음 필터창을 켰을때, 사진을 띄우기 위한 용도라 바로 kill 
-	CDialogEx::OnTimer(nIDEvent);
+	
 }
+
+
+void CButyDlg::OnBnClickedImageCall()
+{
+	DrawImage(myImg, myBitmapInfo);
+}
+
+void CButyDlg::OnBnClickedVideoCall()
+{
+	OnTimer(1);
+}
+
 
 //윈도우 창이 DESTORY 갑자기 종료될때, 저장해야 하는 정보들 기능 수행
 void CButyDlg::OnDestroy()
@@ -266,6 +270,7 @@ void CButyDlg::OnBnClickedCancel()
 	CDialogEx::OnCancel();
 }
 
+/* 백업
 void CButyDlg::OnBnClickedDetect()
 {
 	try
@@ -300,20 +305,147 @@ void CButyDlg::OnBnClickedDetect()
 		AfxMessageBox(CString("Error during eye detection: ") + ex.what());
 	}
 }
+*/
+void CButyDlg::DetectEyesAndDrawRectangles()
+{
+	try
+	{
+		// Copy the current image to myOriginalImg (assuming myOriginalImg is initialized)
+		myOriginalImg = myImg.clone();
+
+		// Convert the Mat image to grayscale for eye detection
+		Mat grayImage;
+		cvtColor(myImg, grayImage, COLOR_BGR2GRAY);
+
+		// Load pre-trained eye cascade classifier
+		CascadeClassifier eyeCascade;
+		eyeCascade.load("C:\\opencv\\build\\etc\\haarcascades\\haarcascade_eye.xml");
+
+		// Detect eyes in the image
+		m_detectedEyes.clear();  // Clear existing data before detecting again
+		eyeCascade.detectMultiScale(grayImage, m_detectedEyes, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(30, 30));
+
+		// Create a mask to keep only the regions inside the green rectangles
+		Mat mask = Mat::zeros(myImg.size(), CV_8UC1);
+
+		// Loop over detected eyes and draw rectangles on the mask
+		for (size_t i = 0; i < m_detectedEyes.size(); i++)
+		{
+			// Get the current eye rectangle
+			Rect currentEyeRect = m_detectedEyes[i];
+
+			// Crop the region of interest (ROI) from the original image using currentEyeRect
+			Mat eyeROI = myOriginalImg(currentEyeRect);
+
+			// Double the size of the ROI
+			Mat enlargedEyeROI;
+			resize(eyeROI, enlargedEyeROI, Size(currentEyeRect.width, currentEyeRect.height) * 2);
+
+			// Check if the enlarged eye ROI fits within the original image
+			if (currentEyeRect.x - currentEyeRect.width / 2 >= 0 &&
+				currentEyeRect.y - currentEyeRect.height / 2 >= 0 &&
+				currentEyeRect.x + currentEyeRect.width / 2 + currentEyeRect.width < myOriginalImg.cols &&
+				currentEyeRect.y + currentEyeRect.height / 2 + currentEyeRect.height < myOriginalImg.rows)
+			{
+				// Replace the region in the original image with the enlarged ROI
+				try
+				{
+					enlargedEyeROI.copyTo(myOriginalImg(currentEyeRect));
+				}
+				catch (const Exception& ex)
+				{
+					// Handle the exception (e.g., display an error message)
+					AfxMessageBox(CString("Error copying enlarged eye ROI to original image: ") + ex.what());
+				}
+			}
+			else
+			{
+				// Handle the case where the enlarged ROI does not fit within the original image
+				//AfxMessageBox(CString("Enlarged eye ROI exceeds the boundaries of the original image.") + ex.what());
+			}
+		}
+
+		// Use the mask to keep only the regions inside the green rectangles
+		Mat result;
+		myOriginalImg.copyTo(result, mask);
+
+		// Redraw the image with eye detection
+		DrawImage(result, myBitmapInfo);
+	}
+	catch (const Exception& ex)
+	{
+		// Handle the exception (e.g., display an error message)
+		AfxMessageBox(CString("Error during eye detection: ") + ex.what());
+	}
+}
+
+void CButyDlg::AdjustEyeSizeUsingSlider()
+{
+	try
+	{
+		// Get the current slider position for adjusting eye size
+		int eyeSizeSliderValue = m_eyeSizeSliderCtrl.GetPos();
+		TRACE("eyeSizeSliderValue: %d\n", eyeSizeSliderValue);
+
+		// Create a new Mat to store the adjusted image
+		Mat adjustedImage = myImg.clone();
+
+		// Loop over detected eye regions and adjust sizes
+		for (size_t i = 0; i < m_detectedEyes.size(); i++)
+		{
+			// Define the region of interest (ROI) for each detected eye
+			Rect eyeROI = m_detectedEyes[i];
+
+			// Extract the eye region from the original image
+			Mat eyeImage = myOriginalImg(eyeROI).clone();
+
+			// Dynamic resizing based on the slider value
+			double resizeFactor = 1.0 + 0.01 * eyeSizeSliderValue; // Example: 1.0 to 2.0 based on the slider
+
+			// Resize the extracted eye region dynamically
+			resize(eyeImage, eyeImage, Size(), resizeFactor, resizeFactor);
+
+			// Optionally, save the adjusted eye region to a new bitmap (Mat)
+			Mat adjustedEyeBitmap = eyeImage.clone();
+
+			// Perform additional operations on the adjustedEyeBitmap if needed
+
+			// Draw the adjusted eye region back onto the new Mat
+			adjustedEyeBitmap.copyTo(adjustedImage(eyeROI));
+		}
+
+		// Redraw the image with adjusted eye sizes
+		DrawImage(adjustedImage, myBitmapInfo);
+	}
+	catch (const Exception& ex)
+	{
+		// Handle the exception (e.g., display an error message)
+		CString errorMessage;
+		errorMessage.Format(_T("Error during eye size adjustment: %s"), ex.what());
+		AfxMessageBox(errorMessage);
+
+		// Print exception information to the Output window
+		TRACE("Exception during eye size adjustment: %s\n", ex.what());
+	}
+
+}
+
+void CButyDlg::OnBnClickedDetect()
+{
+	DetectEyesAndDrawRectangles();
+
+}
 
 void CButyDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	if (pScrollBar->GetDlgCtrlID() == IDC_SLIDER_EYE)
 	{
-		// 눈의 크기를 slider 값으로 설정
-		eyeRadius = static_cast<int>(SendDlgItemMessage(IDC_SLIDER_EYE, TBM_GETPOS, 0, 0));
-
-		// 다시 그리기
-		DrawImage(myImg, myBitmapInfo);
+		AdjustEyeSizeUsingSlider();
 	}
 
-	CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
+	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
+
 
 void CButyDlg::OnBnClickedMerge()
 {
@@ -339,17 +471,12 @@ void CButyDlg::OnBnClickedMerge()
 		faceCascade.detectMultiScale(grayImage, faces, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(30, 30));
 
 		// Load the image to be overlaid
-		Mat overlayImage = imread("C:\\Users\\김경태\\Downloads\\headpin01.jpeg");
+		Mat overlayImage = imread("C:\\Users\\김경태\\Downloads\\headpin02.jpg");
 		if (overlayImage.empty())
 		{
 			AfxMessageBox(_T("Error loading overlay image."));
 			return;
 		}
-
-		// Resize the overlay image to a smaller size (adjust the width and height as needed)
-		//int newWidth = 50;  // New width of the overlay image
-		//int newHeight = 50; // New height of the overlay image
-		//resize(overlayImage, overlayImage, Size(newWidth, newHeight));
 
 		// Loop over detected faces
 		for (size_t i = 0; i < faces.size(); i++)
@@ -358,29 +485,29 @@ void CButyDlg::OnBnClickedMerge()
 			rectangle(myImg, faces[i], Scalar(0, 255, 0), 2);
 
 			// Define the region of interest (ROI) where the overlay will be applied
-			//Rect roiRect(faces[i].x, faces[i].y, faces[i].width, faces[i].height);
+			Rect roiRect(faces[i].x, faces[i].y, faces[i].width, faces[i].height);
 
 			// Calculate the position to overlay the image on top of the face region
-			//int overlayX = faces[i].x + faces[i].width / 4;
-			//int overlayY = faces[i].y - faces[i].height / 4;
+			int overlayX = faces[i].x + faces[i].width / 5 - overlayImage.cols / 1;
+			int overlayY = faces[i].y + faces[i].height / 4 - overlayImage.rows / 1;
 
 			// Ensure that the overlay position is within the bounds of the image
-			//overlayX = max(overlayX, 0);
-			//overlayY = max(overlayY, 0);
+			overlayX = max(overlayX, 0);
+			overlayY = max(overlayY, 0);
 
 			// Calculate the size of the overlay image based on the face size
-			//int newWidth = faces[i].width / 2;
-			//int newHeight = faces[i].height / 2;
+			int newWidth = 400;
+			int newHeight = 50;
 
 			// Resize the overlay image
-			//resize(overlayImage, overlayImage, Size(newWidth, newHeight));
+			resize(overlayImage, overlayImage, Size(newWidth, newHeight));
 
 			// Ensure that the overlay region is within the bounds of the image
-			//if (overlayX + overlayImage.cols <= myImg.cols && overlayY + overlayImage.rows <= myImg.rows)
-			//{
-				// Overlay the image on top of the face region
-				//overlayImage.copyTo(myImg(Rect(overlayX, overlayY, overlayImage.cols, overlayImage.rows)));
-			//}
+			if (overlayX + overlayImage.cols <= myImg.cols && overlayY + overlayImage.rows <= myImg.rows)
+			{
+				//Overlay the image on top of the face region
+				overlayImage.copyTo(myImg(Rect(overlayX, overlayY, overlayImage.cols, overlayImage.rows)));
+			}
 		}
 
 		// Redraw the image with face detection and overlay
