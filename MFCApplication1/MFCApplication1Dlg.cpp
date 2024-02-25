@@ -494,6 +494,9 @@ void CMFCApplication1Dlg::OnBnClickedButyBtn()
 		break;
 	case IDOK:
 		// Do something
+		m_matImage = butyDlg.bmpHistory.back();
+		m_pBitmapInfo = butyDlg.bmpInfoHistory.back();
+		DrawImage(m_matImage, m_pBitmapInfo);
 		break;
 	case IDCANCEL:
 		// Do something

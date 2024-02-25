@@ -29,6 +29,8 @@ CButyDlg::CButyDlg(Mat Img, BITMAPINFO* bitmapInfo)
 {
 	myImg = Img; // 이미지 매트릭스 정보 가져오기 
 	myBitmapInfo = bitmapInfo;
+	bmpHistory.push_back(Img);
+	bmpInfoHistory.push_back(bitmapInfo);
 }
 
 CButyDlg::~CButyDlg()
@@ -77,7 +79,7 @@ BOOL CButyDlg::OnInitDialog()
 
 	// Slider control 초기화
 	// Initialize the slider control for eye size
-	m_eyeSizeSliderCtrl.SetRange(0.1, 3);  // Set your desired range
+	m_eyeSizeSliderCtrl.SetRange(0.1, 4);  // Set your desired range
 	m_eyeSizeSliderCtrl.SetPos(2);  // Set the initial eye size
 	m_eyeSizeSliderCtrl.SetTicFreq(1);
 	m_eyeSizeSliderCtrl.SetPageSize(1);
@@ -97,6 +99,8 @@ void CButyDlg::OnBnClickedOk()
 {
 	// TODO: Add your control notification handler code here
 	//메세지 박스 적용되었습니다 알림 넣기 
+
+	KillTimer(2);
 	CDialogEx::OnOK();
 }
 
@@ -144,7 +148,17 @@ void CButyDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
 
 void CButyDlg::OnTimer(UINT_PTR nIDEvent)
 {
-	
+	if (nIDEvent == 0) {//0번타이머
+
+		//처음 다이얼로그 창을 띄울 때 onInitDialog()에서 drawimage가 이후 
+		// 자동 수행되는 메시지 함수에의해서 출력이 안되서 
+		//onInitDialog()에 타이머로 걸어놓음  
+		DrawImage(bmpHistory.back(), bmpInfoHistory.back());//처음 로딩되는 이미지 
+		KillTimer(0);
+	}
+
+	// Handle other timer events or call the base class
+	CDialogEx::OnTimer(nIDEvent);
 }
 
 
@@ -224,62 +238,7 @@ void CButyDlg::OnBnClickedCancel()
 	// TODO: Add your control notification handler code here
 	CDialogEx::OnCancel();
 }
-
 /*
-void CButyDlg::DetectEyesAndDrawRectangles()
-{
-	try
-	{
-		// Convert the Mat image to grayscale for eye detection
-		Mat grayImage;
-		cvtColor(myImg, grayImage, COLOR_BGR2GRAY);
-
-		// Load pre-trained eye cascade classifier
-		CascadeClassifier eyeCascade;
-		eyeCascade.load("C:\\opencv\\build\\etc\\haarcascades\\haarcascade_eye.xml");
-
-		// Detect eyes in the image
-		std::vector<Rect> detectedEyes;
-		eyeCascade.detectMultiScale(grayImage, detectedEyes, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(30, 30));
-
-		// Get current time for generating unique filenames
-		auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-
-		// Loop over detected eyes
-		for (size_t i = 0; i < detectedEyes.size(); ++i)
-		{
-			// Crop the region of interest (ROI) from the original image using eyeRect
-			Mat eyeCropped = myImg(detectedEyes[i]);
-
-			// Resize the cropped eye image to twice its size
-			Mat resizedEye;
-			resize(eyeCropped, resizedEye, Size(detectedEyes[i].width * 2, detectedEyes[i].height * 2));
-
-			// Calculate the position to paste the resized eye back into the original image
-			int pasteX = detectedEyes[i].x - (resizedEye.cols - detectedEyes[i].width) / 2;
-			int pasteY = detectedEyes[i].y - (resizedEye.rows - detectedEyes[i].height) / 2;
-
-			// Ensure that the pasted region is within the bounds of the original image
-			pasteX = std::max(pasteX, 0);
-			pasteY = std::max(pasteY, 0);
-
-			// Region of interest (ROI) in the original image to paste the resized eye
-			Rect pasteRect(pasteX, pasteY, resizedEye.cols, resizedEye.rows);
-
-			// Blend the resized eye image with the original image in the specified ROI
-			addWeighted(myImg(pasteRect), 0.1, resizedEye, 0.9, 0, myImg(pasteRect));
-		}
-
-		// Redraw the image with eye detection
-		DrawImage(myImg, myBitmapInfo);
-	}
-	catch (const Exception& ex)
-	{
-		// Handle the exception (e.g., display an error message)
-		AfxMessageBox(CString("Error during eye detection: ") + ex.what());
-	}
-}
-*/
 void CButyDlg::DetectEyesAndDrawRectangles()
 {
 	// Get the current position of the slider
@@ -332,11 +291,67 @@ void CButyDlg::DetectEyesAndDrawRectangles()
 		AfxMessageBox(CString("Error during eye detection: ") + ex.what());
 	}
 }
+*/
+void CButyDlg::DetectEyesAndDrawRectangles()
+{
+	// Get the current position of the slider
+	int eyeSizeFactor = m_eyeSizeSliderCtrl.GetPos();
+
+	try
+	{
+		// Convert the Mat image to grayscale for eye detection
+		Mat grayImage;
+		cvtColor(myImg, grayImage, COLOR_BGR2GRAY);
+
+		// Load pre-trained eye cascade classifier
+		CascadeClassifier eyeCascade;
+		eyeCascade.load("C:\\opencv\\build\\etc\\haarcascades\\haarcascade_eye.xml");
+
+		// Detect eyes in the image
+		std::vector<Rect> detectedEyes;
+		eyeCascade.detectMultiScale(grayImage, detectedEyes, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(30, 30));
+
+		// Create a copy of the original image to draw on
+		Mat imgWithEyes = myImg.clone();
+
+		// Loop over detected eyes
+		for (size_t i = 0; i < detectedEyes.size(); ++i)
+		{
+			// Crop the region of interest (ROI) from the original image using eyeRect
+			Mat eyeCropped = myImg(detectedEyes[i]);
+
+			// Resize the cropped eye image based on the slider value
+			Mat resizedEye;
+			resize(eyeCropped, resizedEye, Size(detectedEyes[i].width * eyeSizeFactor, detectedEyes[i].height * eyeSizeFactor));
+
+			// Calculate the position to paste the resized eye back into the original image
+			int pasteX = detectedEyes[i].x - (resizedEye.cols - detectedEyes[i].width) / 2;
+			int pasteY = detectedEyes[i].y - (resizedEye.rows - detectedEyes[i].height) / 2;
+
+			// Ensure that the pasted region is within the bounds of the original image
+			pasteX = std::max(pasteX, 0);
+			pasteY = std::max(pasteY, 0);
+
+			// Region of interest (ROI) in the original image to paste the resized eye
+			Rect pasteRect(pasteX, pasteY, resizedEye.cols, resizedEye.rows);
+
+			// Blend the resized eye image with the copy of the original image in the specified ROI
+			addWeighted(imgWithEyes(pasteRect), 0.1, resizedEye, 0.9, 0, imgWithEyes(pasteRect));
+		}
+		// Redraw the image with eye detection
+		DrawImage(imgWithEyes, myBitmapInfo);
+	}
+	catch (const Exception& ex)
+	{
+		// Handle the exception (e.g., display an error message)
+		AfxMessageBox(CString("Error during eye detection: ") + ex.what());
+	}
+}
 
 void CButyDlg::OnSliderEyeSizeChanged(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	// Handle the eye size change event here
-	//DetectEyesAndDrawRectangles();
+	DetectEyesAndDrawRectangles();
 	*pResult = 0;
 }
 

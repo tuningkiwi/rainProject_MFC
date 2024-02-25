@@ -41,6 +41,8 @@ public:
 	int eyeRadius; // 추가된 부분
 	CSliderCtrl m_eyeSizeSliderCtrl;
 	std::vector<Rect> m_detectedEyes;
+	vector<Mat> bmpHistory;
+	vector<BITMAPINFO*> bmpInfoHistory;
 
 
 	afx_msg void OnBnClickedOk();
