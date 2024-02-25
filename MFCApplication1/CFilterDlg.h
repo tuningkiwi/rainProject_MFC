@@ -95,3 +95,4 @@ public:
 //권한확인테스트1
 //username tuningnaver email naver
 //username
+//git global setting을 바꿔봄
