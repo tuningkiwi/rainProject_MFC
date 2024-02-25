@@ -153,9 +153,9 @@ void CColorControls::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
 	SetStretchBltMode(dc.GetSafeHdc(), COLORONCOLOR);
 
 	//StretchDIBits 함수는 DIB, JPEG 또는 PNG 이미지의 픽셀 사각형에 
-	// 대한 색 데이터를 지정된 대상 사각형에 복사합니다.
+	//대한 색 데이터를 지정된 대상 사각형에 복사합니다.
 	//dc.GetSafeHdc(): 출력 디바이스 컨텍스트를 가져옵니다
-	// 함수가 성공하면 반환 값은 복사된 검사 줄의 수입니다. 이 값은 미러된 콘텐츠에 대해 음수일 수 있습니다.
+	//함수가 성공하면 반환 값은 복사된 검사 줄의 수입니다. 이 값은 미러된 콘텐츠에 대해 음수일 수 있습니다.
 	StretchDIBits(dc.GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), 0, 0, requestImg.cols, requestImg.rows, requestImg.data, requestBmpInfo, DIB_RGB_COLORS, SRCCOPY);
 }
 
@@ -186,22 +186,22 @@ void CColorControls::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	//다른 작업이 이미지를 변경할 수 있습니다. 따라서 복사본을 사용하여 스레드 간의 충돌을 방지합니다.
 	//객체 지향 설계: 이미지 처리 함수가 해당 이미지의 소유권을 가지지 않고 
 	//다른 함수와 독립적으로 작동할 수 있도록 합니다.
-	static Mat previousTransformedImage = myImg.clone();// 이전에 적용된 변환 이미지를 저장할 변수
+	static Mat previousTransformedImage = myImg.clone();//이전에 적용된 변환 이미지를 저장할 변수
 
 	if (*pScrollBar == m_slider_h) {
         int hueShift = m_slider_h.GetPos() - 50; //슬라이더 초기 위치(50)
-		myImgAfterChange = previousTransformedImage.clone(); // 이전에 적용된 변환 이미지를 복사
+		myImgAfterChange = previousTransformedImage.clone(); //이전에 적용된 변환 이미지를 복사
 
         if (hueShift != 0) {
-            // 이미지를 HSV 색 공간으로 변환			
+            //이미지를 HSV 색 공간으로 변환			
 			Mat hsvImage;
             cvtColor(myImgAfterChange, hsvImage, COLOR_BGR2HSV);
 
-            // HSV 이미지의 H 채널에 색조를 적용
+            //HSV 이미지의 H 채널에 색조를 적용
             for (int i = 0; i < hsvImage.rows; ++i) {
                 for (int j = 0; j < hsvImage.cols; ++j) {
                     hsvImage.at<Vec3b>(i, j)[0] += hueShift; // H 채널에 색조 변환
-                    // 색조가 0~180 범위 내에 있도록 보정
+                    //색조가 0~180 범위 내에 있도록 보정
                     if (hsvImage.at<Vec3b>(i, j)[0] < 0)
                         hsvImage.at<Vec3b>(i, j)[0] += 180;
                     else if (hsvImage.at<Vec3b>(i, j)[0] >= 180)
@@ -209,10 +209,10 @@ void CColorControls::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
                 }
             }
 
-            // HSV 이미지를 다시 BGR 색 공간으로 변환
+            //HSV 이미지를 다시 BGR 색 공간으로 변환
             cvtColor(hsvImage, myImgAfterChange, COLOR_HSV2BGR);
 
-            // 비트맵 정보 생성 및 이미지 출력
+            //비트맵 정보 생성 및 이미지 출력
             CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
             DrawImage(myImgAfterChange, myBmpInfoAfterChange);			
         }
@@ -225,11 +225,11 @@ void CColorControls::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			Mat hsvImage1;
 			cvtColor(myImgAfterChange, hsvImage1, COLOR_BGR2HSV);
 
-			// HSV 이미지의 S 채널에 채도를 적용
+			//HSV 이미지의 S 채널에 채도를 적용
 			for (int i = 0; i < hsvImage1.rows; ++i) {
 				for (int j = 0; j < hsvImage1.cols; ++j) {
 					hsvImage1.at<Vec3b>(i, j)[1] += saturationShift; // S 채널에 채도 변환
-					// 채도가 0~255 범위 내에 있도록 보정
+					//채도가 0~255 범위 내에 있도록 보정
 					if (hsvImage1.at<Vec3b>(i, j)[1] < 0)
 						hsvImage1.at<Vec3b>(i, j)[1] = 0;
 					else if (hsvImage1.at<Vec3b>(i, j)[1] > 255)
@@ -246,7 +246,7 @@ void CColorControls::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		int brightnessChange = m_slider_v.GetPos() - 50;
 
 		if (brightnessChange != 0) {
-			// 이미지 밝기 조절
+			//이미지 밝기 조절
 			Mat adjustedImage;
 			myImgAfterChange.convertTo(adjustedImage, -1, 1, brightnessChange);						
 			DrawImage(adjustedImage, myBmpInfoAfterChange);			
@@ -254,7 +254,7 @@ void CColorControls::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	}
 	
 	if (*pScrollBar == m_slider_h || *pScrollBar == m_slider_s || *pScrollBar == m_slider_v) {
-		// 각 슬라이더에 대한 이벤트 처리
+		//각 슬라이더에 대한 이벤트 처리
 		UpdateSliderValue(IDC_SLIDER_H, IDC_SLIDER_EDIT_H);
 		UpdateSliderValue(IDC_SLIDER_S, IDC_SLIDER_EDIT_S);
 		UpdateSliderValue(IDC_SLIDER_V, IDC_SLIDER_EDIT_V);
@@ -285,7 +285,7 @@ void CColorControls::CreateBitmapInfo(BITMAPINFO** btmInfo, int w, int h, int bp
 
 	if (bpp == 8) //1채널 
 		*btmInfo = (BITMAPINFO*) new BYTE[sizeof(BITMAPINFO) + 255 * sizeof(RGBQUAD)];
-	else // 24(3채널) or 32bit(4채널)
+	else //24(3채널) or 32bit(4채널)
 		*btmInfo = (BITMAPINFO*) new BYTE[sizeof(BITMAPINFO)];
 
 	(*btmInfo)->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);//구조체에 필요한 바이트 수
@@ -332,7 +332,7 @@ void CColorControls::OnBnClickedBack()
 	myImgAfterChange = myImg.clone();
 	myBmpInfoAfterChange = myBitmapInfo;
 
-	// 슬라이더 위치를 이전 위치로 되돌립니다.
+	//슬라이더 위치를 이전 위치로 되돌립니다.
 	m_slider_h.SetPos(50);  m_slider_s.SetPos(50);  m_slider_v.SetPos(50);
 	m_slider_edit_h.SetWindowTextW(L"50"); m_slider_edit_s.SetWindowTextW(L"50"); m_slider_edit_v.SetWindowTextW(L"50");
 
@@ -368,18 +368,18 @@ void CColorControls::OnBnClickedMfccolorbuttonColor()
 	m_staticColor.Invalidate();
 	m_staticColor.UpdateWindow();
 
-	// Color Button Control의 현재 색상을 가져옵니다.
+	//Color Button Control의 현재 색상을 가져옵니다.
 	COLORREF color = m_mfcColorBtn.GetColor();
 
-	// RGB 값을 얻어옵니다.
+	//RGB 값을 얻어옵니다.
 	int red = GetRValue(color);
 	int green = GetGValue(color);
 	int blue = GetBValue(color);
 
-	// 선택한 색상을 변수에 저장합니다.
+	//선택한 색상을 변수에 저장합니다.
 	m_selectedColor = Vec3b(blue, green, red);
 
-	// RGB 값을 텍스트로 변환합니다.
+	//RGB 값을 텍스트로 변환합니다.
 	CString strRGB;
 	strRGB.Format(_T("%d, %d, %d"), red, green, blue);
 	SetDlgItemText(IDC_COLOR_EDIT, strRGB);
@@ -401,7 +401,6 @@ void CColorControls::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	
-	//if (drawingMode == true)
 	if (drawingMode && IsPointInsideImageArea(point))
 	{
 		start_pos = point;
@@ -417,27 +416,23 @@ void CColorControls::OnLButtonUp(UINT nFlags, CPoint point)
 	if (drawingMode && IsPointInsideImageArea(point))
 	{
 		CClientDC dc(this);
-
-		// 그리기를 진행할 이미지 영역에 대한 정보를 얻습니다.
-		CRect imageRect;
-		GetImageRect(imageRect);
-
-		// 마우스 클릭 지점이 이미지 영역 내에 있는지 확인합니다.
-		if (imageRect.PtInRect(start_pos) && imageRect.PtInRect(point))
+		
+		//마우스 클릭 지점이 이미지 영역 내에 있는지 확인합니다.
+		if (IsPointInsideImageArea(start_pos) && IsPointInsideImageArea(point))
 		{
-			// 이미지 영역 내에서만 그리기 작업을 수행합니다.
+			//이미지 영역 내에서만 그리기 작업을 수행합니다.
 			CPen mypen(PS_SOLID, 5, RGB(m_selectedColor[2], m_selectedColor[1], m_selectedColor[0]));
 			dc.SelectObject(&mypen);
 			dc.SelectObject(GetStockObject(NULL_BRUSH));
 
 			if (nFlags & MK_CONTROL)
 			{
-				// 왼쪽 상단 모서리의 x 좌표, y좌표, 오른쪽 하단 모서리의 x 좌표, y좌표
+				//왼쪽 상단 모서리의 x 좌표, y좌표, 오른쪽 하단 모서리의 x 좌표, y좌표
 				dc.Ellipse(start_pos.x, start_pos.y, point.x, point.y);
 			}
 			else if (nFlags & MK_SHIFT)
 			{
-				// 선 그리기
+				//선 그리기
 				dc.MoveTo(start_pos);
 				dc.LineTo(point);
 			}
@@ -445,13 +440,10 @@ void CColorControls::OnLButtonUp(UINT nFlags, CPoint point)
 			{
 				dc.Rectangle(start_pos.x, start_pos.y, point.x, point.y);
 			}
-		}
-
+		}		
 		drawingMode = false; // 그리기 모드를 종료합니다.
 	}
-	/*CreateBitmapInfo(&myBmpInfoAfterChange, myImgAfterChange.cols, myImgAfterChange.rows, myImgAfterChange.channels() * 8);
-	DrawImage(myImgAfterChange, myBmpInfoAfterChange);*/
-		
+			
 	CDialogEx::OnLButtonUp(nFlags, point);
 }
 
@@ -461,7 +453,7 @@ void CColorControls::OnBnClickedDrawing()
 	drawingMode = true;
 }
 
-// 이미지 영역 내에서만 그리기를 허용하는지 확인하는 함수
+//이미지 영역 내에서만 그리기를 허용하는지 확인하는 함수
 bool CColorControls::IsPointInsideImageArea(CPoint point)
 {
 	CRect imageRect;
@@ -469,11 +461,11 @@ bool CColorControls::IsPointInsideImageArea(CPoint point)
 	return imageRect.PtInRect(point);
 }
 
-// 이미지 영역을 얻어오는 함수
+//이미지 영역을 얻어오는 함수
 void CColorControls::GetImageRect(CRect& rect)
 {
 	// 이미지를 표시하는 컨트롤의 위치와 크기를 얻어옵니다.
-	CWnd* pImageCtrl = GetDlgItem(IDC_IMAGE_CONTROL); // 이미지를 표시하는 컨트롤의 ID를 적절히 수정하세요.
+	CWnd* pImageCtrl = GetDlgItem(IDC_IMAGE_CONTROL); 
 	if (pImageCtrl)
 	{
 		pImageCtrl->GetClientRect(rect); // 클라이언트 영역을 얻어옵니다.
@@ -485,7 +477,6 @@ void CColorControls::GetImageRect(CRect& rect)
 //추출 색상을 선택해 해당 색상으로 변환
 void CColorControls::FindingColor(const Mat& myImg, const Vec3b& targetColor)
 {
-	// 입력 이미지를 HSV 색 공간으로 변환
 	Mat grayImage;
 	cvtColor(myImg, grayImage, COLOR_BGR2GRAY);
 		
@@ -499,7 +490,7 @@ void CColorControls::FindingColor(const Mat& myImg, const Vec3b& targetColor)
 	//Mat extractedColor;
 	myImg.copyTo(myImgAfterChange, mask);
 	
-	//부모창에 전달하려면 선언되어있는 myImgAfterChange멤버 변수 사용할 것
+	//부모창에 전달하려면 선언되어있는 myImgAfterChange멤버 변수 사용
 	/*CreateBitmapInfo(&myBmpInfoAfterChange, extractedColor.cols, extractedColor.rows, extractedColor.channels() * 8);
 	DrawImage(extractedColor, myBmpInfoAfterChange);*/
 
@@ -510,10 +501,8 @@ void CColorControls::FindingColor(const Mat& myImg, const Vec3b& targetColor)
 //추출 버튼
 void CColorControls::OnBnClickedFindColor()
 {
-	// MFC Color 버튼에서 선택한 색상 가져오기
 	COLORREF selectedColor = m_mfcColorBtn.GetColor(); 
 
-	// 선택한 색상의 RGB 값을 추출
 	int red = GetRValue(selectedColor);
 	int green = GetGValue(selectedColor);
 	int blue = GetBValue(selectedColor);
@@ -521,6 +510,5 @@ void CColorControls::OnBnClickedFindColor()
 	// OpenCV에서 사용할 색상 값으로 변환 (BGR 순서로 변환)
 	Vec3b targetColor(blue, green, red);
 
-	// 이미지에서 선택한 색상을 추출하고 해당 영역을 강조
 	FindingColor(myImg, targetColor);
 }

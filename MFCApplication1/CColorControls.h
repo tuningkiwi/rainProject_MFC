@@ -36,8 +36,9 @@ public:
 	Mat myImgAfterChange;
 	BITMAPINFO* myBmpInfoAfterChange;
 
-	void DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo);
+	void DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo);//생성된 비트맵 정보를 사용하여 이미지를 화면에 그립니다.
 	void CreateBitmapInfo(BITMAPINFO** newInfo, int w, int h, int bpp);
+	//변환된 이미지에 대한 비트맵 정보를 생성, 이미지의 너비, 높이 및 비트 수를 기반으로 비트맵 정보 구조체를 초기화합니다.
 
 	afx_msg void OnDestroy();
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
@@ -75,7 +76,7 @@ public:
 	afx_msg void OnBnClickedDrawing();//선택한 컬러로 그리기	
 	afx_msg void OnBnClickedFindColor();//이미지에서 컬러 추출
 	void CColorControls::FindingColor(const Mat& myImg, const Vec3b& targetColor);//추출 컬러로 변환
-	bool CColorControls::IsPointInsideImageArea(CPoint point);
-	void CColorControls::GetImageRect(CRect& rect);
-
+	bool CColorControls::IsPointInsideImageArea(CPoint point);//이미지 영역 확인
+	void CColorControls::GetImageRect(CRect& rect);//이미지 영역 가져오기
+	
 };
