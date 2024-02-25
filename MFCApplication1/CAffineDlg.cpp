@@ -117,13 +117,14 @@ void CAffineDlg::ReadImage(Mat originImg, BITMAPINFO* originBmpInfo)
 	//불러올 사진 cols 가져오기.
 	CClientDC dc(GetDlgItem(IDC_PC_IT));
 	CRect rect;// 이미지를 넣을 사각형 
-	if (originImg.cols > wx) 
+	if (originImg.cols > wx || originImg.rows > wy)
 	{
 		//cols: 1080 = rows : wid;
 		int resize_h = cvRound((wx * originImg.rows) / originImg.cols);
 		int resize_w = wx; //width를 최대크기로 설정 
 		if (wy - resize_h < 0) { //width를 맞추니, height가 넘친다 
-			resize_w = wy * wx / resize_h;
+			resize_w = wy * originImg.cols / originImg.rows;
+			resize_h = wy;
 		}
 		int x = cvRound((wx - resize_w) / 2);
 		int y = cvRound((wy - resize_h) / 2);
@@ -154,6 +155,8 @@ void CAffineDlg::ReadImage(Mat originImg, BITMAPINFO* originBmpInfo)
 	//dc.GetSafeHdc(): 출력 디바이스 컨텍스트를 가져옵니다
 	// 함수가 성공하면 반환 값은 복사된 검사 줄의 수입니다. 이 값은 미러된 콘텐츠에 대해 음수일 수 있습니다.
 	StretchDIBits(dc.GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), 0, 0, originImg.cols, originImg.rows, originImg.data, originBmpInfo, DIB_RGB_COLORS, SRCCOPY);
+	//SetDIBitsToDevice(dc.GetSafeHdc(), 0, 0, originImg.cols, originImg.rows, 0, 0, 0, originImg.rows, originImg.data, originBmpInfo, DIB_RGB_COLORS);
+
 }
 
 void CAffineDlg::OnTimer(UINT_PTR nIDEvent)
