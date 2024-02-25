@@ -657,13 +657,13 @@ void CMFCApplication1Dlg::OnBnClickedVideoBtn()
 
 void CMFCApplication1Dlg::OnBnClickedMergeBtn()
 {
-	// 타이머 설정
 	SetTimer(2, 30, NULL);
 }
 
 void CMFCApplication1Dlg::OnDestroy()
 {
 	KillTimer(1);
+	KillTimer(2);
 	CDialogEx::OnDestroy();
 }
 
@@ -673,10 +673,6 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 	{
 		//mat_frame가 입력 이미지입니다.
 		capture->read(mat_frame);
-
-		//이곳에 OpenCV 함수들을 적용합니다.
-		//여기에서는 그레이스케일 이미지로 변환합니다.
-		//cvtColor(mat_frame, mat_frame, COLOR_BGR2GRAY);
 
 		//화면에 보여주기 위한 처리입니다.
 		int bpp = 8 * mat_frame.elemSize();
@@ -785,111 +781,78 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 		CDialogEx::OnTimer(nIDEvent);
 	}
 	
-	if (nIDEvent == 2) {
-		cv::dnn::Net faceDetectionNet;
+	if (nIDEvent == 2)
+	{
+		CWnd* pVideoWnd = GetDlgItem(IDC_PC_VIEW);
 
-		// 모델 파일과 구성 파일의 경로
-		std::string modelFile = "C:\\Users\\김경태\\source\\repos\\rainProject_MFC\\models\\res10_300x300_ssd_iter_140000.caffemodel";
-		std::string configFile = "C:\\Users\\김경태\\source\\repos\\rainProject_MFC\\models\\deploy.prototxt";
-		
-		try {
-			// 모델 로드
-			faceDetectionNet = cv::dnn::readNetFromCaffe(configFile, modelFile);
-			
-			// 모델이 비어 있는지 확인
-			if (faceDetectionNet.empty()) {
-				// 모델이 비어 있으면 예외 발생
-				throw cv::Exception(cv::Error::StsError, "Empty model.", __FUNCTION__, __FILE__, __LINE__);
+		if (pVideoWnd)
+		{
+			// 이미지를 삽입할 비트맵 파일 경로
+			CString strImagePath = _T("C:/Users/김경태/Downloads/headpin02.jpg");
+
+			// CString을 UTF-8로 변환
+			CT2CA pszConvertedAnsiString(strImagePath);
+			std::string utf8Path(pszConvertedAnsiString);
+			// UTF-8로 변환된 문자열을 CString에 대입
+			strImagePath = utf8Path.c_str();
+
+			// 이미지를 로드합니다.
+			CImage image;
+			if (image.Load(strImagePath) == S_OK)
+			{
+				// 이미지를 동영상 출력 윈도우에 그립니다.
+				CRect rect;
+				pVideoWnd->GetClientRect(&rect);
+
+				// 목표 영역 크기를 조절
+				int targetWidth = rect.Width() / 4;  // 목표 영역의 폭을 반으로 줄임
+				int targetHeight = rect.Height() / 8; // 목표 영역의 높이를 반으로 줄임
+
+				// 이미지의 원본 크기
+				int originalWidth = image.GetWidth();
+				int originalHeight = image.GetHeight();
+
+				// 이미지를 목표 영역에 그릴 때의 목적지 좌표
+				int targetX = 450;  // X 좌표 조절
+				int targetY = 100; // Y 좌표 조절
+
+				// 이미지를 목표 영역에 그립니다.
+				image.StretchBlt(pVideoWnd->GetDC()->GetSafeHdc(), targetX, targetY, targetWidth, targetHeight, 0, 0, originalWidth, originalHeight, SRCCOPY);
 			}
-
-			// 얼굴 감지
-			cv::Mat frameBlob = cv::dnn::blobFromImage(mat_frame, 1.0, cv::Size(300, 300), cv::Scalar(104, 177, 123), false, false);
-			faceDetectionNet.setInput(frameBlob);
-			cv::Mat detections = faceDetectionNet.forward();
-
-			// 감지된 얼굴 표시
-			for (int i = 0; i < detections.size[2]; i++) {
-				float confidence = detections.ptr<float>(0)[i * 7 + 2];
-
-				if (confidence > 0.5) {  // 예측 신뢰도가 일정 수준 이상인 경우
-					int x1 = static_cast<int>(detections.ptr<float>(0)[i * 7 + 3] * static_cast<float>(mat_frame.cols));
-					int y1 = static_cast<int>(detections.ptr<float>(0)[i * 7 + 4] * static_cast<float>(mat_frame.rows));
-					int x2 = static_cast<int>(detections.ptr<float>(0)[i * 7 + 5] * static_cast<float>(mat_frame.cols));
-					int y2 = static_cast<int>(detections.ptr<float>(0)[i * 7 + 6] * static_cast<float>(mat_frame.rows));
-
-					// 사각형 그리기
-					cv::rectangle(mat_frame, cv::Rect(x1, y1, x2 - x1, y2 - y1), cv::Scalar(0, 255, 0), 2);
-				}
-			}
-		}
-		catch (cv::Exception& e) {
-			// 얼굴 감지 중 예외 처리
-			CString errorMsg;
-
-			if (e.code == cv::Error::StsBadArg)
-				errorMsg = "Error: Bad argument.";
-			else if (e.code == cv::Error::StsOutOfRange)
-				errorMsg = "Error: Out of range.";
-			else if (e.code == cv::Error::StsUnsupportedFormat)
-				errorMsg = "Error: Unsupported format.";
 			else
-				errorMsg.Format(_T("Error: %s"), CString(e.what()));
-
-			AfxMessageBox(errorMsg);
-		}
-		/*
-		size_t bpp = 8 * mat_frame.elemSize();
-		BITMAPINFO* bitInfo = (BITMAPINFO*)malloc(sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD));
-		bitInfo->bmiHeader.biBitCount = static_cast<int>(bpp);
-		bitInfo->bmiHeader.biWidth = static_cast<int>(mat_frame.cols);
-		bitInfo->bmiHeader.biHeight = static_cast<int>(-mat_frame.rows);
-		bitInfo->bmiHeader.biPlanes = 1;
-		bitInfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-		bitInfo->bmiHeader.biCompression = BI_RGB;
-		bitInfo->bmiHeader.biClrImportant = 0;
-		bitInfo->bmiHeader.biClrUsed = 0;
-		bitInfo->bmiHeader.biSizeImage = 0;
-		bitInfo->bmiHeader.biXPelsPerMeter = 0;
-		bitInfo->bmiHeader.biYPelsPerMeter = 0;
-
-		// Image is bigger or smaller than into destination rectangle
-		// we use stretch in full rect
-
-		if (mat_frame.cols == winSize.width && mat_frame.rows == winSize.height) {
-			// source and destination have the same size
-			// transfer memory block
-
-			// NOTE: the padding border will be shown here. Anyway, it will be max 3px width
-			SetDIBitsToDevice(cimage_mfc.GetDC(),
-				//destination rectangle
-				0, 0, winSize.width, winSize.height,
-				0, 0, 0, mat_frame.rows,
-				mat_frame.data, bitInfo, DIB_RGB_COLORS);
-		}
-		else {
-			// destination rectangle
-			int destx = 0, desty = 0;
-			int destw = winSize.width;
-			int desth = winSize.height;
-
-			// rectangle defined on the source bitmap
-			// using imgWidth instead of mat_temp.cols will ignore the padding border
-			int imgx = 0, imgy = 0;
-			int imgWidth = mat_frame.cols - border;
-			int imgHeight = mat_frame.rows;
-
-			StretchDIBits(cimage_mfc.GetDC(),
-				destx, desty, destw, desth,
-				imgx, imgy, imgWidth, imgHeight,
-				mat_frame.data, bitInfo, DIB_RGB_COLORS, SRCCOPY);
+			{
+				AfxMessageBox(_T("이미지를 로드할 수 없습니다."));
+			}
 		}
 
-		free(bitInfo);  // 메모리 해제
-	
-		*/
+		// 동영상의 다음 프레임을 가져와서 이미지를 업데이트합니다.
+		UpdateVideoFrame();
 	}
+
+	CDialogEx::OnTimer(nIDEvent);
 }
 
+void CMFCApplication1Dlg::UpdateVideoFrame()
+{
+	if (m_cap.isOpened())
+	{
+		m_cap.read(frame);
+
+		if (frame.empty())
+		{
+			m_cap.set(cv::CAP_PROP_POS_FRAMES, 0);
+			m_cap.read(frame);
+		}
+
+		// 동영상을 표시하는 Picture Control에 현재 프레임을 그립니다.
+		TRACE("Before DrawImage\n");
+		DrawImage(frame, m_pBitmapInfo);
+		TRACE("After DrawImage\n");
+
+		// m_currentFrame 업데이트
+		m_currentFrame++;
+	}
+}
 
 void CMFCApplication1Dlg::OnBnClickedBtnVideoFilter()
 {//비디오 필터링 출력 

@@ -54,7 +54,7 @@ public:
 	afx_msg void OnBnClickedVideoCall();
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void DetectEyesAndDrawRectangles();
-	afx_msg void AdjustEyeSizeUsingSlider();
+	afx_msg void OnSliderEyeSizeChanged(NMHDR* pNMHDR, LRESULT* pResult);
 
 	// 동영상 불러오기
 

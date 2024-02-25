@@ -78,7 +78,6 @@ public:
 	Mat image;
 	cv::Size winSize;
 	int border = 0;
-
 	CStatic m_picture;
 	VideoCapture* capture;
 	Mat mat_frame;
@@ -87,7 +86,11 @@ public:
 	VideoCapture m_cap; // 카메라 캡처 객체
 	CStatic m_pcView; // Picture Control 객체
 	UINT_PTR m_nFaceDetectionTimerID = 0;
-	
+
+	// 동영상 이미지 합성 변수 및 함수
+	CImageList m_imageList;
+	int m_currentFrame = 0;	
+	void UpdateVideoFrame();
 
 	// 비디오 필터링 버튼
 	CButton videoFilterBtn;

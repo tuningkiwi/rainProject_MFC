@@ -5,6 +5,8 @@
 #include "MFCApplication1.h"
 #include "afxdialogex.h"
 #include "CButyDlg.h"
+#include <chrono>
+#include <ctime>
 
 #include "opencv2/objdetect.hpp"
 #include "opencv2/highgui.hpp"
@@ -51,6 +53,7 @@ BEGIN_MESSAGE_MAP(CButyDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_MERGE, &CButyDlg::OnBnClickedMerge)
 	ON_BN_CLICKED(IDC_IMAGECALL, &CButyDlg::OnBnClickedImageCall)
 	ON_BN_CLICKED(IDC_VIDEOCALL, &CButyDlg::OnBnClickedVideoCall)
+	ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_SLIDER_EYE, &CButyDlg::OnSliderEyeSizeChanged)
 	ON_WM_HSCROLL()
 END_MESSAGE_MAP()
 
@@ -68,19 +71,21 @@ BOOL CButyDlg::OnInitDialog()
 	GetDlgItem(IDC_REVERT_FT)->MoveWindow(1000, 720 - 220, 200, 45);
 	GetDlgItem(IDC_DETECT)->MoveWindow(1000, 720 - 280, 200, 45);
 	GetDlgItem(IDC_MERGE)->MoveWindow(1000, 720 - 400, 200, 45);
+	GetDlgItem(IDC_SLIDER_EYE)->MoveWindow(1200, 720 - 340, 200, 45);
 	GetDlgItem(IDC_IMAGECALL)->MoveWindow(1000, 720 - 460, 200, 45);
 	GetDlgItem(IDC_VIDEOCALL)->MoveWindow(1000, 720 - 520, 200, 45);
 
 	// Slider control 초기화
-	CSliderCtrl* pSlider = static_cast<CSliderCtrl*>(GetDlgItem(IDC_SLIDER_EYE));
-	if (pSlider)
-	{
-		pSlider->SetRange(1, 100); // 적절한 범위 설정
-		pSlider->SetPos(50);       // 초기값 설정
+	// Initialize the slider control for eye size
+	m_eyeSizeSliderCtrl.SetRange(0.1, 3);  // Set your desired range
+	m_eyeSizeSliderCtrl.SetPos(2);  // Set the initial eye size
+	m_eyeSizeSliderCtrl.SetTicFreq(1);
+	m_eyeSizeSliderCtrl.SetPageSize(1);
 
-		// Slider control의 위치 설정 (절대적인 수치 사용)
-		pSlider->MoveWindow(1000, 720 - 280 - 55, 200, 45);  // 적절한 수치로 설정
-	}
+	// Register the event handler for the slider
+	m_eyeSizeSliderCtrl.SetBuddy(GetDlgItem(IDC_SLIDER_EYE));  // IDC_STATIC_EYE_SIZE is an example static control to display the current eye size
+	m_eyeSizeSliderCtrl.SetRangeMin(1);
+	m_eyeSizeSliderCtrl.SetRangeMax(10);  // Set the same range as above
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
@@ -95,56 +100,6 @@ void CButyDlg::OnBnClickedOk()
 	CDialogEx::OnOK();
 }
 
-
-//다이얼로그창에 사진 띄우기 
-/*
-void CButyDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
-	KillTimer(1);
-
-	//필터창 크기
-	CRect rect;
-	this->GetClientRect(&rect);
-	//CRect ftWnd(0,0,1280,720);// four-integers are left, top, right, and bottom
-	// picctrl 너비, 높이 조정 
-	int wx = int(rect.right * 5 / 6);
-	int wy = rect.bottom;
-
-	//불러올 사진 cols 가져오기.
-	CClientDC dc(GetDlgItem(IDC_PC_FT));
-	//CRect rect;// 이미지를 넣을 사각형 
-	if (requestImg.cols > wx) {
-		//cols: 1080 = rows : wid;
-		int resize_h = cvRound((wx * requestImg.rows) / requestImg.cols);
-		int y = cvRound((wy - resize_h) / 2);
-		//if (y < 0) { //구현예정. 
-		//	//float ratio =  m_matImage.rows / m_matImage.cols;
-		//	y = 0;
-		//	
-		//}
-		GetDlgItem(IDC_PC_FT)->MoveWindow(0, y, requestImg.cols, resize_h);
-	}
-	else {
-		int x = cvRound((wx - requestImg.cols) / 2);
-		int y = cvRound((wy - requestImg.rows) / 2);
-		GetDlgItem(IDC_PC_FT)->MoveWindow(x, y, requestImg.cols, requestImg.rows);
-	}
-
-
-	//GetClientRect(left, top, right, bottom ) 클라이언트 영역의 좌표
-	//함수가 성공하면 반환 값이 0이 아닙니다.
-	//불러올 이미지 사진에 따라 조정된 Picture Ctrl 크기 
-	GetDlgItem(IDC_PC_FT)->GetClientRect(&rect);
-
-	//픽셀을 삭제합니다. 이 모드는 해당 정보를 보존하지 않고 
-	SetStretchBltMode(dc.GetSafeHdc(), COLORONCOLOR);
-
-	//StretchDIBits 함수는 DIB, JPEG 또는 PNG 이미지의 픽셀 사각형에 
-	// 대한 색 데이터를 지정된 대상 사각형에 복사합니다.
-	//dc.GetSafeHdc(): 출력 디바이스 컨텍스트를 가져옵니다
-	// 함수가 성공하면 반환 값은 복사된 검사 줄의 수입니다. 이 값은 미러된 콘텐츠에 대해 음수일 수 있습니다.
-	StretchDIBits(dc.GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), 0, 0, requestImg.cols, requestImg.rows, requestImg.data, requestBmpInfo, DIB_RGB_COLORS, SRCCOPY);
-}
-*/
 
 void CButyDlg::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) {
 	KillTimer(1);
@@ -200,7 +155,7 @@ void CButyDlg::OnBnClickedImageCall()
 
 void CButyDlg::OnBnClickedVideoCall()
 {
-	OnTimer(1);
+	DrawImage(myImg, myBitmapInfo);
 }
 
 
@@ -270,14 +225,11 @@ void CButyDlg::OnBnClickedCancel()
 	CDialogEx::OnCancel();
 }
 
-/* 백업
-void CButyDlg::OnBnClickedDetect()
+/*
+void CButyDlg::DetectEyesAndDrawRectangles()
 {
 	try
 	{
-		// Copy the current image to myOriginalImg (assuming myOriginalImg is initialized)
-		myOriginalImg = myImg.clone();
-
 		// Convert the Mat image to grayscale for eye detection
 		Mat grayImage;
 		cvtColor(myImg, grayImage, COLOR_BGR2GRAY);
@@ -287,13 +239,35 @@ void CButyDlg::OnBnClickedDetect()
 		eyeCascade.load("C:\\opencv\\build\\etc\\haarcascades\\haarcascade_eye.xml");
 
 		// Detect eyes in the image
-		std::vector<Rect> eyes;
-		eyeCascade.detectMultiScale(grayImage, eyes, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(30, 30));
+		std::vector<Rect> detectedEyes;
+		eyeCascade.detectMultiScale(grayImage, detectedEyes, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(30, 30));
 
-		// Loop over detected eyes and draw rectangles
-		for (size_t i = 0; i < eyes.size(); i++)
+		// Get current time for generating unique filenames
+		auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+		// Loop over detected eyes
+		for (size_t i = 0; i < detectedEyes.size(); ++i)
 		{
-			rectangle(myImg, eyes[i], Scalar(0, 255, 0), 2);
+			// Crop the region of interest (ROI) from the original image using eyeRect
+			Mat eyeCropped = myImg(detectedEyes[i]);
+
+			// Resize the cropped eye image to twice its size
+			Mat resizedEye;
+			resize(eyeCropped, resizedEye, Size(detectedEyes[i].width * 2, detectedEyes[i].height * 2));
+
+			// Calculate the position to paste the resized eye back into the original image
+			int pasteX = detectedEyes[i].x - (resizedEye.cols - detectedEyes[i].width) / 2;
+			int pasteY = detectedEyes[i].y - (resizedEye.rows - detectedEyes[i].height) / 2;
+
+			// Ensure that the pasted region is within the bounds of the original image
+			pasteX = std::max(pasteX, 0);
+			pasteY = std::max(pasteY, 0);
+
+			// Region of interest (ROI) in the original image to paste the resized eye
+			Rect pasteRect(pasteX, pasteY, resizedEye.cols, resizedEye.rows);
+
+			// Blend the resized eye image with the original image in the specified ROI
+			addWeighted(myImg(pasteRect), 0.1, resizedEye, 0.9, 0, myImg(pasteRect));
 		}
 
 		// Redraw the image with eye detection
@@ -308,11 +282,11 @@ void CButyDlg::OnBnClickedDetect()
 */
 void CButyDlg::DetectEyesAndDrawRectangles()
 {
+	// Get the current position of the slider
+	int eyeSizeFactor = m_eyeSizeSliderCtrl.GetPos();
+
 	try
 	{
-		// Copy the current image to myOriginalImg (assuming myOriginalImg is initialized)
-		myOriginalImg = myImg.clone();
-
 		// Convert the Mat image to grayscale for eye detection
 		Mat grayImage;
 		cvtColor(myImg, grayImage, COLOR_BGR2GRAY);
@@ -322,55 +296,35 @@ void CButyDlg::DetectEyesAndDrawRectangles()
 		eyeCascade.load("C:\\opencv\\build\\etc\\haarcascades\\haarcascade_eye.xml");
 
 		// Detect eyes in the image
-		m_detectedEyes.clear();  // Clear existing data before detecting again
-		eyeCascade.detectMultiScale(grayImage, m_detectedEyes, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(30, 30));
+		std::vector<Rect> detectedEyes;
+		eyeCascade.detectMultiScale(grayImage, detectedEyes, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(30, 30));
 
-		// Create a mask to keep only the regions inside the green rectangles
-		Mat mask = Mat::zeros(myImg.size(), CV_8UC1);
-
-		// Loop over detected eyes and draw rectangles on the mask
-		for (size_t i = 0; i < m_detectedEyes.size(); i++)
+		// Loop over detected eyes
+		for (size_t i = 0; i < detectedEyes.size(); ++i)
 		{
-			// Get the current eye rectangle
-			Rect currentEyeRect = m_detectedEyes[i];
+			// Crop the region of interest (ROI) from the original image using eyeRect
+			Mat eyeCropped = myImg(detectedEyes[i]);
 
-			// Crop the region of interest (ROI) from the original image using currentEyeRect
-			Mat eyeROI = myOriginalImg(currentEyeRect);
+			// Resize the cropped eye image based on the slider value
+			Mat resizedEye;
+			resize(eyeCropped, resizedEye, Size(detectedEyes[i].width * eyeSizeFactor, detectedEyes[i].height * eyeSizeFactor));
 
-			// Double the size of the ROI
-			Mat enlargedEyeROI;
-			resize(eyeROI, enlargedEyeROI, Size(currentEyeRect.width, currentEyeRect.height) * 2);
+			// Calculate the position to paste the resized eye back into the original image
+			int pasteX = detectedEyes[i].x - (resizedEye.cols - detectedEyes[i].width) / 2;
+			int pasteY = detectedEyes[i].y - (resizedEye.rows - detectedEyes[i].height) / 2;
 
-			// Check if the enlarged eye ROI fits within the original image
-			if (currentEyeRect.x - currentEyeRect.width / 2 >= 0 &&
-				currentEyeRect.y - currentEyeRect.height / 2 >= 0 &&
-				currentEyeRect.x + currentEyeRect.width / 2 + currentEyeRect.width < myOriginalImg.cols &&
-				currentEyeRect.y + currentEyeRect.height / 2 + currentEyeRect.height < myOriginalImg.rows)
-			{
-				// Replace the region in the original image with the enlarged ROI
-				try
-				{
-					enlargedEyeROI.copyTo(myOriginalImg(currentEyeRect));
-				}
-				catch (const Exception& ex)
-				{
-					// Handle the exception (e.g., display an error message)
-					AfxMessageBox(CString("Error copying enlarged eye ROI to original image: ") + ex.what());
-				}
-			}
-			else
-			{
-				// Handle the case where the enlarged ROI does not fit within the original image
-				//AfxMessageBox(CString("Enlarged eye ROI exceeds the boundaries of the original image.") + ex.what());
-			}
+			// Ensure that the pasted region is within the bounds of the original image
+			pasteX = std::max(pasteX, 0);
+			pasteY = std::max(pasteY, 0);
+
+			// Region of interest (ROI) in the original image to paste the resized eye
+			Rect pasteRect(pasteX, pasteY, resizedEye.cols, resizedEye.rows);
+
+			// Blend the resized eye image with the original image in the specified ROI
+			addWeighted(myImg(pasteRect), 0.1, resizedEye, 0.9, 0, myImg(pasteRect));
 		}
-
-		// Use the mask to keep only the regions inside the green rectangles
-		Mat result;
-		myOriginalImg.copyTo(result, mask);
-
 		// Redraw the image with eye detection
-		DrawImage(result, myBitmapInfo);
+		DrawImage(myImg, myBitmapInfo);
 	}
 	catch (const Exception& ex)
 	{
@@ -379,55 +333,11 @@ void CButyDlg::DetectEyesAndDrawRectangles()
 	}
 }
 
-void CButyDlg::AdjustEyeSizeUsingSlider()
+void CButyDlg::OnSliderEyeSizeChanged(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	try
-	{
-		// Get the current slider position for adjusting eye size
-		int eyeSizeSliderValue = m_eyeSizeSliderCtrl.GetPos();
-		TRACE("eyeSizeSliderValue: %d\n", eyeSizeSliderValue);
-
-		// Create a new Mat to store the adjusted image
-		Mat adjustedImage = myImg.clone();
-
-		// Loop over detected eye regions and adjust sizes
-		for (size_t i = 0; i < m_detectedEyes.size(); i++)
-		{
-			// Define the region of interest (ROI) for each detected eye
-			Rect eyeROI = m_detectedEyes[i];
-
-			// Extract the eye region from the original image
-			Mat eyeImage = myOriginalImg(eyeROI).clone();
-
-			// Dynamic resizing based on the slider value
-			double resizeFactor = 1.0 + 0.01 * eyeSizeSliderValue; // Example: 1.0 to 2.0 based on the slider
-
-			// Resize the extracted eye region dynamically
-			resize(eyeImage, eyeImage, Size(), resizeFactor, resizeFactor);
-
-			// Optionally, save the adjusted eye region to a new bitmap (Mat)
-			Mat adjustedEyeBitmap = eyeImage.clone();
-
-			// Perform additional operations on the adjustedEyeBitmap if needed
-
-			// Draw the adjusted eye region back onto the new Mat
-			adjustedEyeBitmap.copyTo(adjustedImage(eyeROI));
-		}
-
-		// Redraw the image with adjusted eye sizes
-		DrawImage(adjustedImage, myBitmapInfo);
-	}
-	catch (const Exception& ex)
-	{
-		// Handle the exception (e.g., display an error message)
-		CString errorMessage;
-		errorMessage.Format(_T("Error during eye size adjustment: %s"), ex.what());
-		AfxMessageBox(errorMessage);
-
-		// Print exception information to the Output window
-		TRACE("Exception during eye size adjustment: %s\n", ex.what());
-	}
-
+	// Handle the eye size change event here
+	//DetectEyesAndDrawRectangles();
+	*pResult = 0;
 }
 
 void CButyDlg::OnBnClickedDetect()
@@ -438,12 +348,7 @@ void CButyDlg::OnBnClickedDetect()
 
 void CButyDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-	if (pScrollBar->GetDlgCtrlID() == IDC_SLIDER_EYE)
-	{
-		AdjustEyeSizeUsingSlider();
-	}
-
-	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
+	
 }
 
 
