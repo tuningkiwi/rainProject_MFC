@@ -979,12 +979,13 @@ CRect CFilterDlg::pictureControlSizeSet(){
 	//불러올 사진 cols 가져오기.
 
 	CRect rect;// 이미지를 넣을 사각형 
-	if (bmpHistory.back().cols > wx) {
+	if (bmpHistory.back().cols > wx || bmpHistory.back().rows > wy) {
 		//cols: 1080 = rows : wid;
 		int resize_h = cvRound((wx * bmpHistory.back().rows) / bmpHistory.back().cols);
 		int resize_w = wx; //width를 최대크기로 설정 
 		if (wy - resize_h < 0) { //width를 맞추니, height가 넘친다 
-			resize_w = wy * wx / resize_h;
+			resize_w = wy * bmpHistory.back().cols / bmpHistory.back().rows;
+			resize_h = wy;
 		}
 		int x = cvRound((wx - resize_w) / 2);
 		int y = cvRound((wy - resize_h) / 2);
