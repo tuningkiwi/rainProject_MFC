@@ -94,11 +94,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WINDOWS;_DEBUG;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\opencv\build\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%OPENCV_DIR%\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>C:\opencv\build\x64\vc16\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%OPENCV_DIR%\x64\vc16\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>opencv_world490d.lib</AdditionalDependencies>
     </Link>
     <Midl>

@@ -378,7 +378,7 @@ void CFilterDlg::OnBnClickedEmbossFt()//1채널 필터링
 	}
 }
 
-//컬러(채널3)를 그레이(채널1)로 변경 
+//컬러투그레이함수 컬러(채널3)를 그레이(채널1)로 변경 
 Mat CFilterDlg::colorToGray()
 {
 	// TODO: Add your implementation code here.
@@ -934,6 +934,7 @@ int CFilterDlg::noiseFilter(int stddev){
 	}
 }
 
+//#진흙필터함수 엠보싱필터함수
 int CFilterDlg::embossFilter() {
 	Mat src = colorToGray();//color 사진의 경우 gray로 변경.
 	//그레이로 잘 출력되는 지 확인 
@@ -969,6 +970,7 @@ int CFilterDlg::bilateralFilter_my() {
 	return 1;
 }
 
+//픽쳐컨트롤변경함수
 CRect CFilterDlg::pictureControlSizeSet(){
 	//필터창 크기
 	CRect wnd;
@@ -1008,138 +1010,4 @@ CRect CFilterDlg::pictureControlSizeSet(){
 //	// TODO: Add your control notification handler code here
 //}
 
-
-void CFilterDlg::videoPrint() {
-	//KillTimer(2);
-	// int wid = 1280;
-	// int hei = 720;
-	// picCtrl_FT.MoveWindow(0, 0, wid, hei);
-
-	// // 웹캠 열기
-	// capture = new VideoCapture(0, CAP_DSHOW);
-	// if (!capture->isOpened())
-	// {
-	// 	MessageBox(_T("웹캠을 열 수 없습니다."));
-	// 	return;
-	// }
-
-	// // 웹캠 크기 설정
-	// capture->set(CAP_PROP_FRAME_WIDTH, wid);
-	// capture->set(CAP_PROP_FRAME_HEIGHT, hei);
-
-	// // 타이머 설정
-	// //SetTimer(1, 30, NULL);
-
-	// capture->read(mat_frame);
-
-	// //이곳에 OpenCV 함수들을 적용합니다.
-	// //여기에서는 그레이스케일 이미지로 변환합니다.
-	// //cvtColor(mat_frame, mat_frame, COLOR_BGR2GRAY);
-
-	// //화면에 보여주기 위한 처리입니다.
-	// int bpp = 8 * mat_frame.elemSize();
-	// assert((bpp == 8 || bpp == 24 || bpp == 32));
-
-	// int padding = 0;
-	// //32 bit image is always DWORD aligned because each pixel requires 4 bytes
-	// if (bpp < 32)
-	// 	padding = 4 - (mat_frame.cols % 4);
-
-	// if (padding == 4)
-	// 	padding = 0;
-
-	// int border = 0;
-	// //32 bit image is always DWORD aligned because each pixel requires 4 bytes
-	// if (bpp < 32)
-	// {
-	// 	border = 4 - (mat_frame.cols % 4);
-	// }
-
-	// Mat mat_temp;
-	// if (border > 0 || mat_frame.isContinuous() == false)
-	// {
-	// 	// Adding needed columns on the right (max 3 px)
-	// 	cv::copyMakeBorder(mat_frame, mat_temp, 0, 0, 0, border, cv::BORDER_CONSTANT, 0);
-	// }
-	// else
-	// {
-	// 	mat_temp = mat_frame;
-	// }
-
-	// RECT r;
-	// picCtrl_FT.GetClientRect(&r);
-	// //r.right = 500;
-	// //r.bottom = 500;
-	// cv::Size winSize(r.right, r.bottom);
-
-	// cimage_mfc.Create(winSize.width, winSize.height, 24);
-
-	// //CreateBitmapInfo(BITMAPINFO * *bmpinfo, int w, int h, int bpp)
-
-	// BITMAPINFO* bitInfo = (BITMAPINFO*)malloc(sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD));
-	// bitInfo->bmiHeader.biBitCount = bpp;
-	// bitInfo->bmiHeader.biWidth = mat_temp.cols;
-	// bitInfo->bmiHeader.biHeight = -mat_temp.rows;
-	// bitInfo->bmiHeader.biPlanes = 1;
-	// bitInfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-	// bitInfo->bmiHeader.biCompression = BI_RGB;
-	// bitInfo->bmiHeader.biClrImportant = 0;
-	// bitInfo->bmiHeader.biClrUsed = 0;
-	// bitInfo->bmiHeader.biSizeImage = 0;
-	// bitInfo->bmiHeader.biXPelsPerMeter = 0;
-	// bitInfo->bmiHeader.biYPelsPerMeter = 0;
-
-	// //그레이스케일 인경우 팔레트가 필요
-	// if (bpp == 8)
-	// {
-	// 	RGBQUAD* palette = bitInfo->bmiColors;
-	// 	for (int i = 0; i < 256; i++)
-	// 	{
-	// 		palette[i].rgbBlue = palette[i].rgbGreen = palette[i].rgbRed = (BYTE)i;
-	// 		palette[i].rgbReserved = 0;
-	// 	}
-	// }
-
-	// // Image is bigger or smaller than into destination rectangle
-	// // we use stretch in full rect
-
-	// if (mat_temp.cols == winSize.width && mat_temp.rows == winSize.height)
-	// {
-	// 	// source and destination have same size
-	// 	// transfer memory block
-	// 	// NOTE: the padding border will be shown here. Anyway it will be max 3px width
-
-	// 	SetDIBitsToDevice(cimage_mfc.GetDC(),
-	// 		//destination rectangle
-	// 		0, 0, winSize.width, winSize.height,
-	// 		0, 0, 0, mat_temp.rows,
-	// 		mat_temp.data, bitInfo, DIB_RGB_COLORS);
-	// }
-	// else
-	// {
-	// 	// destination rectangle
-	// 	int destx = 0, desty = 0;
-	// 	int destw = winSize.width;
-	// 	int desth = winSize.height;
-
-	// 	// rectangle defined on source bitmap
-	// 	// using imgWidth instead of mat_temp.cols will ignore the padding border
-	// 	int imgx = 0, imgy = 0;
-	// 	int imgWidth = mat_temp.cols - border;
-	// 	int imgHeight = mat_temp.rows;
-
-	// 	StretchDIBits(cimage_mfc.GetDC(),
-	// 		destx, desty, destw, desth,
-	// 		imgx, imgy, imgWidth, imgHeight,
-	// 		mat_temp.data, bitInfo, DIB_RGB_COLORS, SRCCOPY);
-	// }
-
-	// HDC dc = ::GetDC(picCtrl_FT.m_hWnd);
-	// cimage_mfc.BitBlt(dc, 0, 0);
-
-	// ::ReleaseDC(picCtrl_FT.m_hWnd, dc);
-
-	// cimage_mfc.ReleaseDC();
-	// cimage_mfc.Destroy();
-}
 
