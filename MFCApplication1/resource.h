@@ -54,6 +54,7 @@
 #define IDC_BUTTON3                     1018
 #define IDC_BUTTON_RR                   1018
 #define IDC_VIDEO_BTN                   1018
+#define IDC_IMAGECALL                   1018
 #define IDC_BUTTON_LR                   1019
 #define IDC_PARTBLUR_FT                 1020
 #define IDC_STATIC_delete               1021
@@ -85,6 +86,7 @@
 #define IDC_BUTTON4                     1046
 #define IDC_BTN_VIDEO_FILTER            1046
 #define IDC_MERGE_FACE                  1047
+#define IDC_VIDEOCALL                   1048
 #define IDC_BUTTON_FLIP                 1048
 
 // Next default values for new objects
