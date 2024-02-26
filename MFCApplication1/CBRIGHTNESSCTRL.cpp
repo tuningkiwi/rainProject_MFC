@@ -40,27 +40,29 @@ BOOL CBRIGHTNESSCTRL::OnInitDialog()
 
 	CRect wndSz;
 	this->GetWindowRect(wndSz);// right:창의 너비 bottm: 창의 높이 
-	GetDlgItem(IDC_CANVAS)->MoveWindow(0, 0, int(wndSz.right * 5 / 6), wndSz.bottom);
+	GetDlgItem(IDC_CANVAS)->MoveWindow(0, 0, int(wndSz.right * 5 / 6), wndSz.bottom); 
+	// 픽쳐 컨트롤 시작 좌표 , 전체창의 5/6 부분 으로 출력
+	
+	GetDlgItem(IDC_STATIC7)->MoveWindow(960, 710, 500, 500); // 'SETTING'그룹창
 
-	GetDlgItem(IDC_STATIC8)->MoveWindow(960, 140, 25, 25); // 밝기
+	GetDlgItem(IDC_STATIC8)->MoveWindow(960, 140, 25, 25);// 밝기
 	GetDlgItem(IDC_STATIC9)->MoveWindow(960, 260, 25, 25);// 대비
-	GetDlgItem(IDC_STATIC7)->MoveWindow(960, 710, 50, 50); // 'SETTING'그룹창
 
-	GetDlgItem(IDC_SPIN2)->MoveWindow(1170, 284, 20, 20);
-	GetDlgItem(IDC_EDIT2)->MoveWindow(1150, 284, 20, 20);
+	GetDlgItem(IDC_SPIN2)->MoveWindow(1170, 284, 20, 20);// 스핀 컨트롤
+	GetDlgItem(IDC_EDIT2)->MoveWindow(1150, 284, 20, 20);// 에딧 컨트롤 ver=스핀 에딧 컨트롤 상태 
 
-	GetDlgItem(IDC_SPIN1)->MoveWindow(1170, 161, 20, 20);
-	GetDlgItem(IDC_EDIT1)->MoveWindow(1150, 161, 20, 20);
+	GetDlgItem(IDC_SPIN1)->MoveWindow(1170, 161, 20, 20);// 스핀 컨트롤
+	GetDlgItem(IDC_EDIT1)->MoveWindow(1150, 161, 20, 20);// 에딧 컨트롤 ver=스핀 에딧 컨트롤 상태 
 
-	GetDlgItem(IDC_SLIDER1)->MoveWindow(960, 160, 180, 45);
-	GetDlgItem(IDC_SLIDER2)->MoveWindow(960, 280, 180, 45);
+	GetDlgItem(IDC_SLIDER1)->MoveWindow(960, 160, 180, 45);// 트랙바 
+	GetDlgItem(IDC_SLIDER2)->MoveWindow(960, 280, 180, 45);// 트랙바
 
-	GetDlgItem(IDCANCEL)->MoveWindow(1000, 720 - 100, 200, 45);
-	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);
+	GetDlgItem(IDCANCEL)->MoveWindow(1000, 720 - 100, 200, 45); //취소
+	GetDlgItem(IDOK)->MoveWindow(1000, 720 - 160, 200, 45);// 확인 
 
-	GetDlgItem(IDC_BUTTON2)->MoveWindow(980, 370 ,75,40); 
-	GetDlgItem(IDC_BUTTON3)->MoveWindow(1100, 370, 75, 40); 
-	GetDlgItem(IDC_BUTTON4)->MoveWindow(1000, 500 ,200, 45);
+	GetDlgItem(IDC_BUTTON2)->MoveWindow(980, 370 ,75,40); //흑백모드
+	GetDlgItem(IDC_BUTTON3)->MoveWindow(1100, 370, 75, 40); //컬러모드
+	GetDlgItem(IDC_BUTTON4)->MoveWindow(1000, 500 ,200, 45);// 되돌리기 
 	//GetDlgItem(IDC_BUTTON1)->MoveWindow(1100, 450, 75, 40);
 
 	// 슬라이더 초기화
@@ -72,20 +74,16 @@ BOOL CBRIGHTNESSCTRL::OnInitDialog()
 	m_slider2.SetPos(100); // 초기 명암비 값 설정
 	m_slider2.SetTicFreq(10);
 
-
+	// 에디트 컨트롤 초기화
+	m_edit2.SetWindowText(_T("0")); // 초기 명암비 값 설정
+	m_edit.SetWindowText(_T("0")); // 초기 밝기 값 설정
+	m_edit_val = 0; 
+	m_edit_val2 = 0;
 
 	// 스핀 컨트롤 초기화
 	//m_spin.SetRange(-100, 100); // 밝기 범위 설정
 	//m_spin.SetPos(50); // 초기 밝기 값 설정
-
-	// 에디트 컨트롤 초기화
-	m_edit2.SetWindowText(_T("0")); // 초기 명암비 값 설정
-
-	m_edit.SetWindowText(_T("0")); // 초기 밝기 값 설정
-
-	m_edit_val = 0; 
-	m_edit_val2 = 0;
-
+	
 	SetTimer(1, 80, NULL);
 	return TRUE; // 포커스 설정을 위한 기본값 반환
 }
@@ -124,34 +122,37 @@ END_MESSAGE_MAP()
 // CBRIGHTNESSCTRL 메시지 처리기
 
 void CBRIGHTNESSCTRL::DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo) // 매트릭스 판때기 , 비트맵 판때기
-{
-	KillTimer(1);
-	CRect canvas; // 먼저 메인에서 불러온 이미지를 이어서 받을 사각형 과(의)객체 'canvas' 생성
-	this->GetClientRect(&canvas); //사각형 객체에='canvas' [사각형의 x, y 좌표설정이되는 = (0, 0) 함수'GetClientRect']
-	int wx = int(canvas.right * 5 / 6);
-	int wy = canvas.bottom;
+{		// 타이머 중지
+		KillTimer(1);
 
-	//불러올 사진 cols 가져오기.
+		// 캔버스 영역 가져오기
+		CRect canvas;
+		this->GetClientRect(&canvas);
+		int wx = int(canvas.right * 5 / 6); // 캔버스의 가로 길이 설정
+		int wy = canvas.bottom; // 캔버스의 세로 길이 설정
 
-	CClientDC dc(GetDlgItem(IDC_CANVAS));
-	
-	if (requestImg.cols > wx) {
-		
-		int resize_h = cvRound((wx * requestImg.rows) / requestImg.cols);
-		int y = cvRound((wy - resize_h) / 2);
-	
-		GetDlgItem(IDC_CANVAS)->MoveWindow(0, y, requestImg.cols, resize_h);
-	}
-	else {
-		int x = cvRound((wx - requestImg.cols) / 2);
-		int y = cvRound((wy - requestImg.rows) / 2);
-		GetDlgItem(IDC_CANVAS)->MoveWindow(x, y, requestImg.cols, requestImg.rows);
-	}
-	GetDlgItem(IDC_CANVAS)->GetClientRect(&canvas);
-	SetStretchBltMode(dc.GetSafeHdc(),COLORONCOLOR);
-	StretchDIBits(dc.GetSafeHdc(), 0, 0, canvas.Width(), canvas.Height(), 0, 0, requestImg.cols, requestImg.rows,
-		requestImg.data, requestBmpInfo, DIB_RGB_COLORS, SRCCOPY);
-	
+		// 캔버스 DC 생성
+		CClientDC dc(GetDlgItem(IDC_CANVAS));
+
+		// 이미지 크기에 따라 캔버스 크기 조정
+		if (requestImg.cols > wx) {
+			int resize_h = cvRound((wx * requestImg.rows) / requestImg.cols); // 이미지 비율 유지를 위한 높이 조정
+			int y = cvRound((wy - resize_h) / 2); // 이미지를 캔버스의 중앙에 배치하기 위한 Y 좌표 계산
+			GetDlgItem(IDC_CANVAS)->MoveWindow(0, y, requestImg.cols, resize_h); // 캔버스 크기 조정
+		}
+		else {
+			int x = cvRound((wx - requestImg.cols) / 2); // 이미지를 캔버스의 중앙에 배치하기 위한 X 좌표 계산
+			int y = cvRound((wy - requestImg.rows) / 2); // 이미지를 캔버스의 중앙에 배치하기 위한 Y 좌표 계산
+			GetDlgItem(IDC_CANVAS)->MoveWindow(x, y, requestImg.cols, requestImg.rows); // 캔버스 크기 조정
+		}
+
+		// 캔버스의 크기 다시 가져오기
+		GetDlgItem(IDC_CANVAS)->GetClientRect(&canvas);
+
+		// 비트맵을 사용하여 이미지 화면에 출력
+		SetStretchBltMode(dc.GetSafeHdc(), COLORONCOLOR); // 비트맵을 스트레치하여 출력할 때 색상 유지 모드 설정
+		StretchDIBits(dc.GetSafeHdc(), 0, 0, canvas.Width(), canvas.Height(), 0, 0, requestImg.cols, requestImg.rows,
+			requestImg.data, requestBmpInfo, DIB_RGB_COLORS, SRCCOPY); // 비트맵 출력
 }
 
 void CBRIGHTNESSCTRL::OnDestroy()
@@ -179,7 +180,8 @@ void CBRIGHTNESSCTRL::CreateBitmapInfo(BITMAPINFO** btmInfo, int w, int h, int b
 	(*btmInfo)->bmiHeader.biXPelsPerMeter = 0;//비트맵에 대한 대상 디바이스의 가로 해상도(미터당 픽셀)
 	(*btmInfo)->bmiHeader.biYPelsPerMeter = 0;//비트맵에 대한 대상 디바이스의 세로 해상도(미터당 픽셀)를 지정합니다.
 	(*btmInfo)->bmiHeader.biClrUsed = 0;//비트맵에서 실제로 사용되는 색 테이블의 색 인덱스 수를 지정합니다.
-	(*btmInfo)->bmiHeader.biClrImportant = 0;//비트맵을 표시하는 데 중요한 것으로 간주되는 색 인덱스의 수를 지정합니다.이 값이 0이면 모든 색이 중요합니다.
+	(*btmInfo)->bmiHeader.biClrImportant = 0;//비트맵을 표시하는 데 중요한 것으로 간주되는 색 인덱스의 수를 지정합니다.
+											//이 값이 0이면 모든 색이 중요합니다.
 
 	if (bpp == 8)
 	{
@@ -196,11 +198,11 @@ void CBRIGHTNESSCTRL::CreateBitmapInfo(BITMAPINFO** btmInfo, int w, int h, int b
 	(*btmInfo)->bmiHeader.biHeight = -h;//음수는 원본이 왼쪽 위 모서리에 있는 하향식 DIB입니다.
 }
 
-void CBRIGHTNESSCTRL::OnBnClickedButton4()
+void CBRIGHTNESSCTRL::OnBnClickedButton4() // 되돌리기 로 전환 버튼 
 {
 	//if ((myImg.channels()==3 )||(myImg.channels()==1)) {
-		colorToGray();
-		GrayToColor();
+		colorToGray();// 흑백 모드
+		GrayToColor();// 컬러 모드 
 		DrawImage(myImg, myBitmapInfo);
 
 		MessageBox(L"원본으로 돌아갑니다", _T("원초적본능"), MB_OK | MB_ICONINFORMATION);
@@ -219,7 +221,7 @@ void CBRIGHTNESSCTRL::OnTimer(UINT_PTR nIDEvent)
 	CDialogEx::OnTimer(nIDEvent);
 }
 
-void CBRIGHTNESSCTRL::OnBnClickedButton2()
+void CBRIGHTNESSCTRL::OnBnClickedButton2() // 흑백 모드 전환 버튼
 {
 	if (colorToGray()) 
 	{
@@ -228,7 +230,7 @@ void CBRIGHTNESSCTRL::OnBnClickedButton2()
 	}
 }
 
-void CBRIGHTNESSCTRL::OnBnClickedButton3()
+void CBRIGHTNESSCTRL::OnBnClickedButton3() // 컬러 모드 전환 버튼 
 {
 	if (GrayToColor()) 
 	{
@@ -248,9 +250,9 @@ BOOL CBRIGHTNESSCTRL::colorToGray()
 		cvtColor(myImg, myImg, COLOR_BGR2GRAY);
 
 		// 이미지 정보 업데이트
-		CreateBitmapInfo(&BitChangeImg, myImg.cols, myImg.rows, myImg.channels() * 8);
+		CreateBitmapInfo(&BitChangeImg, myImg.cols, myImg.rows, 8);
 		// 흑백 이미지로 변환되었으므로 채널 수는 1이므로 8로 설정
-		// 즉 컬러체널 원소 = 3 ==> 흑백으로 변환되니 흑백 기준의 채널 수 '8'로 변경되는것! 하지만 아래 설정으로 인해 24
+		// 즉 컬러체널 원소 = 3 ==> 흑백으로 변환되니 흑백 기준의 채널 수 '8'로 변경되는것! 
 		
 		// 성공 메시지 출력
 		//CString successMessage = _T("성공적으로 변환되었습니다.");
@@ -274,7 +276,8 @@ BOOL CBRIGHTNESSCTRL::GrayToColor()
 		myImg = backupImg.clone();
 
 		// 이미지 정보 업데이트
-		CreateBitmapInfo(&BitChangeImg2, myImg.cols, myImg.rows,myImg.channels() *8); // 컬러 이미지로 변환되었으므로 채널 수는 3이므로 24로 설정
+		CreateBitmapInfo(&BitChangeImg2, myImg.cols, myImg.rows,myImg.channels() *8);
+		// 컬러 이미지로 변환되었으므로 채널 수는 3이므로 24로 설정
 
 		// 성공 메시지 출력
 		//CString successMessage = _T("성공적으로 변환되었습니다.");
@@ -297,46 +300,49 @@ void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	int newValue2 = 0;
 	if (pScrollBar->GetDlgCtrlID() == IDC_SLIDER1)
 	{
-		// 슬라이더에서 값 변경될 때
+		
 		newValue = m_slider.GetPos(); // 슬라이더에서 값 가져오기
 		m_spin.SetPos(newValue); // 스핀 컨트롤에 값 설정
-		CString strValue;
-		strValue.Format(_T("%d"), newValue);
+		CString strValue; //문자열을 strvalue 에 받고 Format 서식 문자열을 사용하여 문자열을 생성 %d는 정수를 나타내는 서식 지정자이며, 
+		strValue.Format(_T("%d"), newValue);//해당 지정자에 newValue의 값이 대입되어 문자열이 생성됩니다.
 		m_edit.SetWindowText(strValue); // 에디트 컨트롤에 값 설정
 
 		if ((myImg.channels() == 3))
-		{
-			Mat tmpImg = myImg.clone(); //open cv4 책= ycrcv 참조
-			cvtColor(tmpImg, tmpImg, COLOR_BGR2YCrCb);
+		{//open cv4 책= ycrcv 참조
+			Mat tmpImg = myImg.clone(); //입력 이미지 myImg를 복제하여 새로운 이미지 tmpImg에 저장합니다.
+			cvtColor(tmpImg, tmpImg, COLOR_BGR2YCrCb);//BGR 색공간에서 YCrCb 색공간으로 이미지를 변환
+													//=이미지를 밝기(Y)와 색상(크로마)의 세 가지 채널로 분리합니다.
 
-			std::vector<Mat> ycrcb_planes;
-			split(tmpImg, ycrcb_planes);
+			std::vector<Mat> ycrcb_planes;// YCrCb 이미지를 저장할 벡터를 선언합니다.
+			split(tmpImg, ycrcb_planes);//split 통해 이미지를 각각의 채널로 나뉘고 벡터에 저장합니다.
 
 			Mat adjustedImage;
-			ycrcb_planes[0] = ycrcb_planes[0] + newValue;
-			merge(ycrcb_planes, adjustedImage);
+			ycrcb_planes[0] = ycrcb_planes[0] + newValue; //밝기 채널(Y)에 값을 받고 더해서 밝지 제어
+			merge(ycrcb_planes, adjustedImage);//수정된 밝기 채널이(input) 다시 새로운 Mat (output) 병합
 
-			cvtColor(adjustedImage, adjustedImage, COLOR_YCrCb2BGR);
+			cvtColor(adjustedImage, adjustedImage, COLOR_YCrCb2BGR); //밝기 채널만 받은 Mat 을 BGR 색공간으로 변환
 
 			// 이미지 표시
 			CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
+			//이미지를 표시하고 결과 이미지와 비트맵 정보를 업데이트합니다.입력 이미지의 채널이 3인 경우에는 *8
 			DrawImage(adjustedImage, BitChangeImg);
+			
 			resultImg = adjustedImage.clone();
 			BitChangeResultImg = BitChangeImg;
+			//resultImg에 결과 이미지를 얕은복사하여 저장합니다.
+			//BitChangeResultImg에 비트맵 정보를 얕은복사하여 저장합니다.
 		}
 		else if (myImg.channels() == 1)
 		{
-			Mat adjustedImage = myImg + newValue;
+			Mat adjustedImage = myImg + newValue;//입력 myImg의 각 픽셀 값에 newValue를 더하여 명암 조정
 
-			// 이미지 표시
-			CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
+			CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, 8);
 			DrawImage(adjustedImage, BitChangeImg);
 
 			resultImg = adjustedImage.clone();
 			BitChangeResultImg = BitChangeImg2;
-
 		}
-
+	
 	}
 	else if (pScrollBar->GetDlgCtrlID() == IDC_SLIDER2)
 	{
@@ -356,6 +362,7 @@ void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 			vector<Mat> ycrcb_planes2;
 			split(tmpImg2, ycrcb_planes2);
+			
 			float contrast = 1.0;
 
 			ycrcb_planes2[0] = ycrcb_planes2[0] + (newValue2 - 128) * contrast;
@@ -378,45 +385,37 @@ void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		}
 		else if (myImg.channels() == 1)
 		{
+			Mat tmpImg2= myImg.clone();//myImg의 복사
+			cvtColor(tmpImg2, tmpImg2, COLOR_GRAY2BGR);//복사본을 회색에서 BGR 형식으로 변환합니다.
 			
-
-			Mat tmpImg2= myImg.clone();
-			cvtColor(tmpImg2, tmpImg2, COLOR_GRAY2BGR);
-			//Mat tmpImg3; //= myImg.clone();
 			cvtColor(tmpImg2, tmpImg2.clone(), COLOR_BGR2YCrCb);
-			std::vector<Mat> ycrcb_planes2;
+			//따로 복제 할필요가 없음 같은 원소계열 다시 BGR에서 YCrCb 형식으로 변환합니다.
+			std::vector<Mat> ycrcb_planes2;//YCrCb 채널로 분리합니다.
 
 			split(tmpImg2, ycrcb_planes2);
 			float contrast=1.0;
 
 			ycrcb_planes2[0] = ycrcb_planes2[0] + (m_edit_val2 -250 ) * contrast ;
+			//m_edit_val2 값에 따라 대비를 조절하여 Y 채널에 적용합니다.
 
 			Mat adjustedImage2;
 		
-		
-			equalizeHist(ycrcb_planes2[0], ycrcb_planes2[0]); // 평활화 수행 = in  ->  out
+			equalizeHist(ycrcb_planes2[0], ycrcb_planes2[0]); //Y 채널에 히스토그램 평활화를 적용합니다.
 			
-			merge(ycrcb_planes2, adjustedImage2); // split 한 ycrcb_planes2 와 새로운 Mat adjustedImage2 =merge 시킨다
+			merge(ycrcb_planes2, adjustedImage2); //채널을 다시 합쳐서 조정된 이미지를 생성합니다.
 
-			cvtColor(adjustedImage2, adjustedImage2.clone() , COLOR_YCrCb2BGR);
+			cvtColor(adjustedImage2, adjustedImage2.clone() , COLOR_YCrCb2BGR);//YCrCb를 BGR로 변환합니다.
 
-			cvtColor(adjustedImage2, adjustedImage2, COLOR_BGR2GRAY);
+			cvtColor(adjustedImage2, adjustedImage2, COLOR_BGR2GRAY);//BGR를 GRAY로 변환합니다.
+		
 
-			// 이미지 표시
-			CreateBitmapInfo(&BitChangeImg2, adjustedImage2.cols, adjustedImage2.rows, adjustedImage2.channels() * 8);
+			CreateBitmapInfo(&BitChangeImg2, adjustedImage2.cols, adjustedImage2.rows, 8);
 			DrawImage(adjustedImage2, BitChangeImg2);
 
 			resultImg = adjustedImage2.clone();
-			BitChangeResultImg = BitChangeImg2;
+			BitChangeResultImg = BitChangeImg2;//이미지 및 비트맵을 각각 resultImg 및 BitChangeResultImg에 복사합니다.
 		}
 	}
-
-
-			
-
-
-
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 
 	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
@@ -460,7 +459,7 @@ void CBRIGHTNESSCTRL::mspin_updown(NMHDR* pNMHDR, LRESULT* pResult)
 
 	}
 
-	//m_spin.SetPos(m_edit_val); // 스핀 컨트롤에 새로운 값 설정
+	m_spin.SetPos(m_edit_val); // 스핀 컨트롤에 새로운 값 설정
 	m_slider.SetPos(m_edit_val); // 슬라이더에도 새로운 값 설정
 	CString strValue;
 	strValue.Format(_T("%d"), m_edit_val);
@@ -492,7 +491,7 @@ void CBRIGHTNESSCTRL::mspin_updown(NMHDR* pNMHDR, LRESULT* pResult)
 		Mat adjustedImage = myImg + m_edit_val;
 
 		// 이미지 표시+
-		CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
+		CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, 8);
 		DrawImage(adjustedImage, BitChangeImg);
 		resultImg = adjustedImage.clone();
 		BitChangeResultImg = BitChangeImg;
@@ -504,7 +503,7 @@ void CBRIGHTNESSCTRL::mspin_updown(NMHDR* pNMHDR, LRESULT* pResult)
 void CBRIGHTNESSCTRL::mspin_updown2(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	LPNMUPDOWN pNMUpDown2 = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	
 
 		// 스핀 컨트롤의 값이 변경될 때
 	if (pNMUpDown2->iDelta < 0) {//위로 증가 버튼눌렀을 때 iDelta 음수가 출력 
@@ -521,11 +520,11 @@ void CBRIGHTNESSCTRL::mspin_updown2(NMHDR* pNMHDR, LRESULT* pResult)
 		m_edit_val2 -=100;
 	}
 
-	m_spin2.SetPos(m_edit_val2); // 스핀 컨트롤에 새로운 값 설정
-	m_slider2.SetPos(m_edit_val2); // 슬라이더에도 새로운 값 설정
+	m_spin2.SetPos(m_edit_val2); 
+	m_slider2.SetPos(m_edit_val2);
 	CString strValue2;
 	strValue2.Format(_T("%d"), m_edit_val2);
-	m_edit2.SetWindowText(strValue2); // 에디트 컨트롤에도 새로운 값 설정
+	m_edit2.SetWindowText(strValue2); 
 
 	if ((myImg.channels() == 3))
 	{
@@ -580,7 +579,7 @@ void CBRIGHTNESSCTRL::mspin_updown2(NMHDR* pNMHDR, LRESULT* pResult)
 		cvtColor(adjustedImage2, adjustedImage2, COLOR_BGR2GRAY);
 
 		// 이미지 표시
-		CreateBitmapInfo(&BitChangeImg2, adjustedImage2.cols, adjustedImage2.rows, adjustedImage2.channels() * 8);
+		CreateBitmapInfo(&BitChangeImg2, adjustedImage2.cols, adjustedImage2.rows, 8);
 		DrawImage(adjustedImage2, BitChangeImg2);
 
 		resultImg = adjustedImage2.clone();
