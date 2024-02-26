@@ -84,17 +84,17 @@ BOOL CColorControls::OnInitDialog()
 	GetDlgItem(IDC_STATIC_COLOR)->MoveWindow(1000, 50, 70, 40);
 	GetDlgItem(IDC_COLOR_EDIT)->MoveWindow(1080, 50, 120, 40); //RGB값
 
-	GetDlgItem(IDC_SLIDER_H)->MoveWindow(1000, 180, 200, 30); //슬라이더H
-	GetDlgItem(IDC_SLIDER_EDIT_H)->MoveWindow(1140, 220, 50, 30);
-	GetDlgItem(IDC_SLIDER_NAME_H)->MoveWindow(1000, 220, 120, 30);
+	GetDlgItem(IDC_SLIDER_H)->MoveWindow(1000, 160, 200, 30); //슬라이더H
+	GetDlgItem(IDC_SLIDER_EDIT_H)->MoveWindow(1140, 200, 50, 30);
+	GetDlgItem(IDC_SLIDER_NAME_H)->MoveWindow(1000, 200, 120, 30);
 
-	GetDlgItem(IDC_SLIDER_S)->MoveWindow(1000, 280, 200, 30); //슬라이더S
-	GetDlgItem(IDC_SLIDER_EDIT_S)->MoveWindow(1140, 320, 50, 30);
-	GetDlgItem(IDC_SLIDER_NAME_S)->MoveWindow(1000, 320, 120, 30);
+	GetDlgItem(IDC_SLIDER_S)->MoveWindow(1000, 260, 200, 30); //슬라이더S
+	GetDlgItem(IDC_SLIDER_EDIT_S)->MoveWindow(1140, 300, 50, 30);
+	GetDlgItem(IDC_SLIDER_NAME_S)->MoveWindow(1000, 300, 120, 30);
 
-	GetDlgItem(IDC_SLIDER_V)->MoveWindow(1000, 380, 200, 30); //슬라이더V
-	GetDlgItem(IDC_SLIDER_EDIT_V)->MoveWindow(1140, 420, 50, 30);
-	GetDlgItem(IDC_SLIDER_NAME_V)->MoveWindow(1000, 420, 120, 30);
+	GetDlgItem(IDC_SLIDER_V)->MoveWindow(1000, 360, 200, 30); //슬라이더V
+	GetDlgItem(IDC_SLIDER_EDIT_V)->MoveWindow(1140, 400, 50, 30);
+	GetDlgItem(IDC_SLIDER_NAME_V)->MoveWindow(1000, 400, 120, 30);
 
 	
 	SetTimer(1, 80, NULL);//100ms  사진 불러오기 위한 타이머 
