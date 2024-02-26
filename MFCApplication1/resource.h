@@ -57,7 +57,6 @@
 #define IDC_VIDEO_BTN                   1018
 #define IDC_IMAGECALL                   1018
 #define IDC_BUTTON_LR                   1019
-#define IDC_BUTTON4                     1019
 #define IDC_PARTBLUR_FT                 1020
 #define IDC_BUTTON5                     1020
 #define IDC_STATIC_delete               1021
