@@ -794,7 +794,7 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 		if (pVideoWnd)
 		{
 			// 이미지를 삽입할 비트맵 파일 경로
-			CString strImagePath = _T("C:/Users/김경태/Downloads/headpin02.jpg");
+			CString strImagePath = _T("./img/airplane1.jpg");
 
 			// CString을 UTF-8로 변환
 			CT2CA pszConvertedAnsiString(strImagePath);
