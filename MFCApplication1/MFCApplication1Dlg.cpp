@@ -505,7 +505,7 @@ void CMFCApplication1Dlg::OnBnClickedAffineBtn()
 //경태: 객체 검출 및 변형 
 void CMFCApplication1Dlg::OnBnClickedButyBtn()
 {
-	//CDialog filterDlg(IDD_DIALOG1);
+	// CDialog ButyDlg(IDD_Buty);
 	CButyDlg butyDlg(m_matImage, m_pBitmapInfo);
 
 	// Create and show the dialog box
@@ -519,19 +519,15 @@ void CMFCApplication1Dlg::OnBnClickedButyBtn()
 		AfxMessageBox(_T("Dialog box could not be created!"));
 		break;
 	case IDABORT:
-		// Do something
 		break;
 	case IDOK:
-		// Do something
 		m_matImage = butyDlg.bmpHistory.back();
 		m_pBitmapInfo = butyDlg.bmpInfoHistory.back();
 		DrawImage(m_matImage, m_pBitmapInfo);
 		break;
 	case IDCANCEL:
-		// Do something
 		break;
 	default:
-		// Do something
 		break;
 	};
 }
@@ -689,6 +685,15 @@ void CMFCApplication1Dlg::OnBnClickedVideoBtn()
 
 void CMFCApplication1Dlg::OnBnClickedMergeBtn()
 {
+	// 파일 선택 대화 상자 열기
+	CFileDialog dlg(TRUE, NULL, NULL, OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST, _T("이미지 파일 (*.bmp;*.jpg;*.png)|*.bmp;*.jpg;*.png|모든 파일 (*.*)|*.*||"));
+
+	if (dlg.DoModal() == IDOK)
+	{
+		// 사용자가 파일을 선택하면 파일 경로를 멤버 변수에 저장합니다.
+		m_strImagePath = dlg.GetPathName();
+	}
+
 	SetTimer(2, 30, NULL);
 }
 
@@ -703,15 +708,16 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 {
 	if (nIDEvent == 1)
 	{
-		//mat_frame가 입력 이미지입니다.
+		// 캡처한 프레임을 mat_frame에 읽어옵니다.
 		capture->read(mat_frame);
 
-		//화면에 보여주기 위한 처리입니다.
+		// mat_frame을 화면에 보여주기 위한 처리입니다.
 		int bpp = 8 * mat_frame.elemSize();
-		assert((bpp == 8 || bpp == 24 || bpp == 32));
+		assert((bpp == 8 || bpp == 24 || bpp == 32));  // 이미지의 비트 수를 확인하고, 비트 수가 8, 24, 32 중 하나여야 한다고 가정
 
 		int padding = 0;
-		//32 bit image is always DWORD aligned because each pixel requires 4 bytes
+
+		// 32비트 이미지는 각 픽셀이 4바이트를 사용하므로 DWORD로 정렬됩니다.
 		if (bpp < 32)
 			padding = 4 - (mat_frame.cols % 4);
 
@@ -719,16 +725,17 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 			padding = 0;
 
 		int border = 0;
-		//32 bit image is always DWORD aligned because each pixel requires 4 bytes
+
+		// 32비트 이미지는 각 픽셀이 4바이트를 사용하므로 DWORD로 정렬됩니다.
 		if (bpp < 32)
 		{
 			border = 4 - (mat_frame.cols % 4);
 		}
 
-		Mat mat_temp;
+		Mat mat_temp;  // 이미지에 패딩을 추가한 mat_temp를 만듭니다.
 		if (border > 0 || mat_frame.isContinuous() == false)
 		{
-			// Adding needed columns on the right (max 3 px)
+			// 오른쪽에 필요한 열(최대 3px)을 추가합니다.
 			cv::copyMakeBorder(mat_frame, mat_temp, 0, 0, 0, border, cv::BORDER_CONSTANT, 0);
 		}
 		else
@@ -736,90 +743,89 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 			mat_temp = mat_frame;
 		}
 
+		// 비트맵 정보를 설정합니다. mat_temp의 속성을 bitInfo에 대입하고, 헤더 정보 등을 설정합니다.
 		RECT r;
-		m_picture.GetClientRect(&r);
-		//r.right = 500;
-		//r.bottom = 500;
-		cv::Size winSize(r.right, r.bottom);
+		m_picture.GetClientRect(&r);         // 클라이언트 영역을 나타내는 RECT 구조체를 만들고, 현재 윈도우의 클라이언트 크기를 가져옴
+		cv::Size winSize(r.right, r.bottom); // winSize는 m_picture 컨트롤의 클라이언트 영역 크기를 가진 객체
 
-		cimage_mfc.Create(winSize.width, winSize.height, 24);
+		cimage_mfc.Create(winSize.width, winSize.height, 24);  // cimage_mfc 객체를 생성하고 사이즈 설정, 각 픽셀에 대해 24비트 색상 사용
 
-		BITMAPINFO* bitInfo = (BITMAPINFO*)malloc(sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD));
-		bitInfo->bmiHeader.biBitCount = bpp;
-		bitInfo->bmiHeader.biWidth = mat_temp.cols;
-		bitInfo->bmiHeader.biHeight = -mat_temp.rows;
-		bitInfo->bmiHeader.biPlanes = 1;
-		bitInfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-		bitInfo->bmiHeader.biCompression = BI_RGB;
-		bitInfo->bmiHeader.biClrImportant = 0;
-		bitInfo->bmiHeader.biClrUsed = 0;
-		bitInfo->bmiHeader.biSizeImage = 0;
-		bitInfo->bmiHeader.biXPelsPerMeter = 0;
-		bitInfo->bmiHeader.biYPelsPerMeter = 0;
+		BITMAPINFO* bitInfo = (BITMAPINFO*)malloc(sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD));  // 구조체 동적 할당
+		bitInfo->bmiHeader.biBitCount = bpp;                    // bpp 변수는 이미지의 비트 수를 나타내며, 이를 biBitCount에 설정
+		bitInfo->bmiHeader.biWidth = mat_temp.cols;             // 이미지의 폭인 biWidth를 mat_temp.cols 로 설정
+		bitInfo->bmiHeader.biHeight = -mat_temp.rows;           // 이미지의 높이를 나타내는 biHeight를 -mat_temp.rows로 설정. 하단 방향으로 그려짐
+		bitInfo->bmiHeader.biPlanes = 1;                        // 비트맵 평면 수를 나타냄
+		bitInfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);   // 구조체의 크기 설정
+		bitInfo->bmiHeader.biCompression = BI_RGB;              // 비트맵의 압출 방식을 나타내는 biCompression을 BI_RGB로 설정
+		bitInfo->bmiHeader.biClrImportant = 0;                  // 색상 관련 정보 설정
+		bitInfo->bmiHeader.biClrUsed = 0;                       // 색상 관련 정보 설정
+		bitInfo->bmiHeader.biSizeImage = 0;                     // 색상 관련 정보 설정
+		bitInfo->bmiHeader.biXPelsPerMeter = 0;                 // 색상 관련 정보 설정
+		bitInfo->bmiHeader.biYPelsPerMeter = 0;                 // 색상 관련 정보 설정
 
 		//그레이스케일 인경우 팔레트가 필요
 		if (bpp == 8)
 		{
+			// 8비트 그레이스케일 이미지에 대한 팔레트 설정
 			RGBQUAD* palette = bitInfo->bmiColors;
+
 			for (int i = 0; i < 256; i++)
 			{
+				// R, G, B 값을 픽셀 값으로 설정
 				palette[i].rgbBlue = palette[i].rgbGreen = palette[i].rgbRed = (BYTE)i;
+				
+				// 예약 필드는 0으로 설정
 				palette[i].rgbReserved = 0;
 			}
 		}
 
-		// Image is bigger or smaller than into destination rectangle
-		// we use stretch in full rect
-
+		// 이미지가 목표 사각형보다 크거나 작을 경우 전체 사각형에서 확장합니다.
 		if (mat_temp.cols == winSize.width && mat_temp.rows == winSize.height)
 		{
-			// source and destination have same size
-			// transfer memory block
-			// NOTE: the padding border will be shown here. Anyway it will be max 3px width
-
+			// 이미지와 대상이 같은 크기를 가지고 있다면, 메모리 블록을 전송합니다.
 			SetDIBitsToDevice(cimage_mfc.GetDC(),
-				//destination rectangle
+				// 대상 사각형
 				0, 0, winSize.width, winSize.height,
 				0, 0, 0, mat_temp.rows,
 				mat_temp.data, bitInfo, DIB_RGB_COLORS);
 		}
 		else
 		{
-			// destination rectangle
+			// 대상 사각형
 			int destx = 0, desty = 0;
 			int destw = winSize.width;
 			int desth = winSize.height;
 
-			// rectangle defined on source bitmap
-			// using imgWidth instead of mat_temp.cols will ignore the padding border
+			// 소스 비트맵에 정의된 사각형
 			int imgx = 0, imgy = 0;
+			// mat_temp.cols 대신 imgWidth를 사용하면 패딩 테두리를 무시합니다.
 			int imgWidth = mat_temp.cols - border;
 			int imgHeight = mat_temp.rows;
 
+			// 이미지와 대상이 크기가 다르면, 이미지를 대상에 맞게 확대 또는 축소하여 출력합니다.
 			StretchDIBits(cimage_mfc.GetDC(),
 				destx, desty, destw, desth,
 				imgx, imgy, imgWidth, imgHeight,
 				mat_temp.data, bitInfo, DIB_RGB_COLORS, SRCCOPY);
 		}
 
-		HDC dc = ::GetDC(m_picture.m_hWnd);
-		cimage_mfc.BitBlt(dc, 0, 0);
-
-		::ReleaseDC(m_picture.m_hWnd, dc);
-
-		cimage_mfc.ReleaseDC();
-		cimage_mfc.Destroy();
+		HDC dc = ::GetDC(m_picture.m_hWnd);       // m_picture 윈도우의 디바이스 컨텍스트(DC)를 얻습니다. 화면과 관련된 정보를 포함
+		cimage_mfc.BitBlt(dc, 0, 0);              // cimage_mfc 라는 CImage 객체에 저장된 이미지를 m_picture 윈도우의 DC로 복사 
+												  // BitBlt 함수는 비트 단위로 이미지를 복사하며, 여기서는 (0, 0) 위치부터 시작하여 이미지 복사								
+		::ReleaseDC(m_picture.m_hWnd, dc);        // m_picture 윈도우의 DC를 해제. DC를 사용한 후에는 반드시 해제 필요
+		cimage_mfc.ReleaseDC();                   // cimage_mfc에 연결된 DC를 해제
+		cimage_mfc.Destroy();                     // cimage_mfc 객체를 파괴. 객체를 다 사용한 후에는 메모리 누수를 방지하기 위해 파괴
 
 		CDialogEx::OnTimer(nIDEvent);
 	}
-	
+	/*
 	if (nIDEvent == 2)
 	{
 		CWnd* pVideoWnd = GetDlgItem(IDC_PC_VIEW);
 
 		if (pVideoWnd)
 		{
-			// 이미지를 삽입할 비트맵 파일 경로
+			// 동영상을 렌더링할 비트맵 파일 경로
 			CString strImagePath = _T("./img/airplane1.jpg");
 
 			// CString을 UTF-8로 변환
@@ -860,6 +866,39 @@ void CMFCApplication1Dlg::OnTimer(UINT_PTR nIDEvent)
 		// 동영상의 다음 프레임을 가져와서 이미지를 업데이트합니다.
 		UpdateVideoFrame();
 	}
+	*/
+	
+	if (nIDEvent == 2)
+	{
+		// 이미지를 로드합니다.
+		CImage image;
+		if (image.Load(m_strImagePath) == S_OK)
+		{
+			// 나머지 코드는 이전과 동일합니다.
+			CWnd* pVideoWnd = GetDlgItem(IDC_PC_VIEW);
+			if (pVideoWnd)
+			{
+				CRect rect;
+				pVideoWnd->GetClientRect(&rect);
+
+				int targetWidth = rect.Width() / 4;
+				int targetHeight = rect.Height() / 8;
+
+				int originalWidth = image.GetWidth();
+				int originalHeight = image.GetHeight();
+
+				int targetX = 450;
+				int targetY = 100;
+
+				image.StretchBlt(pVideoWnd->GetDC()->GetSafeHdc(), targetX, targetY, targetWidth, targetHeight, 0, 0, originalWidth, originalHeight, SRCCOPY);
+			}
+			else
+			{
+				AfxMessageBox(_T("이미지를 로드할 수 없습니다."));
+			}
+		}
+	}
+	UpdateVideoFrame();
 
 	CDialogEx::OnTimer(nIDEvent);
 }
