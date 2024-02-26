@@ -68,8 +68,8 @@ BOOL CBRIGHTNESSCTRL::OnInitDialog()
 	m_slider.SetPos(50); // 초기 밝기 값 설정
 	m_slider.SetTicFreq(10);
 
-	m_slider2.SetRange(-100,150); // 명암비 범위 설정
-	m_slider2.SetPos(128); // 초기 명암비 값 설정
+	m_slider2.SetRange(-300,300); // 명암비 범위 설정
+	m_slider2.SetPos(100); // 초기 명암비 값 설정
 	m_slider2.SetTicFreq(10);
 
 
@@ -224,6 +224,7 @@ void CBRIGHTNESSCTRL::OnBnClickedButton2()
 	if (colorToGray()) 
 	{
 		DrawImage(myImg, BitChangeImg); // 변환된 이미지 표시
+
 	}
 }
 
@@ -232,6 +233,7 @@ void CBRIGHTNESSCTRL::OnBnClickedButton3()
 	if (GrayToColor()) 
 	{
 		DrawImage(myImg, BitChangeImg2);
+
 	}
 }
 
@@ -243,12 +245,12 @@ BOOL CBRIGHTNESSCTRL::colorToGray()
 		backupImg = myImg.clone();
 
 		// 흑백 이미지로 변환
-		cvtColor(myImg, myImg, cv::COLOR_BGR2GRAY);
+		cvtColor(myImg, myImg, COLOR_BGR2GRAY);
 
 		// 이미지 정보 업데이트
-		CreateBitmapInfo(&BitChangeImg, myImg.cols, myImg.rows, 8); 
+		CreateBitmapInfo(&BitChangeImg, myImg.cols, myImg.rows, myImg.channels() * 8);
 		// 흑백 이미지로 변환되었으므로 채널 수는 1이므로 8로 설정
-		// 즉 컬러체널 원소 = 3 ==> 흑백으로 변환되니 흑백 기준의 채널 수 '8'로 변경되는것!
+		// 즉 컬러체널 원소 = 3 ==> 흑백으로 변환되니 흑백 기준의 채널 수 '8'로 변경되는것! 하지만 아래 설정으로 인해 24
 		
 		// 성공 메시지 출력
 		//CString successMessage = _T("성공적으로 변환되었습니다.");
@@ -290,136 +292,134 @@ BOOL CBRIGHTNESSCTRL::GrayToColor()
 
 void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-	
-		int newValue = 0;
-		int newValue2 = 0;
-		if (pScrollBar->GetDlgCtrlID() == IDC_SLIDER1) {
-			// 슬라이더에서 값 변경될 때
-			newValue = m_slider.GetPos(); // 슬라이더에서 값 가져오기
-			m_spin.SetPos(newValue); // 스핀 컨트롤에 값 설정
-			CString strValue;
-			strValue.Format(_T("%d"), newValue);
-			m_edit.SetWindowText(strValue); // 에디트 컨트롤에 값 설정
 
-			if ((myImg.channels() == 3))
-			{
-				Mat tmpImg = myImg.clone(); //open cv4 책= ycrcv 참조
-				cvtColor(tmpImg, tmpImg, COLOR_BGR2YCrCb);
+	int newValue = 0;
+	int newValue2 = 0;
+	if (pScrollBar->GetDlgCtrlID() == IDC_SLIDER1)
+	{
+		// 슬라이더에서 값 변경될 때
+		newValue = m_slider.GetPos(); // 슬라이더에서 값 가져오기
+		m_spin.SetPos(newValue); // 스핀 컨트롤에 값 설정
+		CString strValue;
+		strValue.Format(_T("%d"), newValue);
+		m_edit.SetWindowText(strValue); // 에디트 컨트롤에 값 설정
 
-				std::vector<Mat> ycrcb_planes;
-				split(tmpImg, ycrcb_planes);
+		if ((myImg.channels() == 3))
+		{
+			Mat tmpImg = myImg.clone(); //open cv4 책= ycrcv 참조
+			cvtColor(tmpImg, tmpImg, COLOR_BGR2YCrCb);
 
-				Mat adjustedImage;
-				ycrcb_planes[0] = ycrcb_planes[0] + newValue;
-				merge(ycrcb_planes, adjustedImage);
+			std::vector<Mat> ycrcb_planes;
+			split(tmpImg, ycrcb_planes);
 
-				cvtColor(adjustedImage, adjustedImage, COLOR_YCrCb2BGR);
+			Mat adjustedImage;
+			ycrcb_planes[0] = ycrcb_planes[0] + newValue;
+			merge(ycrcb_planes, adjustedImage);
 
-				// 이미지 표시
-				CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
-				DrawImage(adjustedImage, BitChangeImg);
-				resultImg = adjustedImage.clone();
-				BitChangeResultImg = BitChangeImg;
-			}
-			else if (myImg.channels() == 1)
-			{
-				Mat adjustedImage = myImg + newValue;
+			cvtColor(adjustedImage, adjustedImage, COLOR_YCrCb2BGR);
 
-				// 이미지 표시
-				CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
-				DrawImage(adjustedImage, BitChangeImg);
-				
-				resultImg = adjustedImage.clone();
-				BitChangeResultImg = BitChangeImg2;
+			// 이미지 표시
+			CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
+			DrawImage(adjustedImage, BitChangeImg);
+			resultImg = adjustedImage.clone();
+			BitChangeResultImg = BitChangeImg;
+		}
+		else if (myImg.channels() == 1)
+		{
+			Mat adjustedImage = myImg + newValue;
 
-			}
+			// 이미지 표시
+			CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
+			DrawImage(adjustedImage, BitChangeImg);
+
+			resultImg = adjustedImage.clone();
+			BitChangeResultImg = BitChangeImg2;
 
 		}
-		else if(pScrollBar->GetDlgCtrlID() == IDC_SLIDER2) {
-			// 슬라이더에서 값 변경될 때
-			int newValue2 = m_slider2.GetPos(); // 슬라이더에서 값 가져오기
-			m_spin2.SetPos(newValue2); // 스핀 컨트롤에 값 설정
-			CString strValue2;
-			strValue2.Format(_T("%d"), newValue2);
-			m_edit2.SetWindowText(strValue2); // 에디트 컨트롤에 값 설정
 
-			if ((myImg.channels() == 3))
-			{
-				Mat tmpImg2 = myImg.clone(); //open cv4 책= ycrcv 참조
-				cvtColor(tmpImg2, tmpImg2, COLOR_BGR2YCrCb);
+	}
+	else if (pScrollBar->GetDlgCtrlID() == IDC_SLIDER2)
+	{
+		
 
-				vector<Mat> ycrcb_planes2;
-				split(tmpImg2, ycrcb_planes2);
-				float contrast = 1.0;
+		// 슬라이더에서 값 변경될 때
+		int newValue2 = m_slider2.GetPos(); // 슬라이더에서 값 가져오기
+		m_spin2.SetPos(newValue2); // 스핀 컨트롤에 값 설정
+		CString strValue2;
+		strValue2.Format(_T("%d"), newValue2);
+		m_edit2.SetWindowText(strValue2); // 에디트 컨트롤에 값 설정
 
-				ycrcb_planes2[0] = ycrcb_planes2[0] + (newValue2 - 128)* contrast;
+		if ((myImg.channels() == 3))
+		{
+			Mat tmpImg2 = myImg.clone(); //open cv4 책= ycrcv 참조
+			cvtColor(tmpImg2, tmpImg2, COLOR_BGR2YCrCb);
 
-				Mat adjustedImage2;
-				
-				equalizeHist(ycrcb_planes2[0], ycrcb_planes2[0]); // 평활화 수행 = in  ->  out
-				merge(ycrcb_planes2, adjustedImage2); // split 한 ycrcb_planes2 와 새로운 Mat adjustedImage2 =merge 시킨다
-				
-				
-				cvtColor(adjustedImage2, adjustedImage2, COLOR_YCrCb2BGR);
+			vector<Mat> ycrcb_planes2;
+			split(tmpImg2, ycrcb_planes2);
+			float contrast = 1.0;
 
-				// 이미지 표시
-				CreateBitmapInfo(&BitChangeImg2, adjustedImage2.cols, adjustedImage2.rows, adjustedImage2.channels() * 8);
-				DrawImage(adjustedImage2, BitChangeImg2);
+			ycrcb_planes2[0] = ycrcb_planes2[0] + (newValue2 - 128) * contrast;
 
-				resultImg = adjustedImage2.clone();
-				BitChangeResultImg = BitChangeImg2;
+			Mat adjustedImage2;
 
-			}
-			else if (myImg.channels() == 1)
-			{
-				Mat colorImage = myImg.clone();
-				cvtColor(myImg, colorImage, COLOR_GRAY2BGR);
+			equalizeHist(ycrcb_planes2[0], ycrcb_planes2[0]); // 평활화 수행 = in  ->  out
+			merge(ycrcb_planes2, adjustedImage2); // split 한 ycrcb_planes2 와 새로운 Mat adjustedImage2 =merge 시킨다
 
-				// BGR 이미지를 YCrCb 이미지로 변환
-				Mat ycrcbImage;
-				cvtColor(colorImage, ycrcbImage, COLOR_BGR2YCrCb);
 
-				// YCrCb 이미지에서 Y 채널 추출
-				std::vector<Mat> channels;
-				split(ycrcbImage, channels);
+			cvtColor(adjustedImage2, adjustedImage2, COLOR_YCrCb2BGR);
 
-				// Y 채널에 대해 히스토그램 평활화 적용
-				equalizeHist(channels[0], channels[0]);
+			// 이미지 표시
+			CreateBitmapInfo(&BitChangeImg2, adjustedImage2.cols, adjustedImage2.rows, adjustedImage2.channels() * 8);
+			DrawImage(adjustedImage2, BitChangeImg2);
 
-				// 채도 조정을 위해 Y 채널에 contrast 적용
-				float contrast = 1.0;
-				Mat yChannel = channels[0].clone(); // Y 채널 복사
-				yChannel = yChannel + (m_edit_val2 - 128) * contrast; // 채도 조정
-				channels[0] = yChannel;
+			resultImg = adjustedImage2.clone();
+			BitChangeResultImg = BitChangeImg2;
 
-				// YCrCb 이미지 복원
-				merge(channels, ycrcbImage);
+		}
+		else if (myImg.channels() == 1)
+		{
+			
 
-				// YCrCb 이미지를 BGR 이미지로 변환
-				cvtColor(ycrcbImage, colorImage, COLOR_YCrCb2BGR);
+			Mat tmpImg2= myImg.clone();
+			cvtColor(tmpImg2, tmpImg2, COLOR_GRAY2BGR);
+			//Mat tmpImg3; //= myImg.clone();
+			cvtColor(tmpImg2, tmpImg2.clone(), COLOR_BGR2YCrCb);
+			std::vector<Mat> ycrcb_planes2;
 
-				// BGR 이미지를 흑백 이미지로 변환하여 원래 이미지에 적용
-				cvtColor(colorImage, myImg, COLOR_BGR2GRAY);
+			split(tmpImg2, ycrcb_planes2);
+			float contrast=1.0;
 
-				// 이미지 표시
-				CreateBitmapInfo(&BitChangeImg, myImg.cols, myImg.rows, myImg.channels() * 8);
-				DrawImage(myImg, BitChangeImg);
+			ycrcb_planes2[0] = ycrcb_planes2[0] + (m_edit_val2 -250 ) * contrast ;
 
-				resultImg = myImg.clone();
-				BitChangeResultImg = BitChangeImg2;
-			}
+			Mat adjustedImage2;
+		
+		
+			equalizeHist(ycrcb_planes2[0], ycrcb_planes2[0]); // 평활화 수행 = in  ->  out
+			
+			merge(ycrcb_planes2, adjustedImage2); // split 한 ycrcb_planes2 와 새로운 Mat adjustedImage2 =merge 시킨다
+
+			cvtColor(adjustedImage2, adjustedImage2.clone() , COLOR_YCrCb2BGR);
+
+			cvtColor(adjustedImage2, adjustedImage2, COLOR_BGR2GRAY);
+
+			// 이미지 표시
+			CreateBitmapInfo(&BitChangeImg2, adjustedImage2.cols, adjustedImage2.rows, adjustedImage2.channels() * 8);
+			DrawImage(adjustedImage2, BitChangeImg2);
+
+			resultImg = adjustedImage2.clone();
+			BitChangeResultImg = BitChangeImg2;
+		}
+	}
 
 
 			
 
-		}
+
 
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 
 	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
-
-
 void CBRIGHTNESSCTRL::OnNMCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	
@@ -435,7 +435,6 @@ void CBRIGHTNESSCTRL::OnNMCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 
 	*pResult = 0;
 }
-
 void CBRIGHTNESSCTRL::OnNMCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
@@ -447,8 +446,6 @@ void CBRIGHTNESSCTRL::OnNMCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult)
 	
 	*pResult = 0;
 }
-
-
 void CBRIGHTNESSCTRL::mspin_updown(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
@@ -504,10 +501,6 @@ void CBRIGHTNESSCTRL::mspin_updown(NMHDR* pNMHDR, LRESULT* pResult)
 
 	*pResult = 0;
 }
-
-
-
-//
 void CBRIGHTNESSCTRL::mspin_updown2(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	LPNMUPDOWN pNMUpDown2 = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
@@ -518,12 +511,14 @@ void CBRIGHTNESSCTRL::mspin_updown2(NMHDR* pNMHDR, LRESULT* pResult)
 		
 
 		
-		m_edit_val2 += 10;
+		m_edit_val2 +=100;
+
+		
 	}
 	else {//아래 버튼을 눌렀을 때 iDelta 양수가 출력된다 
 
 		
-		m_edit_val2 -= 10;
+		m_edit_val2 -=100;
 	}
 
 	m_spin2.SetPos(m_edit_val2); // 스핀 컨트롤에 새로운 값 설정
@@ -536,10 +531,9 @@ void CBRIGHTNESSCTRL::mspin_updown2(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		Mat tmpImg2 = myImg.clone();
 		cvtColor(tmpImg2, tmpImg2, COLOR_BGR2YCrCb);
-
+		
 		std::vector<Mat> ycrcb_planes2;
 		
-
 		split(tmpImg2, ycrcb_planes2);
 		float contrast = 1.0;
 
@@ -550,7 +544,9 @@ void CBRIGHTNESSCTRL::mspin_updown2(NMHDR* pNMHDR, LRESULT* pResult)
 		equalizeHist(ycrcb_planes2[0], ycrcb_planes2[0]); // 평활화 수행 = in  ->  out
 		merge(ycrcb_planes2, adjustedImage2); // split 한 ycrcb_planes2 와 새로운 Mat adjustedImage2 =merge 시킨다
 
-		cvtColor(adjustedImage2, adjustedImage2, COLOR_YCrCb2BGR);
+		cvtColor(adjustedImage2, adjustedImage2.clone(), COLOR_YCrCb2BGR);
+
+		
 
 		// 이미지 표시
 		CreateBitmapInfo(&BitChangeImg2, adjustedImage2.cols, adjustedImage2.rows, adjustedImage2.channels() * 8);
@@ -561,49 +557,37 @@ void CBRIGHTNESSCTRL::mspin_updown2(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 	else if (myImg.channels() == 1)
 	{
-		// 흑백 이미지를 BGR 이미지로 변환
-		Mat colorImage = myImg.clone();
-		cvtColor(myImg, colorImage, COLOR_GRAY2BGR);
+		Mat tmpImg2 = myImg.clone();
+		cvtColor(tmpImg2, tmpImg2, COLOR_GRAY2BGR);
+		//Mat tmpImg3; //= myImg.clone();
+		cvtColor(tmpImg2, tmpImg2.clone(), COLOR_BGR2YCrCb);
+		std::vector<Mat> ycrcb_planes2;
 
-		// BGR 이미지를 YCrCb 이미지로 변환
-		Mat ycrcbImage;
-		cvtColor(colorImage, ycrcbImage, COLOR_BGR2YCrCb);
-
-		// YCrCb 이미지에서 Y 채널 추출
-		std::vector<Mat> channels;
-		split(ycrcbImage, channels);
-
-		// Y 채널에 대해 히스토그램 평활화 적용
-		equalizeHist(channels[0], channels[0]);
-
-		// 채도 조정을 위해 Y 채널에 contrast 적용
+		split(tmpImg2, ycrcb_planes2);
 		float contrast = 1.0;
-		Mat yChannel = channels[0].clone(); // Y 채널 복사
-		yChannel = yChannel + (m_edit_val2 - 128) * contrast; // 채도 조정
-		channels[0] = yChannel;
 
-		// YCrCb 이미지 복원
-		merge(channels, ycrcbImage);
+		ycrcb_planes2[0] = ycrcb_planes2[0] + (m_edit_val2 - 250) * contrast;
 
-		// YCrCb 이미지를 BGR 이미지로 변환
-		cvtColor(ycrcbImage, colorImage, COLOR_YCrCb2BGR);
+		Mat adjustedImage2;
 
-		// BGR 이미지를 흑백 이미지로 변환하여 원래 이미지에 적용
-		cvtColor(colorImage, myImg, COLOR_BGR2GRAY);
+
+		equalizeHist(ycrcb_planes2[0], ycrcb_planes2[0]); // 평활화 수행 = in  ->  out
+
+		merge(ycrcb_planes2, adjustedImage2); // split 한 ycrcb_planes2 와 새로운 Mat adjustedImage2 =merge 시킨다
+
+		cvtColor(adjustedImage2, adjustedImage2.clone(), COLOR_YCrCb2BGR);
+
+		cvtColor(adjustedImage2, adjustedImage2, COLOR_BGR2GRAY);
 
 		// 이미지 표시
-		CreateBitmapInfo(&BitChangeImg, myImg.cols, myImg.rows, myImg.channels() * 8);
-		DrawImage(myImg, BitChangeImg);
+		CreateBitmapInfo(&BitChangeImg2, adjustedImage2.cols, adjustedImage2.rows, adjustedImage2.channels() * 8);
+		DrawImage(adjustedImage2, BitChangeImg2);
 
-		resultImg = myImg.clone();
+		resultImg = adjustedImage2.clone();
 		BitChangeResultImg = BitChangeImg2;
 	}
 	*pResult = 0;
 }
-
-
-
-
 void CBRIGHTNESSCTRL::OnBnClickedOk()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
