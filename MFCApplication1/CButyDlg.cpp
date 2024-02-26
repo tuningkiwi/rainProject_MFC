@@ -391,7 +391,7 @@ void CButyDlg::OnBnClickedMerge()
 		faceCascade.detectMultiScale(grayImage, faces, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(30, 30));
 
 		// Load the image to be overlaid
-		Mat overlayImage = imread("C:\\Users\\김경태\\Downloads\\headpin02.jpg");
+		Mat overlayImage = imread("./img/airplane1.jpg");
 		if (overlayImage.empty())
 		{
 			AfxMessageBox(_T("Error loading overlay image."));
