@@ -33,13 +33,21 @@ public:
 	void DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo);
 	BOOL colorToGray();
 	BOOL GrayToColor();
-	Mat matChangImg;
-	Mat matChangImg2;
+	//Mat matChangImg;
+	//Mat matChangImg2;
+	//
 	BITMAPINFO* BitChangeImg;
 	BITMAPINFO* BitChangeImg2;
+	
+	BITMAPINFO* BitChangeResultImg;
+	Mat resultImg; 
+
+	int mode; 
+
 	Mat myImg;// 이미지 정보를 담고 있는 객체.
 	Mat backupImg;// 이미지 정보를 담고 있는 객체.
 	BITMAPINFO* myBitmapInfo; // Bitmap 정보를 담고 있는 구조체.
+
 	afx_msg void OnBnClickedButton2();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnDestroy();
@@ -67,5 +75,6 @@ public:
 	afx_msg void OnNMCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBnClickedButton4();
-	afx_msg void OnBnClickedButton1();
+//	afx_msg void OnBnClickedButton1();
+	afx_msg void OnBnClickedOk();
 };

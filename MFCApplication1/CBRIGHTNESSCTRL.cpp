@@ -25,10 +25,10 @@ CBRIGHTNESSCTRL::CBRIGHTNESSCTRL(Mat Img, BITMAPINFO* bitmapInfo)
 }
 
 
-void CBRIGHTNESSCTRL::OnBnClickedButton1()
-{
-	printf; 
-}
+//void CBRIGHTNESSCTRL::OnBnClickedButton1()
+//{
+//	
+//}
 
 
 CBRIGHTNESSCTRL::~CBRIGHTNESSCTRL()
@@ -61,7 +61,7 @@ BOOL CBRIGHTNESSCTRL::OnInitDialog()
 	GetDlgItem(IDC_BUTTON2)->MoveWindow(980, 370 ,75,40); 
 	GetDlgItem(IDC_BUTTON3)->MoveWindow(1100, 370, 75, 40); 
 	GetDlgItem(IDC_BUTTON4)->MoveWindow(980, 450, 75, 40);
-	GetDlgItem(IDC_BUTTON1)->MoveWindow(1100, 450, 75, 40);
+	//GetDlgItem(IDC_BUTTON1)->MoveWindow(1100, 450, 75, 40);
 
 	// 슬라이더 초기화
 	m_slider.SetRange(-100, 100); // 밝기 범위 설정
@@ -118,7 +118,8 @@ ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN1, &CBRIGHTNESSCTRL::mspin_updown)
 ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER2, &CBRIGHTNESSCTRL::OnNMCustomdrawSlider2)
 ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN2, &CBRIGHTNESSCTRL::mspin_updown2)
 ON_BN_CLICKED(IDC_BUTTON4, &CBRIGHTNESSCTRL::OnBnClickedButton4)
-ON_BN_CLICKED(IDC_BUTTON1, &CBRIGHTNESSCTRL::OnBnClickedButton1)
+//ON_BN_CLICKED(IDC_BUTTON1, &CBRIGHTNESSCTRL::OnBnClickedButton1)
+ON_BN_CLICKED(IDOK, &CBRIGHTNESSCTRL::OnBnClickedOk)
 END_MESSAGE_MAP()
 // CBRIGHTNESSCTRL 메시지 처리기
 
@@ -201,6 +202,7 @@ void CBRIGHTNESSCTRL::OnBnClickedButton4()
 		colorToGray();
 		GrayToColor();
 		DrawImage(myImg, myBitmapInfo);
+
 		MessageBox(L"원본으로 돌아갑니다", _T("원초적본능"), MB_OK | MB_ICONINFORMATION);
 	
 }
@@ -316,6 +318,8 @@ void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				// 이미지 표시
 				CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
 				DrawImage(adjustedImage, BitChangeImg);
+				resultImg = adjustedImage.clone();
+				BitChangeResultImg = BitChangeImg;
 			}
 			else if (myImg.channels() == 1)
 			{
@@ -324,6 +328,10 @@ void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				// 이미지 표시
 				CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
 				DrawImage(adjustedImage, BitChangeImg);
+				
+				resultImg = adjustedImage.clone();
+				BitChangeResultImg = BitChangeImg2;
+
 			}
 
 		}
@@ -352,6 +360,10 @@ void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				// 이미지 표시
 				CreateBitmapInfo(&BitChangeImg2, adjustedImage2.cols, adjustedImage2.rows, adjustedImage2.channels() * 8);
 				DrawImage(adjustedImage2, BitChangeImg2);
+
+				resultImg = adjustedImage2.clone();
+				BitChangeResultImg = BitChangeImg2;
+
 			}
 			else if (myImg.channels() == 1)
 			{
@@ -362,6 +374,10 @@ void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				// 이미지 표시
 				CreateBitmapInfo(&BitChangeImg2, adjustedImage2.cols, adjustedImage2.rows, adjustedImage2.channels() * 8);
 				DrawImage(adjustedImage2, BitChangeImg2);
+
+				resultImg = adjustedImage2.clone();
+				BitChangeResultImg = BitChangeImg2;
+
 			}
 
 		}
@@ -438,14 +454,20 @@ void CBRIGHTNESSCTRL::mspin_updown(NMHDR* pNMHDR, LRESULT* pResult)
 		// 이미지 표시
 		CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
 		DrawImage(adjustedImage, BitChangeImg);
+		resultImg = adjustedImage.clone();
+		BitChangeResultImg = BitChangeImg;
+
 	}
 	else if (myImg.channels() == 1)
 	{
 		Mat adjustedImage = myImg + m_edit_val;
 
-		// 이미지 표시
+		// 이미지 표시+
 		CreateBitmapInfo(&BitChangeImg, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
 		DrawImage(adjustedImage, BitChangeImg);
+		resultImg = adjustedImage.clone();
+		BitChangeResultImg = BitChangeImg;
+
 	}
 
 	*pResult = 0;
@@ -490,6 +512,9 @@ void CBRIGHTNESSCTRL::mspin_updown2(NMHDR* pNMHDR, LRESULT* pResult)
 		// 이미지 표시
 		CreateBitmapInfo(&BitChangeImg2, adjustedImage2.cols, adjustedImage2.rows, adjustedImage2.channels() * 8);
 		DrawImage(adjustedImage2, BitChangeImg2);
+		resultImg = adjustedImage2.clone();
+		BitChangeResultImg = BitChangeImg2;
+
 	}
 	else if (myImg.channels() == 1)
 	{
@@ -500,8 +525,18 @@ void CBRIGHTNESSCTRL::mspin_updown2(NMHDR* pNMHDR, LRESULT* pResult)
 		// 이미지 표시
 		CreateBitmapInfo(&BitChangeImg2, adjustedImage2.cols, adjustedImage2.rows, adjustedImage2.channels() * 8);
 		DrawImage(adjustedImage2, BitChangeImg2);
+		resultImg = adjustedImage2.clone();
+		BitChangeResultImg = BitChangeImg2;
+
 	}
 	*pResult = 0;
 }
 
 
+
+
+void CBRIGHTNESSCTRL::OnBnClickedOk()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CDialogEx::OnOK();
+}
