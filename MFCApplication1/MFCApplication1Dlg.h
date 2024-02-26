@@ -91,6 +91,7 @@ public:
 	CImageList m_imageList;
 	int m_currentFrame = 0;	
 	void UpdateVideoFrame();
+	CString m_strImagePath;  // 이미지 파일 경로 저장
 
 	// 비디오 필터링 버튼
 	CButton videoFilterBtn;
