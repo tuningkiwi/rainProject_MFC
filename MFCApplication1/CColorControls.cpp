@@ -219,7 +219,7 @@ void CColorControls::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	}
 	else if (*pScrollBar == m_slider_s) {
 		int saturationShift = m_slider_s.GetPos() - 50;
-
+		myImgAfterChange = previousTransformedImage.clone(); //이전에 적용된 변환 이미지를 복사
 		if (saturationShift != 0) {
 			
 			Mat hsvImage1;
@@ -244,11 +244,12 @@ void CColorControls::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	}
 	else if (*pScrollBar == m_slider_v) {
 		int brightnessChange = m_slider_v.GetPos() - 50;
-
+		myImgAfterChange = previousTransformedImage.clone(); //이전에 적용된 변환 이미지를 복사
 		if (brightnessChange != 0) {
 			//이미지 밝기 조절
 			Mat adjustedImage;
-			myImgAfterChange.convertTo(adjustedImage, -1, 1, brightnessChange);						
+			myImgAfterChange.convertTo(adjustedImage, -1, 1, brightnessChange);		
+			CreateBitmapInfo(&myBmpInfoAfterChange, adjustedImage.cols, adjustedImage.rows, adjustedImage.channels() * 8);
 			DrawImage(adjustedImage, myBmpInfoAfterChange);			
 		}
 	}
