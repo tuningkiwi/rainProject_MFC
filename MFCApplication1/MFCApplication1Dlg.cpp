@@ -540,8 +540,14 @@ void CMFCApplication1Dlg::OnBnClickedButyBtn()
 void CMFCApplication1Dlg::OnBnClickedBrightnessctrlBtn()
 {
 	CBRIGHTNESSCTRL brightdlg(m_matImage, m_pBitmapInfo);
-	brightdlg.DoModal();
-
+	if (brightdlg.DoModal() == IDOK) {
+		
+		m_matImage = brightdlg.resultImg;
+		m_pBitmapInfo = brightdlg.BitChangeResultImg;
+		DrawImage();
+	}
+	
+	
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
 
