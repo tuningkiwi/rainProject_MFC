@@ -33,16 +33,14 @@ public:
 	void DrawImage(Mat requestImg, BITMAPINFO* requestBmpInfo);
 	BOOL colorToGray();
 	BOOL GrayToColor();
-	//Mat matChangImg;
-	//Mat matChangImg2;
-	//
+
 	BITMAPINFO* BitChangeImg;
 	BITMAPINFO* BitChangeImg2;
 	
 	BITMAPINFO* BitChangeResultImg;
 	Mat resultImg; 
 
-	int mode; 
+	 
 
 	Mat myImg;// 이미지 정보를 담고 있는 객체.
 	Mat backupImg;// 이미지 정보를 담고 있는 객체.
@@ -51,7 +49,7 @@ public:
 	afx_msg void OnBnClickedButton2();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnDestroy();
-	//afx_msg void OnTimer(UINT_PTR nIDEvent);
+	
 	
 	
 	// virtual HRESULT get_accChild(VARIANT varChild, IDispatch** ppdispChild);
