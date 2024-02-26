@@ -68,8 +68,8 @@ BOOL CBRIGHTNESSCTRL::OnInitDialog()
 	m_slider.SetPos(50); // 초기 밝기 값 설정
 	m_slider.SetTicFreq(10);
 
-	m_slider2.SetRange(0, 100); // 명암비 범위 설정
-	m_slider2.SetPos(50); // 초기 명암비 값 설정
+	m_slider2.SetRange(-100,150); // 명암비 범위 설정
+	m_slider2.SetPos(128); // 초기 명암비 값 설정
 	m_slider2.SetTicFreq(10);
 
 
@@ -372,9 +372,7 @@ void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			}
 			else if (myImg.channels() == 1)
 			{
-
-				// 흑백 이미지를 BGR 이미지로 변환
-				Mat colorImage;
+				Mat colorImage = myImg.clone();
 				cvtColor(myImg, colorImage, COLOR_GRAY2BGR);
 
 				// BGR 이미지를 YCrCb 이미지로 변환
@@ -384,19 +382,23 @@ void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				// YCrCb 이미지에서 Y 채널 추출
 				std::vector<Mat> channels;
 				split(ycrcbImage, channels);
-				float contrast=1.0;
-				
+
 				// Y 채널에 대해 히스토그램 평활화 적용
 				equalizeHist(channels[0], channels[0]);
-				channels [0] = channels[0] + (newValue2 - 128) * contrast;
-				Mat yChannel = channels[0];
-				// 평활화된 Y 채널을 다시 복원
+
+				// 채도 조정을 위해 Y 채널에 contrast 적용
+				float contrast = 1.0;
+				Mat yChannel = channels[0].clone(); // Y 채널 복사
+				yChannel = yChannel + (m_edit_val2 - 128) * contrast; // 채도 조정
+				channels[0] = yChannel;
+
+				// YCrCb 이미지 복원
 				merge(channels, ycrcbImage);
 
 				// YCrCb 이미지를 BGR 이미지로 변환
 				cvtColor(ycrcbImage, colorImage, COLOR_YCrCb2BGR);
 
-				// 변환된 이미지를 다시 흑백으로 변환
+				// BGR 이미지를 흑백 이미지로 변환하여 원래 이미지에 적용
 				cvtColor(colorImage, myImg, COLOR_BGR2GRAY);
 
 				// 이미지 표시
@@ -405,7 +407,6 @@ void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 				resultImg = myImg.clone();
 				BitChangeResultImg = BitChangeImg2;
-				
 			}
 
 
@@ -514,9 +515,14 @@ void CBRIGHTNESSCTRL::mspin_updown2(NMHDR* pNMHDR, LRESULT* pResult)
 
 		// 스핀 컨트롤의 값이 변경될 때
 	if (pNMUpDown2->iDelta < 0) {//위로 증가 버튼눌렀을 때 iDelta 음수가 출력 
+		
+
+		
 		m_edit_val2 += 10;
 	}
 	else {//아래 버튼을 눌렀을 때 iDelta 양수가 출력된다 
+
+		
 		m_edit_val2 -= 10;
 	}
 
@@ -556,7 +562,7 @@ void CBRIGHTNESSCTRL::mspin_updown2(NMHDR* pNMHDR, LRESULT* pResult)
 	else if (myImg.channels() == 1)
 	{
 		// 흑백 이미지를 BGR 이미지로 변환
-		Mat colorImage;
+		Mat colorImage = myImg.clone();
 		cvtColor(myImg, colorImage, COLOR_GRAY2BGR);
 
 		// BGR 이미지를 YCrCb 이미지로 변환
@@ -566,19 +572,23 @@ void CBRIGHTNESSCTRL::mspin_updown2(NMHDR* pNMHDR, LRESULT* pResult)
 		// YCrCb 이미지에서 Y 채널 추출
 		std::vector<Mat> channels;
 		split(ycrcbImage, channels);
-		float contrast = 1.0;
 
 		// Y 채널에 대해 히스토그램 평활화 적용
 		equalizeHist(channels[0], channels[0]);
-		channels[0] = channels[0] + (m_edit_val2 - 128) * contrast;
-		Mat yChannel = channels[0];
-		// 평활화된 Y 채널을 다시 복원
+
+		// 채도 조정을 위해 Y 채널에 contrast 적용
+		float contrast = 1.0;
+		Mat yChannel = channels[0].clone(); // Y 채널 복사
+		yChannel = yChannel + (m_edit_val2 - 128) * contrast; // 채도 조정
+		channels[0] = yChannel;
+
+		// YCrCb 이미지 복원
 		merge(channels, ycrcbImage);
 
 		// YCrCb 이미지를 BGR 이미지로 변환
 		cvtColor(ycrcbImage, colorImage, COLOR_YCrCb2BGR);
 
-		// 변환된 이미지를 다시 흑백으로 변환
+		// BGR 이미지를 흑백 이미지로 변환하여 원래 이미지에 적용
 		cvtColor(colorImage, myImg, COLOR_BGR2GRAY);
 
 		// 이미지 표시
@@ -587,7 +597,6 @@ void CBRIGHTNESSCTRL::mspin_updown2(NMHDR* pNMHDR, LRESULT* pResult)
 
 		resultImg = myImg.clone();
 		BitChangeResultImg = BitChangeImg2;
-
 	}
 	*pResult = 0;
 }
