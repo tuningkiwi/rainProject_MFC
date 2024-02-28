@@ -389,24 +389,24 @@ void CBRIGHTNESSCTRL::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		}
 		else if (myImg.channels() == 1)
 		{
-			Mat tmpImg2;
-			cvtColor(myImg, tmpImg2, COLOR_GRAY2BGR);
-			Mat tmpImg3;
-			cvtColor(tmpImg2, tmpImg3, COLOR_BGR2YCrCb);
-			std::vector<Mat> ycrcb_planes2;
+			Mat tmpImg2;// gray 받을 Mat 객체 생성
+			cvtColor(myImg, tmpImg2, COLOR_GRAY2BGR); // input = myimg -> output = tmpImg2 , 변환 혹은 기존 이미지를 output 결과로 보내고 bgr변경
+			Mat tmpImg3;// bgr 을 받을 Mat 객체 생성
+			cvtColor(tmpImg2, tmpImg3, COLOR_BGR2YCrCb);// input = tmpImg2 (이미 bgr로 변경된이미지)를 output = tmpImg3 결과로 보내고 Ycrcb 변경 
+			std::vector<Mat> ycrcb_planes2; // y 채널 추출할 백터형 Mat 객체 생성
 
-			split(tmpImg3, ycrcb_planes2);
+			split(tmpImg3, ycrcb_planes2);//split을 통해 tmpImg3(이미 Ycrcb변경된이미지)를 output=ycrcb_planes2(백터형 Mat에 보내고) 
 			float contrast = 1.0;
 			equalizeHist(ycrcb_planes2[0], ycrcb_planes2[0]); 
-			ycrcb_planes2[0] = ycrcb_planes2[0] + (m_edit_val2 - 128) * contrast;
+			ycrcb_planes2[0] = ycrcb_planes2[0] + (m_edit_val2 - 128) * contrast; // 명암비 계산 수식을 계산하고 
 
 			Mat adjustedImage2;
 
-			merge(ycrcb_planes2, adjustedImage2); 
+			merge(ycrcb_planes2, adjustedImage2); // 명암비가 계산된 <백터형>Mat ycrcb_planes2 과 새로운 Mat adjustedImage2 객체를 합친다.
 
-			cvtColor(adjustedImage2, tmpImg3, COLOR_YCrCb2BGR);
+			cvtColor(adjustedImage2, tmpImg3, COLOR_YCrCb2BGR);//합친 Mat adjustedImage2 다시 Ycrcb 로 받았던 bgr Mat tmpImg3에 다시 전달
 
-			cvtColor(tmpImg3, myImg, COLOR_BGR2GRAY);
+			cvtColor(tmpImg3, myImg, COLOR_BGR2GRAY);//전달받은 output = bgr을 받았던 Mat tmpImg3 를 gray 변환된 기존이미지에 보냄
 
 			// 이미지 표시
 			CreateBitmapInfo(&BitChangeImg2, myImg.cols, myImg.rows, 8);
